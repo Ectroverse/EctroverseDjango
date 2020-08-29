@@ -36,8 +36,8 @@ that's it!  without docker this would be a dozen steps
 ## Look at logs
 
 Watch Django's console (i.e. the uwsgi log) with
-`docker exec -it ectroversedjango_python_1 /bin/bash`
-`tail -f /tmp/mylog.log`
+1. `docker exec -it ectroversedjango_python_1 /bin/bash`
+2. `tail -f /tmp/mylog.log`
 
 Nginx log:
 `docker logs -f ectroversedjango_nginx_1`
