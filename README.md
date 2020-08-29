@@ -1,6 +1,6 @@
 ## Getting it setup on a new machine:
 
-0. Copy .env.template to .env and change the secret key if you care about security
+0. Copy .env.template to .env (`cp .env.template .ev`) and change the secret key if you care about security
 1. `docker-compose up -d`
 2. `docker exec -it ectroversedjango_python_1 /bin/bash`
 3. `python manage.py makemigrations app`
