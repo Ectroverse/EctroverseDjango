@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="{% static 'icon.jpg' %}">
+
+{% block title %}<title>Ectroverse</title>{% endblock %}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<!-- Add additional CSS in static file -->
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+
+<!-- Bootstrap stuff -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+<!-- Our CSS should come after everything else -->
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+<style type="text/css">
+body
+{
+    background-image:url("/static/background.gif");
+    background-attachment:fixed;
+}
+</style>
+
+<!-- Tick Timer Script -->
+<script>
+function startTime() {
+  var today = new Date();
+  var m = today.getMinutes();
+  var s = today.getSeconds();
+  m_left = 9 - (m % 10);
+  s_left = 59 - (s % 60);
+  s_left = fixTimeDigits(s_left);
+  document.getElementById('txt').innerHTML =
+  m_left + ":" + s_left;
+  var t = setTimeout(startTime, 500);
+}
+function fixTimeDigits(i) {
+  if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+  return i;
+}
+
+// Toggle check boxes, used on various pages
+function toggle_form(id) { for(i=0;i<_(id).length;i++) if(_(id).elements[i].type == "checkbox") _(id).elements[i].click(); }
+
+function changeslider(newValue,field) {
+	window.document.getElementById(field).value=newValue;
+}
+</script>
+
+
+</head>
+
+<body style="margin:auto;" onload="startTime()">
+
+{% if user.is_authenticated %}
+
+
+
+<div class="row">
+	<div class="sidebar col-lg-2 col-md-2 col-sm-2 hidden-xs"> <!-- Hide on mobile -->
+        <!-- Sidebar content -->
+        <table style="text-align:left;line-height:120%;" cellspacing="0" cellpadding="0">
+            <tbody>
+            <tr><td height="40" style="background-repeat:no-repeat;" background="{% static 'files_004' %}">&nbsp;</td></tr>
+            <tr>
+            <td height="20" style="background-repeat:no-repeat;" background="{% static 'files_010' %}"><b>
+            <font size="2" face="Tahoma"><a href="/">Headquarters</a></font></b></td></tr>
+            <tr><td background="{% static 'files_013' %}">
+            <table style="text-align:left;" cellspacing="0" cellpadding="0">
+                <tbody><tr><td><b><font size="2" face="Tahoma">
+                <a href="/council">Council</a><br>
+                <a href="/units">Units</a>
+                <br>
+                <a href="/planets">Planets</a><br>
+                <a href="/empire" style="color:red;">Empire</a>
+                <br>&nbsp;&nbsp;- 
+                <a href="/famaid" style="color:red;">Send aid</a><br>&nbsp;&nbsp;- 
+                <a href="/famgetaid" style="color:red;">Receive aid</a><br>&nbsp;&nbsp;- 
+                <a href="/famnews" style="color:red;">News</a><br>&nbsp;&nbsp;- 
+                <a href="/famrels" style="color:red;">Relations</a><br>
+                <a href="/fleets">Fleets</a><br>
+                <a href="/map">Galaxy map</a><br>&nbsp;&nbsp;- 
+                <a href="/map">Full map</a><br>&nbsp;&nbsp;- 
+                <a href="/observessurveys" style="color:red;">Scouting</a><br>
+                <a href="/research" style="color:red;">Research</a><br>
+                <a href="/spec" style="color:red;">Operations</a><br></font>
+                </b></td></tr>
+                </tbody>
+            </table>
+            </td></tr>
+            <tr><td style="background-repeat:no-repeat;" background="{% static 'files_013' %}"><img src="{% static 'files_017' %}" height="15"></td></tr>
+            <tr><td background="{% static 'files_013' %}">
+            <table style="text-align:left;" cellspacing="0" cellpadding="0">
+                <tbody><tr><td><b><font size="2" face="Tahoma">
+                <a href="/ranking">Faction Rank</a><br>
+                <a href="/ranking" style="color:red;">Empire Rank</a><br>
+                <a href="/account"">Account</a>
+                <br>
+                <a href="{% url 'logout'%}?next={{request.path}}">Logout</a>
+                <br><br>
+                <form action="search?2fix" method="POST"><input type="text" name="search" size="8"><br>
+                <input type="submit" size="2" value="OK"></form><br>
+                <a href="https://discord.gg/"  style="color:red;" target="_blank">Discord</a><br>
+                <a href="guide" style="color:red;">Guide</a><br>
+                <a href="facebook"  style="color:red;" target="_blank">Facebook</a><br></font></b>
+                </td>
+                </tr>
+                </tbody>
+            </table>
+            </td></tr>
+            <tr><td height="20" style="background-repeat:no-repeat;" background="{% static 'files_022' %}">&nbsp;</td></tr>
+            <tr><td height="75" style="background-repeat:no-repeat;" background="{% static 'files_014.jpg' %}">&nbsp;</td></tr>
+            </tbody>
+        </table>
+	</div>
+	
+	 <!-- mobile version of sidebar -->
+	<div class="row hidden-lg hidden-md hidden-sm">
+	
+	<div class="container">
+
+    
+	<div class="dropdown keep-open">
+      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      &nbsp;&nbsp;Menu
+      <span class="caret"></span></button>
+    
+            <ul class="dropdown-menu" role="menu"  style="background-color: black;">
+
+            <li><a href="/">Headquarters</a></li>
+            <li><a href="/council">Council</a></li>
+            <li><a href="/units">Units</a></li>
+            <li><a href="/planets">Planets</a></li>
+            <li><a href="/empire" style="color:red;">Empire</a>
+                <ul>
+                <li><a href="/famaid" style="color:red;">Send aid</a></li>
+                <li><a href="/famgetaid" style="color:red;">Receive aid</a></li>
+                <li><a href="/famnews" style="color:red;">News</a></li>
+                <li><a href="/famrels" style="color:red;">Relations</a></li>
+                </ul>
+            </li>
+            <li><a href="/fleets">Fleets</a>
+            <li><a href="/map">Galaxy map</a>
+                <ul>
+                <li><a href="/map">Full map</a></li>
+                <li><a href="/observessurveys" style="color:red;">Scouting</a></li>
+                </ul>
+            <li><a href="/research" style="color:red;">Research</a>
+            <li><a href="/spec" style="color:red;">Operations</a>
+            <li><a href="/rankings">Faction rankings</a></li>
+            <li><a href="/rankings" style="color:red;">Empire rankings</a></li>
+            <li><a href="/account">Account</a></li>
+            <br>
+            <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
+            <br>
+            <form action="search?2fix" method="POST"><input type="text" name="search" size="8"><br>
+            <input type="submit" size="2" value="OK"></form></li>
+            <li><a href="https://discord.gg/"  style="color:red;" target="_blank">Discord</a></li>
+            <li><a href="guide" style="color:red;">Guide</a></li>
+            <li><a href="facebook"  style="color:red;" target="_blank">Facebook</a></b></li>
+            </ul>
+
+         </div>
+	</div>
+	</div>
+
+
+	
+	<div class="content col-lg-10 col-md-10 col-sm-10 col-xs-12">
+        <!-- Topbar content -->
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
+            <tbody><tr><td style="min-width: 35px;" width="35" height="63" background="{% static 'files_018.png' %}"></td><td>
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
+                <tbody><tr><td height="21" align="center">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
+                    <tbody><tr><td width="41" height="21" background="{% static 'i03.jpg' %}"></td>
+                    <td background="{% static 'files_008' %}">
+                    <table style="white-space: nowrap; overflow: auto; " width="100%" cellspacing="0" cellpadding="0" border="0"><tbody><tr><td width="30%" align="center"><font size="1"><b>Networth : <span id="headernetworth">{{status.networth}} </span>
+                        </b></font></td><td width="40%" align="center">
+                        <font size="1"><b> Next tick: <span id="headerTime">
+                        <!-- Tick timer done with javascript --><div style="display: inline" id="txt"></div>
+                        </span></b></font></td><td width="30%" align="center"><font size="1"><b>Population : <span id="headerpopulation">{{status.population}}</span></b>
+                        </font></td></tr></tbody>
+                    </table>
+                    </td><td width="78" height="21" background="{% static 'files_005' %}"></td></tr></tbody>
+                </table>
+                </td></tr><tr><td width="100%" align="center">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
+                    <tbody><tr>
+                    <td onclick="document.location='hq?2fix'" id="headermail" style="background-image:url('/static/i09.jpg');" border="0" class="href" width="41" height="42"></td>
+                    <td onclick="document.location='hq?2fix'" id="headerbuild" style="background-image:url('/static/i10.jpg');" border="0" class="href" width="40" height="42"></td>
+                    <td onclick="document.location='hq?2fix'" id="headeraid" style="background-image:url('/static/i11.jpg');" border="0" class="href" width="39" height="42"></td>
+                    <td onclick="document.location='hq?2fix'" id="headerfleet" style="background-image:url('/static/i12.jpg');" border="0" class="href" width="39" height="42"></td>
+                    <td width="18" height="42" background="{% static 'files_016' %}"></td><td background="{% static 'files_015' %}" align="left">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
+
+                        <tr>
+                        <td width="50%" nowrap="nowrap" align="center"><font size="1"><b>Energy: <span id="headerenergy">{{status.energy}}</span><br>Mineral: <span id="headermineral">{{status.minerals}}</span></b></font></td>
+                        <td width="50%" nowrap="nowrap" align="center"><font size="1"><b>Crystal: <span id="headercrystal">{{status.crystals}}</span><br>Ectrolium: <span id="headerectrolium">{{status.ectrolium}}</span></b></font></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    </td><td width="49" height="42" background="{% static 'files_023' %}"></td></tr></tbody>
+                </table>
+                </td></tr></tbody>
+            </table>
+            </td></tr></tbody>
+        </table>
+
+
+
+        <br>
+
+
+
+        <!-- Main area content -->
+        <table width="90%" cellspacing="0" cellpadding="0" border="0" background="{% static 'files_021' %}" align="center">
+            <tbody>
+            <tr>
+            <td width="22" height="24" background="{% static 'files_011' %}"></td><td nowrap="nowrap" align="center"><b><font size="2" face="verdana">{{ page_title }}</font></b></td>
+            <td width="62" height="24" background="{% static 'files_003' %}" align="right"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <table width="90%" cellspacing="0" cellpadding="0" border="0" align="center">
+            <tbody>
+            <tr>
+            <td width="7" background="{% static 'files_020.jpg' %}">&nbsp;</td>
+            <td bgcolor="#0b1119" align="center">
+
+            {% block content %}
+            {% endblock %}
+
+            </td>
+            <td width="7" background="{% static 'i43.jpg' %}">&nbsp;</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <table width="90%" cellspacing="0" cellpadding="0" border="0" align="center">
+            <tbody>
+            <tr>
+            <td width="62">
+                <img src="{% static 'files_019' %}" height="12">
+            </td>
+            <td width="100%" background="{% static 'i47.jpg' %}">
+                <img src="{% static 'i47.jpg' %}" height="12">
+            </td>
+            <td width="62">
+                <img src="{% static 'files_012' %}" height="12">
+            </td>
+            </tr>
+            </tbody>
+        </table>
+
+	</div>
+
+</div>
+
+
+
+
+{% else %}
+
+YOU SHOULD NEVER BE ABLE TO GET TO THIS PAGE!! THE VIEW REQUIRES AUTHENTICATION!
+
+
+{% endif %} 
+
+
+
+</body>
+</html>

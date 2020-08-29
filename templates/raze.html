@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+
+<td bgcolor="#0b1119" align="center"><br>
+<form action="/raze{{planet.id}}/" method="POST">
+{% csrf_token %}
+
+{% if top_msg %}
+{{top_msg|safe}}
+<br><br>
+{% endif %}
+
+
+<input type="hidden" value="4300" name="id">
+There are 1927 buildings on this planet. This planet can support 202 buildings, additional ones will be very expensive.
+<br>
+The overbuilding penalty for this planet is 9000.41%
+<br><br><br>
+<table width="200">
+    {% if planet.solar_collectors > 0 %}
+    <tr><td align="center">
+        <b>Solar collectors</b>
+        <br>
+        <input id="disbandrange0" type="text" name="SC" size="10" value="0" onchange="changeslider(this.value,'disbandslider0')">
+        <input id="disbandslider0" type="range" min="0" max="{{planet.solar_collectors}}" value="0" onchange="changeslider(this.value,'disbandrange0')">
+        There are {{planet.solar_collectors}} on this planet
+        <br>
+        ( {{status.total_solar_collectors}} total )
+        <br><br>
+    </td></tr>
+    {% endif %}
+    
+    {% if planet.fission_reactors > 0 %}
+    <tr><td align="center">
+        <b>Fission Reactors</b>
+        <br>
+        <input id="disbandrange1" type="text" name="FR" size="10" value="0" onchange="changeslider(this.value,'disbandslider1')">
+        <input id="disbandslider1" type="range" min="0" max="{{planet.fission_reactors}}" value="0" onchange="changeslider(this.value,'disbandrange1')">
+        There are {{planet.fission_reactors}} on this planet
+        <br>
+        ( {{status.total_fission_reactors}} total )
+        <br><br>
+    </td></tr>
+    {% endif %}
+
+    {% if planet.mineral_plants > 0 %}
+    <tr><td align="center">
+        <b>Mineral Plants</b>
+        <br>
+        <input id="disbandrange2" type="text" name="MP" size="10" value="0" onchange="changeslider(this.value,'disbandslider2')">
+        <input id="disbandslider2" type="range" min="0" max="{{planet.mineral_plants}}" value="0" onchange="changeslider(this.value,'disbandrange2')">
+        There are {{planet.mineral_plants}} on this planet
+        <br>
+        ( {{status.total_mineral_plants}} total )
+        <br><br>
+    </td></tr>
+    {% endif %}
+
+    {% if planet.crystal_labs > 0 %}
+    <tr><td align="center">
+        <b>Crystal Laboratories</b>
+        <br>
+        <input id="disbandrange3" type="text" name="CL" size="10" value="0" onchange="changeslider(this.value,'disbandslider3')">
+        <input id="disbandslider3" type="range" min="0" max="{{planet.crystal_labs}}" value="0" onchange="changeslider(this.value,'disbandrange3')">
+        There are {{planet.crystal_labs}} on this planet
+        <br>
+        ( {{status.total_crystal_labs}} total )
+        <br><br>
+    </td></tr>
+    {% endif %}
+
+    {% if planet.refinement_stations > 0 %}
+    <tr><td align="center">
+        <b>Refinement Stations</b>
+        <br>
+        <input id="disbandrange4" type="text" name="RS" size="10" value="0" onchange="changeslider(this.value,'disbandslider4')">
+        <input id="disbandslider4" type="range" min="0" max="{{planet.refinement_stations}}" value="0" onchange="changeslider(this.value,'disbandrange4')">
+        There are {{planet.refinement_stations}} on this planet
+        <br>
+        ( {{status.total_refinement_stations}} total )
+        <br><br>
+    </td></tr>
+    {% endif %}
+    
+    {% if planet.cities > 0 %}
+    <tr><td align="center">
+        <b>Cities</b>
+        <br>
+        <input id="disbandrange5" type="text" name="CT" size="10" value="0" onchange="changeslider(this.value,'disbandslider5')">
+        <input id="disbandslider5" type="range" min="0" max="{{planet.cities}}" value="0" onchange="changeslider(this.value,'disbandrange5')">
+        There are {{planet.cities}} on this planet
+        <br>
+        ( {{status.total_cities}} total )
+        <br><br>
+    </td></tr>
+    {% endif %}
+    
+    {% if planet.research_centers > 0 %}
+    <tr><td align="center">
+        <b>Research Centers</b>
+        <br>
+        <input id="disbandrange6" type="text" name="RC" size="10" value="0" onchange="changeslider(this.value,'disbandslider6')">
+        <input id="disbandslider6" type="range" min="0" max="{{planet.research_centers}}" value="0" onchange="changeslider(this.value,'disbandrange6')">
+        There are {{planet.research_centers}} on this planet
+        <br>
+        ( {{status.total_research_centers}} total )
+        <br><br>
+    </td></tr>
+    {% endif %}
+    
+    {% if planet.defense_sats > 0 %}
+    <tr><td align="center">
+        <b>Defense Satellites</b>
+        <br>
+        <input id="disbandrange7" type="text" name="DS" size="10" value="0" onchange="changeslider(this.value,'disbandslider7')">
+        <input id="disbandslider7" type="range" min="0" max="{{planet.defense_sats}}" value="0" onchange="changeslider(this.value,'disbandrange7')">
+        There are {{planet.defense_sats}} on this planet
+        <br>
+        ( {{status.total_defense_sats}} total )
+        <br><br>
+    </td></tr>
+    {% endif %}
+    
+    {% if planet.shield_networks > 0 %}
+    <tr><td align="center">
+        <b>Shield Networks</b>
+        <br>
+        <input id="disbandrange8" type="text" name="SN" size="10" value="0" onchange="changeslider(this.value,'disbandslider8')">
+        <input id="disbandslider8" type="range" min="0" max="{{planet.shield_networks}}" value="0" onchange="changeslider(this.value,'disbandrange8')">
+        There are {{planet.shield_networks}} on this planet
+        <br>
+        ( {{status.total_shield_networks}} total )
+        <br><br>
+    </td></tr>
+    {% endif %}
+    
+    {% if planet.portal %}
+    <tr><td align="center">
+        <b>Portal</b>
+        <br>
+        <input type="checkbox" name="PL">
+        Raze the portal
+        <br><br>
+    </td></tr>
+    {% endif %}
+</table>
+<br>
+<input type="submit" value="Raze">
+</form>
+<br><br>
+<a href="planet{{planet.id}}">View planet</a>
+<br><br>
+<a href="system{{planet.x}}:{{planet.y}}">View system</a>
+
+
+{% endblock %}
+

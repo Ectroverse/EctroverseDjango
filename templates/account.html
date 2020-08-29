@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+Account ID: {{status.user.id}}
+<br>
+User name : {{status.user}}
+<br>
+User e-mail : {{status.user.email}}
+<br>
+Faction name : {{status.user_name}}
+<br>
+Faction race : {{status.get_race_display}}
+<br>
+<a href="/password">Change Password</a>
+
+{% endblock %}
+

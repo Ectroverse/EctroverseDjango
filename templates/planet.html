@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+
+
+
+<br>
+Planet {{planet.x}},{{planet.y}}:{{planet.i}}
+<br>
+<br>
+
+
+{% if planet.owner == None %}
+    {% if planet.home_planet %}
+        No one owns this planet, but it is part of a home system and unavailable for exploration
+    {% elif planet.nuked %}
+        This planet suffered a heavy nuclear blast, polution is too high to inhabit it!
+    {% else %}
+        No one owns this planet, it is free to explore.
+        <br><br>
+        <a href="/explore{{planet.id}}">Explore this planet</a>
+        <br><br>
+        <a href="/operation{{planet.id}}">Special operation</a>
+    {% endif %}
+{% elif planet.owner.id != status.user.id %}
+    This planet is owned by <a href="/player{{planet.owner.id}}">{{planet_owner_status.user_name}}</a> of
+    <a href="/empire{{planet_owner_status.empire_num}}">Empire {{planet_owner_status.empire_num}}</a>, networth {{planet_owner_status.networth}}<br><br>
+    <a href="/attack{{planet.id}}">Attack this planet</a><br><br>
+    <a href="/operation{{planet.id}}">Special operation</a>
+<!--if( planetd.surrender == id )
+	httpPrintf( cnt, "<br><br>%s offered you this planet <a href="%s&amp;id=%d">accept offer?</a>", main2d.faction, URLAppend( cnt, "pltake" ), plnid );
+-->
+{% elif planet.owner.id == status.user.id %}
+This planet is yours
+<br><br>
+Population: {{planet.current_population}}/{{planet.max_population}}
+<br><br>
+<!--
+ b = (int)artefactPrecense( &planetd );
+  if( b >= 0 )
+   httpPrintf( cnt, "<br><img src="files?type=image&amp;name=artefact/%s" alt="%s" title="%s"> %s<br>", artefactImage[b], artefactName[b], artefactName[b], artefactDescription[b] );//ArtefactTable[b]->image, ArtefactTable[b]->name, ArtefactTable[b]->name, ArtefactTable[b]->description );
+  -->
+  
+{% if planet.bonus_solar > 0 %}
+    <img src="/static/pr0.gif"> Bonus Solar Production: +{{planet.bonus_solar}}%<br>
+{% elif planet.bonus_mineral > 0 %}
+    <img src="/static/pr1.gif"> Bonus Mineral Production: +{{planet.bonus_mineral}}%<br>
+{% elif planet.bonus_crystal > 0 %}
+    <img src="/static/pr2.gif"> Bonus Crystal Production: +{{planet.bonus_crystal}}%<br>
+{% elif planet.bonus_ectrolium > 0 %}
+    <img src="/static/pr3.gif"> Bonus Ectrolium Production: +{{planet.bonus_ectrolium}}%<br>
+{% elif planet.bonus_fission > 0 %}
+    <img src="/static/pr4.gif"> Bonus Fission Production: +{{planet.bonus_fission}}%<br>
+{% endif %}
+
+<!--
+  httpPrintf( cnt, "<SCRIPT type="text/JavaScript">\n ");
+  sprintf(szString, " function Areyousure(plnid)\n{if(confirm("Are you sure you want to raze eveything on this planet??"))open("raze?id="+plnid+"");
+  for( b = 0 ; b < CMD_BLDG_NUMUSED ; b++ )
+	 {
+	  sprintf(szTemp, "&bldg%d=%lld", b, (long long)planetd.building[b]);
+	  strcat(szString, szTemp);
+	 }
+  strcat(szString, "","_self");\n}");
+  httpString( cnt, szString);
+
+  httpPrintf( cnt,"</SCRIPT>\n");
+  -->
+  
+  <br><a href="/build{{planet.id}}">Build on this planet</a><br><br>
+  <a href="/station{{planet.id}}">Station on this planet</a><br><br>
+  <a href="/raze{{planet.id}}">Raze buildings</a><br><br>
+  
+<form action="/razeall{{planet.id}}/" method="post" onsubmit="return confirm('Are you sure you want to raze all?');">
+{% csrf_token %}
+<button type="submit">Raze All</button>
+</form>
+
+<!-- Offer planet to member of own empire -->
+{% if not planet.home_planet %}
+    <br><form action="/offer{{planet.id}}" method="POST">Offer this planet to :
+    <input type="hidden" value="%d" name="id">
+    <select name="plgive">
+    <option value="">
+    <option value="1">Empire member 1
+    <option value="2" selected>Empire member 2
+    </select><br>
+    <input type="submit" value="Confirm"></form>
+{% endif %}
+
+
+  
+
+<table width="50%"><tr><td width="45%" align="center" valign="top"><b>Buildings</b><br><br>
+{% if planet.solar_collectors > 0 %}<tr><td>Solar Collectors: {{planet.solar_collectors}}</td></tr>{% endif %}
+{% if planet.fission_reactors > 0 %}<tr><td>Fission Reactors: {{planet.fission_reactors}}</td></tr>{% endif %}
+{% if planet.mineral_plants > 0 %}<tr><td>Mineral Plants: {{planet.mineral_plants}}</td></tr>{% endif %}
+{% if planet.crystal_labs > 0 %}<tr><td>Crystal Laboratories: {{planet.crystal_labs}}</td></tr>{% endif %}
+{% if planet.refinement_stations > 0 %}<tr><td>Refinement Stations: {{planet.refinement_stations}}</td></tr>{% endif %}
+{% if planet.cities > 0 %}<tr><td>Cities: {{planet.cities}}</td></tr>{% endif %}
+{% if planet.research_centers > 0 %}<tr><td>Research Centers: {{planet.research_centers}}</td></tr>{% endif %}
+{% if planet.defense_sats > 0 %}<tr><td>Defense Satellites: {{planet.defense_sats}}</td></tr>{% endif %}
+{% if planet.shield_networks > 0 %}<tr><td>Shield Networks: {{planet.shield_networks}}</td></tr>{% endif %}
+{% if planet.portal %}
+<tr><td>Portal</td></tr>
+{% elif planet.portal_under_construction %}
+<tr><td>Portal under Construction</td></tr>
+{% endif %}
+<br>
+<tr><td>{{planet.buildings_under_construction}} additional buildings are under construction</td></tr>
+   
+<!--
+  httpString( cnt, "</td><td width="45%" align="center" valign="top"><b>Units</b><br><br>" );
+  for( a = b = 0 ; a < CMD_UNIT_NUMUSED ; a++ )
+  {
+   if( planetd.unit[a] )
+   {
+    httpPrintf( cnt, "%lld %s<br>", (long long)planetd.unit[a], cmdUnitName[a] );
+    b = 1;
+   }
+  }
+  if( b )
+   httpPrintf( cnt, "<a href="%s&amp;id=%d&unstation=1">Unstation fleet</a>", URLAppend( cnt, "planet" ), plnid );
+-->
+</td></tr></table>
+
+
+
+{% else %}
+THERE SHOULD BE NO WAY TO GET HERE!!!!!!!!!!!!!!!!!!!!!!!!!
+debug info: planet.owner.id: {{planet.owner.id}} and status.user.id: {{status.user.id}}
+{% endif %}
+
+
+{% endblock %}
+

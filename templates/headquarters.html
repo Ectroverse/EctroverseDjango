@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<table cellspacing="0" cellpadding="0" width="90%" border="0" align="center"><tr>
+<td width="7" background="files?type=image&amp;name=i38.jpg">&nbsp;</td>
+<td bgcolor="#0b1119" align="center"><br>
+    <table><tr><td align="right">
+    Current date
+    </td><td>&nbsp;:&nbsp;</td>
+    <td>Week <span id="hqweeks">XX</span>, year <span id="hqyears">XX</span></td></td>
+    </table>
+<br>User <b>{{ user.username }}</b>
+<br>Faction <b>{{ status.user_name }}</b><br><br>
+    <table width="400" border="0"><tr><td align="center">
+    Empire : #{{status.empire_num}}
+    <br>
+    Planets : <span id="hqplanets">{{status.num_planets}}</span><br>Population : <span id="hqpopulation">210691</span>0
+    <br>
+    Networth : <span id="hqnetworth">{{status.networth}}</span></td>
+    <td align="center">
+    Fleet readiness : <span id="hqFleetready">{{status.fleet_readiness}}</span>%
+    <br>
+    Psychics readiness : <span id="hqPsychicsready">{{status.psychic_readiness}}</span>%<br>
+    Agents readiness :   <span id="hqAgentsready">  {{status.agent_readiness}}</span>%<br>
+    Home planet : {{status.home_planet.x}},{{status.home_planet.y}}:{{status.home_planet.i}}</td></tr>
+    </table>
+<br>
+    <table><tr><td align="center"><div class="genwhite"><i>Message from Administration:</i></div>
+    <div class="quote">
+    Insert msg here
+    </div>
+    </td></tr>
+    </table>
+<br>
+<b>Message from your Prime Minister</b>
+<br>
+
+Insert msg here
+
+<br>
+<br>
+
+<b>No new reports</b>
+<br>
+<a href="news?2fix&amp;request=ajax" rel="ajaxpanel" data-loadtype="ajax">See all reports</a>
+<br><br></td><td width="7" background="files?type=image&amp;name=i43.jpg">&nbsp;</td></tr>
+</table>
+
+{% endblock %}

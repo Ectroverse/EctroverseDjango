@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  nginx:
+      image: nginx:1.19
+      ports:
+        - "8000:8000" # 8000 on the host machine points to 8000 inside nginx container
+      volumes:
+        - ./project/nginx/conf:/etc/nginx/conf.d
+        - ./project/nginx/uwsgi_params:/etc/nginx/uwsgi_params
+        - ./static:/static
+      depends_on:
+        - python
+
+  db:
+      image: mysql:5.7 # 8.X causes this issue https://stackoverflow.com/questions/50469587/django-db-utils-operationalerror-2059-authentication-plugin-caching-sha2-pas
+      command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+      ports:
+        - "3306:3306"
+      env_file:
+        - .env # copy .env.template to .env and change passwords/keys
+      environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: djangodatabase
+        MYSQL_USER: dbadmin
+        MYSQL_PASSWORD: ${MYSQLPASS} # defined in .env
+        TZ: 'America/New_York'
+      volumes:
+        - ./project/sql:/docker-entrypoint-initdb.d
+
+  python:
+      build: ./project
+      command: uwsgi --socket :8001 --module project.wsgi --py-autoreload 1 --logto /tmp/mylog.log
+      volumes:
+        - .:/code
+        - ./static:/static
+      expose:
+        - "8001" # this is used for the uwsgi to nginx interface, not the actual website
+      depends_on:
+        - db

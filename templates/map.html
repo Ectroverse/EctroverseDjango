@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div id="mapdiv" style="background-color:black"></div>
+
+<a href="?heatmap=True">Heatmap Test</a>
+
+<script>
+  const width = 100;
+  const height = 100;
+  const circle_radius = 0.1;
+
+  const zoom = d3.zoom()
+      .scaleExtent([0.5, 50]) // max zoom out, max zoom in
+      .on("zoom", zoomed);
+
+  const svg = d3.select("#mapdiv")
+    .append("div") 
+    .append("svg") 
+    .style("height", '80vh')
+    .style("width", '100%')
+    .attr("preserveAspectRatio", "xMidYMin meet") // see here for a nice graphic https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/preserveAspectRatio
+    .attr("viewBox", [-1, -1, width+1, height+1]) // default view
+    .on("click", reset); // zooms out when you click on not the background
+
+  const g = svg.append("g");                   
+
+  // Heatmap overlay
+  {% if show_heatmap %}
+    g.append("image")
+      .attr("x", -0.5)
+      .attr("y", -0.5)
+      .attr('width', 100)
+      .attr('height', 100)
+      .attr('xlink:href','/static/heatmap.png')
+      .style("opacity", 0.5)
+  {% endif %}
+  
+{% for planet in planets %}
+  g.append("a")
+    .attr("xlink:href", "planet{{planet.id}}")
+    .append("circle")
+    .attr("type", "planet") // versus system/sun
+    .attr("cx", {{planet.x}} + 0.3*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("cy", {{planet.y}} + 0.3*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("r", circle_radius * {{planet.size}}/400)
+    .style("fill", "grey")
+    .style("visibility", "hidden") // changes in zoom
+    //.on("click", clicked)
+    .append("title") // hover-over text
+      .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
+      
+  g.append("text")
+    .attr("x", {{planet.x}} + 0.3*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("y", {{planet.y}} + 0.3*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "0.05px")
+    .attr("fill", "white")
+    .attr("text-anchor", "middle") // horizontal centering
+    .attr("dominant-baseline", "central") // vertical centering
+    .style("pointer-events", "none")
+    .style("visibility", "hidden") // changes in zoom
+    .text("{{planet.i}}");
+{% endfor %}
+
+{% for system in systems %}
+  g.append("ellipse") // i couldnt figure out how to distinguish between planets and suns when i did the zoom stuff so this was my solution
+    .attr("cx", {{system.0}})
+    .attr("cy", {{system.1}})
+    .attr("rx", circle_radius*4) // changes in zoom
+    .attr("ry", circle_radius*4) // changes in zoom
+    .style("fill", "yellow")
+    .append("title") // hover-over text
+      .text("{{system.0}},{{system.1}}");    
+      
+  g.append("text")
+    .attr("x", {{system.0}})
+    .attr("y", {{system.1}})
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "0.1px")
+    .attr("fill", "black")
+    .attr("text-anchor", "middle") // horizontal centering
+    .attr("dominant-baseline", "central") // vertical centering
+    .style("pointer-events", "none")
+    .style("visibility", "hidden") // changes in zoom
+    .text("{{system.0}},{{system.1}}"); 
+{% endfor %}
+
+
+  
+  
+  svg.call(zoom);
+
+  function reset() {
+    svg.transition().duration(750).call(
+      zoom.transform,
+      d3.zoomIdentity,
+      d3.zoomTransform(svg.node()).invert([width / 2, height / 2])
+    );
+  }
+
+/*
+  function clicked(d,i) {
+    //const [[x0, y0], [x1, y1]] = path.bounds(d);
+    console.log(d); // coming back as undefined for circles
+    console.log(i); // come back as 0 for every circle
+    d3.event.stopPropagation();
+    svg.transition().duration(750).call(
+      zoom.transform,
+      d3.zoomIdentity
+        .translate(width / 2, height / 2)
+        .scale(Math.min(8, 0.9 / Math.max(circle_radius / width, circle_radius / height)))
+        .translate(-circle_radius, -circle_radius),
+      d3.mouse(svg.node())
+    );
+  }
+*/
+
+  function zoomed() {
+    const {transform} = d3.event;
+    g.attr("transform", transform);
+    g.attr("stroke-width", 1 / transform.k);
+    if (transform.k > 2) {
+        g.selectAll("circle")
+          .style("visibility", "visible");
+        g.selectAll("ellipse")
+          .attr("rx", circle_radius*1.5)
+          .attr("ry", circle_radius*1.5)
+        g.selectAll("text")
+          .style("visibility", "visible");
+    } else {
+        g.selectAll("circle")
+          .style("visibility", "hidden");
+        g.selectAll("ellipse")
+          .attr("rx", circle_radius*4)
+          .attr("ry", circle_radius*4)
+        g.selectAll("text")
+          .style("visibility", "hidden");
+    }
+  }
+
+
+
+</script>
+  
+
+{% endblock %}
+
