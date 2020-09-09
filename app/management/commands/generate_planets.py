@@ -32,6 +32,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
         start_t = time.time()
         Planet.objects.all().delete() # remove all planets
         planet_buffer = [] # MUCH quicker to save them all at once, like 100x faster
+        empires_buffer = []
 
         map_size = 100
 
@@ -42,6 +43,10 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             home_x = round(distance*np.sin(theta) + map_size/2)
             home_y = round(distance*np.cos(theta) + map_size/2)
             theta += 2*np.pi/num_homes
+            empires_buffer.append(Empire(x=home_x,
+                                         y=home_y,
+                                         name="Empire #" + str(j)
+            ))
             for i in range(8): # max 8 players per empire/system
                 planet_buffer.append(Planet(home_planet=True,
                                             x=home_x,
@@ -49,6 +54,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
                                             i=i,
                                             pos_in_system=i,
                                             size=400)) # create is the same as new() and add()
+
 
             # Now add N planets in a small area around the home planet
             N = 6
@@ -72,12 +78,18 @@ class Command(BaseCommand): # must be called command, use file name to name the 
 
         start_tt = time.time()
         Planet.objects.bulk_create(planet_buffer)
+        Empire.objects.bulk_create(empires_buffer)
         print("Saving planets to db took this many seconds", time.time() - start_tt)
 
 
         # TEMPORARY - assign all planets to admin user, for debugging sake
         all_planets = Planet.objects.all()
         all_planets.update(owner=User.objects.get(username='admin'))
+
+        #Give empire 1 to the admin
+        admin = UserStatus.objects.get(id=1)
+        admin.empire = Empire.objects.get(id = 1)
+        admin.save()
 
 
         num_planets = all_planets.count()
