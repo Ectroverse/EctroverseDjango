@@ -50,13 +50,64 @@ class Planet(models.Model):
 
 
 
+class Empire(models.Model):
+    '''
+  int id;
+  int rank;
+  int flags;
+  int numplayers;
+  int politics[CMD_EMPIRE_POLITICS_TOTAL];
+  int player[ARRAY_MAX];
+  int vote[ARRAY_MAX];
+  int depreciated;
+  int homeid;
+  int homepos; // ( y << 16 ) + x
+  int picture;
+  int planets;
+  int artefacts;
+  int construction;
+  int building[CMD_BLDG_EMPIRE_NUMUSED];
+  int counters[16];
+  float taxation;
+  int64_t networth;
+  int64_t fund[CMD_RESSOURCE_NUMUSED];
+  int64_t infos[CMD_RESSOURCE_NUMUSED];
+  char name[USER_NAME_MAX];
+  char password[USER_PASS_MAX];
+    '''
+    x = models.IntegerField(default=0)
+    y = models.IntegerField(default=0)
+    rank = models.IntegerField(default=0)
+    numplayers = models.IntegerField(default=0)
+    planets = models.IntegerField(default=0)
+    artefacts = models.IntegerField(default=0) #do we need this?
+    taxation = models.FloatField(default=0.0)
+    networth = models.BigIntegerField(default=0) 
+    name = models.CharField(max_length=30, default="")
+    password = models.CharField(max_length=30, default="")
+
+
 class UserStatus(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE) # when referenced object is deleted, also delete this
 
     # Info that doesn't change over the round
     user_name = models.CharField(max_length=30, default="user-display-name") # Display name
-    empire_num = models.IntegerField()
-    home_planet = models.ForeignKey(Planet, on_delete=models.SET_NULL, blank=True, null=True) # only time we delete planets will be mid-round
+    # empire_num = models.IntegerField()
+    empire = models.ForeignKey(Empire, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    home_planet = models.ForeignKey(Planet, on_delete=models.SET_NULL, blank=True,
+                                    null=True)  # only time we delete planets will be mid-round
+
+    # empire politics section
+    class EmpireRoles(models.TextChoices):
+        PM = 'PM', _('Prime Minister')
+        MD = 'MD', _('Minister of Development')
+        MW = 'MW', _('Minister of War')
+        MC = 'MC', _('Minister of Communication')
+        P = 'P', _('') #normal player
+        I = 'I', _('Independent')
+    empire_role = models.CharField(max_length=2, choices=EmpireRoles.choices, default=EmpireRoles.P)
+    votes =  models.IntegerField(default=0) #number of people voting for this user to be a leader of their empire
+
 
     # Race
     class Races(models.TextChoices):
@@ -158,7 +209,7 @@ class UserStatus(models.Model):
 # When a new User is created, automatically create an associated UserStatus and main fleet
 def new_user_post_save(sender, instance, created, **kwargs):
     if created:
-        UserStatus.objects.create(user=instance, empire_num=0)
+        UserStatus.objects.create(user=instance)
         Fleet.objects.create(owner=instance, main_fleet=True) # this is the only time a main fleet is created
         # TODO assign home planet here, based on some index stored the number of current players in the round
 post_save.connect(new_user_post_save, sender=User)
