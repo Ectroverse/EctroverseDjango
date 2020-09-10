@@ -4,18 +4,24 @@
 
 {% block content %}
 
+<table>
+<tr><td></td>
+<td>Name</td>
+<td>Race</td>
+<td>Planets</td>
+<td>Networth</td></tr>
 {% for status in player_list %}
 <tr>
- 
 <td>{{status.empire_role}}</td>
 <td>{{status.user_name}}</td>
 <td>{{status.race}}</td>
 <td>{{status.num_planets }}</td>
-<td>{{status.networth  }}</td>
+<td>{{status.networth}}</td>
 {# status - online? #}
 <br>
+</tr>
 {% endfor %}
-
+</table>
 
 {% endblock %}
 
