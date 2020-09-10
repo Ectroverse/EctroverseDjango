@@ -537,6 +537,12 @@ def fleetdisband(request):
     return HttpResponse("GOT HERE")
 
 
+@login_required
+def empire(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    context = {"status": status,
+               "page_title": "Empire"}
+    return render(request, "empire.html", context)
 
 
 
