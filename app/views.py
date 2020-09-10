@@ -541,9 +541,11 @@ def fleetdisband(request):
 def empire(request, empire_id):
     status = get_object_or_404(UserStatus, user=request.user)
     player_list = UserStatus.objects.filter(empire = empire_id)
+    empire = Empire.objects.get(pk = empire_id)
     context = {"status": status,
                "page_title": "Empire",
-               "player_list": player_list}
+               "player_list": player_list,
+                "empire": empire}
     return render(request, "empire.html", context)
 
 
