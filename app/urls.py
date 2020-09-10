@@ -19,4 +19,5 @@ urlpatterns = [
     path('fleets', views.fleets, name='fleets'),
     path('fleetsend', views.fleetsend, name='fleetsend'),
     path('fleetdisband', views.fleetdisband, name='fleetdisband'),
+    path('empire', views.empire, name='empire'),
 ]
