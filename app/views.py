@@ -538,10 +538,12 @@ def fleetdisband(request):
 
 
 @login_required
-def empire(request):
+def empire(request, empire_id):
     status = get_object_or_404(UserStatus, user=request.user)
+    player_list = UserStatus.objects.filter(empire = empire_id)
     context = {"status": status,
-               "page_title": "Empire"}
+               "page_title": "Empire",
+               "player_list": player_list}
     return render(request, "empire.html", context)
 
 
