@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+{% for status in player_list %}
+
+{{status.empire_role}}" "
+{{status.user_name}}" "
+{{status.race}}" "
+{{status.num_planets }}" "
+{{status.networth  }}" "
+{# status - online? #}
+<br>
+{% endfor %}
+
+
+{% endblock %}
+
