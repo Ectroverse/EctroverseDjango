@@ -5,12 +5,13 @@
 {% block content %}
 
 {% for status in player_list %}
-
-{{status.empire_role}}" "
-{{status.user_name}}" "
-{{status.race}}" "
-{{status.num_planets }}" "
-{{status.networth  }}" "
+<tr>
+ 
+<td>{{status.empire_role}}</td>
+<td>{{status.user_name}}</td>
+<td>{{status.race}}</td>
+<td>{{status.num_planets }}</td>
+<td>{{status.networth  }}</td>
 {# status - online? #}
 <br>
 {% endfor %}
