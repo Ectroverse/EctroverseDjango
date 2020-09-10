@@ -85,6 +85,10 @@ class Empire(models.Model):
     networth = models.BigIntegerField(default=0) 
     name = models.CharField(max_length=30, default="")
     password = models.CharField(max_length=30, default="")
+    fund_energy = models.IntegerField(default=0)
+    fund_minerals = models.IntegerField(default=0)
+    fund_crystals = models.IntegerField(default=0)
+    fund_ectrolium = models.IntegerField(default=0)
 
 
 class UserStatus(models.Model):
