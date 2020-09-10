@@ -19,5 +19,5 @@ urlpatterns = [
     path('fleets', views.fleets, name='fleets'),
     path('fleetsend', views.fleetsend, name='fleetsend'),
     path('fleetdisband', views.fleetdisband, name='fleetdisband'),
-    path('empire', views.empire, name='empire'),
+    url(r'^empire(?P<empire_id>[0-9]+)/$', views.empire, name='empire'),
 ]
