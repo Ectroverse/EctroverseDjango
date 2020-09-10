@@ -4,17 +4,17 @@
 
 {% block content %}
 
-<table>
+<table style= "border-spacing: 10px; border-collapse: separate;" } >
 <tr><td></td>
-<td>Name</td>
+<td><b>Name</b></td>
 <td>Race</td>
 <td>Planets</td>
 <td>Networth</td></tr>
 {% for status in player_list %}
 <tr>
-<td>{{status.empire_role}}</td>
-<td>{{status.user_name}}</td>
-<td>{{status.race}}</td>
+<td>{{status.get_empire_role_display}}</td>
+    <td><b>{{status.user_name}}</b></td>
+<td>{{status.get_race_display}}</td>
 <td>{{status.num_planets }}</td>
 <td>{{status.networth}}</td>
 {# status - online? #}
@@ -24,7 +24,7 @@
 </table>
 <br>
 <br>
-<table>
+<table style= "border-spacing: 8px; border-collapse: separate;" } >
 <tr>
 <td>Empire fund:</td>
 <td>{{empire.taxation}}</td>
