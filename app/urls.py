@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^empire(?P<empire_id>[0-9]+)/$', views.empire, name='empire'),
     path('vote', views.vote, name='vote'),
     path('vote_results', views.vote, name='voteresults'),
+    path('pm_options', views.pm_options, name='prime_minister_options'),
 ]
