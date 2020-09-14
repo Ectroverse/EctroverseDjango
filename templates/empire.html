@@ -3,10 +3,12 @@
 {% load static %}
 
 {% block content %}
+<br>
 <a href="/vote">Change your vote</a> - 
-{% if status.empire_role == "PM" }
-<a href="/PMOptions">Prime Minister Options</a>
+{% if status.empire_role == "PM" %}
+<a href="/pm_options">Prime Minister Options</a>
 {% endif %}
+<br>
 
 <table style= "border-spacing: 10px; border-collapse: separate;" } >
 <tr><td></td>

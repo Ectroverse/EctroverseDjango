@@ -3,15 +3,16 @@
 {% load static %}
 
 {% block content %}
-
+<br>
 <form action="/vote" method="post">
 {% csrf_token %}
 {% for player in player_list %}
-    <input type="radio" name="choice" id="{{player_id}}">
-    <label for="choice{{ forloop.counter }}">{{ player.name }}</label><br>
+    <label for="choice{{ forloop.counter }}">{{ player.user_name }}</label>
+	<input type="radio" name="choice" id="{{player_id}}"><br>
 {% endfor %}
 <input type="submit" value="Vote">
 </form>
+<br>
 <a href="/results">See results</a>
 
 
