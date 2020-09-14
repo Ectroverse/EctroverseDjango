@@ -89,9 +89,9 @@ class Empire(models.Model):
     fund_minerals = models.IntegerField(default=0)
     fund_crystals = models.IntegerField(default=0)
     fund_ectrolium = models.IntegerField(default=0)
-    pm_message = models.CharField(max_length=300, default="Welcome to empire #" + str(models.AutoField(primary_key=True)) + "!")
+    pm_message = models.CharField(max_length=300, default="")
     relations_message = models.CharField(max_length=300, default="No relations message.")
-    empire_image = models.ImageField(upload_to='empire_images/'+ str(models.AutoField(primary_key=True)) +"/")
+    empire_image = models.ImageField(upload_to='empire_images/')
 
 
 class UserStatus(models.Model):
