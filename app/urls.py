@@ -20,4 +20,6 @@ urlpatterns = [
     path('fleetsend', views.fleetsend, name='fleetsend'),
     path('fleetdisband', views.fleetdisband, name='fleetdisband'),
     url(r'^empire(?P<empire_id>[0-9]+)/$', views.empire, name='empire'),
+    path('vote', views.vote, name='vote'),
+    path('vote_results', views.vote, name='voteresults'),
 ]
