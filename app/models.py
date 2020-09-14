@@ -111,6 +111,7 @@ class UserStatus(models.Model):
         I = 'I', _('Independent')
     empire_role = models.CharField(max_length=2, choices=EmpireRoles.choices, default=EmpireRoles.P)
     votes =  models.IntegerField(default=0) #number of people voting for this user to be a leader of their empire
+    voting_for =  models.models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
 
     # Race
