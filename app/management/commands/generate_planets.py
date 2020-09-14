@@ -45,7 +45,9 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             theta += 2*np.pi/num_homes
             empires_buffer.append(Empire(x=home_x,
                                          y=home_y,
-                                         name="Empire #" + str(j)
+                                         name="Empire",
+                                         pm_message="Welcome to empire #" + str(j+1)
+
             ))
             for i in range(8): # max 8 players per empire/system
                 planet_buffer.append(Planet(home_planet=True,
