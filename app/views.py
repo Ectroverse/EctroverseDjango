@@ -567,6 +567,29 @@ def vote(request):
         voted_for_status = get_object_or_404(UserStatus, new_voting_for)    
         voted_for_status.votes += 1
         voted_for_status.save()
+        
+        # part to check/make a new leader when someone has voted
+        # if mutiple players have the same ammount of votes - the old leader stays, regarding of his votes
+        # otherwise a player with max votes is chosen
+        player_list = UserStatus.objects.filter(empire = empire_id)
+        leader_votes = 0
+        current_leader = None
+        max_votes = 0
+        for player in player_list:
+            if player.empire_role = 'PM':
+                current_leader = player
+                leader_votes = player.votes
+            if player.votes > max_votes:
+                max_votes = player.votes
+        leaders = []
+        for player in player_list:
+            if player.votes == max_votes:
+                leaders.append(player)
+        if len(leaders) == 1:
+            current_leader.empire_role = 'P'
+            leaders[0].empire_role = 'PM'
+            
+        
         # Always return an HttpResponseRedirect after successfully dealing
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
@@ -589,10 +612,8 @@ def pm_options(request, empire_id):
         if request.POST['empire_relations_message']:
             empire.relations_message = float(request.POST['empire_relations_message'])
     empire.save()
-    context = {"status": status,
-               "page_title": "Prime Minister options"
-              }
-    return render(request, "pm_options.html", context)
+
+    return HttpResponseRedirect("/pm_options")
 
 
 
