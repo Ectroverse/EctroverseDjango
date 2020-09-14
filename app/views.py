@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from .models import *
 from .constants import *
 from .calculations import *
@@ -549,7 +549,28 @@ def empire(request, empire_id):
     return render(request, "empire.html", context)
 
 
-
+@login_required
+def vote(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    try:
+        new_voting_for = int(request.POST['choice'])
+    except (KeyError, Choice.DoesNotExist):
+        context = {"status": status,
+                   "page_title": "Vote"}
+        return render(request, "vote.html", context)
+    else:
+        if status.voting_for is not None:
+            #find previous user voted for and remove one vote from him
+            voted_for_status = get_object_or_404(UserStatus, status.voting_for)
+            voted_for_status.votes -= 1
+            voted_for_status.save()
+        voted_for_status = get_object_or_404(UserStatus, new_voting_for)    
+        voted_for_status.votes += 1
+        voted_for_status.save()
+        # Always return an HttpResponseRedirect after successfully dealing
+        # with POST data. This prevents data from being posted twice if a
+        # user hits the Back button.
+        return HttpResponseRedirect("/results")
 
 
 
