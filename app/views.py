@@ -572,6 +572,28 @@ def vote(request):
         # user hits the Back button.
         return HttpResponseRedirect("/results")
 
+    
+@login_required
+def pm_options(request, empire_id):
+    status = get_object_or_404(UserStatus, user=request.user)
+    empire = Empire.objects.get(pk = status.empire)
+    if request.method == 'POST':
+        if request.POST['empire_name']:
+            empire.name = request.POST['empire_name']
+        if request.POST['empire_pass']:
+            empire.password = request.POST['empire_pass']
+        if request.POST['empire_taxation']:
+            empire.taxation = float(request.POST['empire_taxation'])
+        if request.POST['empire_pm_message']:
+            empire.pm_message = float(request.POST['empire_pm_message'])
+        if request.POST['empire_relations_message']:
+            empire.relations_message = float(request.POST['empire_relations_message'])
+    empire.save()
+    context = {"status": status,
+               "page_title": "Prime Minister options"
+              }
+    return render(request, "pm_options.html", context)
+
 
 
 
