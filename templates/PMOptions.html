@@ -12,7 +12,17 @@
 <tr><td><input type="text"  maxlength="30" name="empire_name" size="10" value="{{empire.name}}"></td></tr>
 <tr><td align="left" nowrap>Empire password</td></tr>
 <tr><td><input type="password" maxlength="30" name="empire_pass" size="10" value="{{empire.password}}"></td></tr>
-<tr><td align="left" nowrap>Empire picture - yet to do</td></tr>
+<tr><td align="left" nowrap>Empire picture</td></tr>
+<form action="/PMOptions" method="post" enctype="multipart/form-data">
+{% csrf_token %}
+<p>{{ form.non_field_errors }}</p>
+<p>{{ form.docfile.label_tag }} {{ form.docfile.help_text }}</p>
+<p>
+    {{ form.docfile.errors }}
+    {{ form.docfile }}
+</p>
+<p><input type="submit" value="Upload" /></p>
+</form> 
 <tr><td align="left" nowrap>Taxation</td></tr>
 <tr><td><input type="text" title="Number between 0 and 100%, with 2 possible decimals."
 pattern="100|([0-9]{1,2}(\.[0-9]{1,2})?)" maxlength="5" name="empire_taxation" size="10" 
