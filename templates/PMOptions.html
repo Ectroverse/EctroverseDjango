@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<form action="/PMOptions" method="post">
+{% csrf_token %}
+
+<table cellspacing="8">
+<tr><td align="left" nowrap>Empire Name</td></tr>
+<tr><td><input type="text"  maxlength="30" name="empire_name" size="10" value="{{empire.name}}"></td></tr>
+<tr><td align="left" nowrap>Empire password</td></tr>
+<tr><td><input type="password" maxlength="30" name="empire_pass" size="10" value="{{empire.password}}"></td></tr>
+<tr><td align="left" nowrap>Empire picture - yet to do</td></tr>
+<tr><td align="left" nowrap>Taxation</td></tr>
+<tr><td><input type="text" title="Number between 0 and 100%, with 2 possible decimals."
+pattern="100|([0-9]{1,2}(\.[0-9]{1,2})?)" maxlength="5" name="empire_taxation" size="10" 
+value="{{empire.taxation}}"></td></tr>
+<tr><td align="left" nowrap>Offer an alliance to an empire</td></tr>
+<tr><td><input type="text" pattern="[0-9]+" maxlength="6" name="empire_offer_alliance" size="10"></td></tr>
+<tr><td align="left" nowrap>Offer a NAP to an empire</td></tr>
+<tr><td><input type="text" pattern="[0-9]+" maxlength="6" name="empire_offer_nap" size="10"></td></tr>
+<tr><td align="left" nowrap>Nr. of hours</td></tr>
+<tr><td><input type="text" pattern="[0-9]+" maxlength="3" name="empire_offer_nap_hours" size="10"></td></tr>
+<tr><td align="left" nowrap>Declare war to an empire</td></tr>
+<tr><td><input type="text" pattern="[0-9]+" maxlength="6" name="empire_declare_war" size="10"></td></tr>
+<tr><td align="left" nowrap>Prime Minister message</td></tr>
+<tr><td><input type="text" maxlength="300" name="empire_pm_message" size="50" value="{{empire.pm_message}}"></td></tr>
+<tr><td align="left" nowrap>Relations message</td></tr>
+<tr><td><input type="text" maxlength="300" name="empire_relations_message" size="50" value="{{empire.relations_message}}"></td></tr>
+
+</table>
+<input type="submit" value="Change">
+</form>
+
+
+{% endblock %}
