@@ -89,9 +89,9 @@ class Empire(models.Model):
     fund_minerals = models.IntegerField(default=0)
     fund_crystals = models.IntegerField(default=0)
     fund_ectrolium = models.IntegerField(default=0)
-    pm_message = models.CharField(max_length=300, default="Welcome to empire #" + empire_id + "!")
+    pm_message = models.CharField(max_length=300, default="Welcome to empire #" + str(models.AutoField(primary_key=True)) + "!")
     relations_message = models.CharField(max_length=300, default="No relations message.")
-    empire_image = models.ImageField(upload_to='empire_images/'+empire_id +"/") 
+    empire_image = models.ImageField(upload_to='empire_images/'+ str(models.AutoField(primary_key=True)) +"/")
 
 
 class UserStatus(models.Model):
@@ -114,7 +114,7 @@ class UserStatus(models.Model):
         I = 'I', _('Independent')
     empire_role = models.CharField(max_length=2, choices=EmpireRoles.choices, default=EmpireRoles.P)
     votes =  models.IntegerField(default=0) #number of people voting for this user to be a leader of their empire
-    voting_for =  models.models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    voting_for =  models.ForeignKey('self', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
 
     # Race

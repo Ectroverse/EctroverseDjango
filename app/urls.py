@@ -5,10 +5,6 @@ from . import views
 from django.conf import settings
 from django.conf.urls.static import static
 
-if settings.DEBUG:
-        urlpatterns += static(settings.MEDIA_URL,
-                              document_root=settings.MEDIA_ROOT)
-
 urlpatterns = [
     path('', views.headquarters, name='headquarters'), # root page
     path('council', views.council, name='council'),
@@ -30,3 +26,7 @@ urlpatterns = [
     path('vote_results', views.vote, name='voteresults'),
     path('pm_options', views.pm_options, name='prime_minister_options'),
 ]
+
+if settings.DEBUG:
+        urlpatterns += static(settings.MEDIA_URL,
+                              document_root=settings.MEDIA_ROOT)
