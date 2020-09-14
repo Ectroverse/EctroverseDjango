@@ -5,6 +5,7 @@ from .constants import *
 from .calculations import *
 from .helper_classes import *
 from .tables import *
+from .forms import *
 from django.contrib.auth.decorators import login_required
 from django.templatetags.static import static
 from io import BytesIO
@@ -13,6 +14,7 @@ from django_tables2 import SingleTableView
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
+
 
 import numpy as np
 import time
@@ -601,6 +603,11 @@ def pm_options(request, empire_id):
     status = get_object_or_404(UserStatus, user=request.user)
     empire = Empire.objects.get(pk = status.empire)
     if request.method == 'POST':
+        if request.POST['empire_picture']:
+            form = DocumentForm(request.POST, request.FILES)
+            if form.is_valid():
+                picture = Empire(empire_image = request.FILES['empire_picture'])
+                picture.save()
         if request.POST['empire_name']:
             empire.name = request.POST['empire_name']
         if request.POST['empire_pass']:
