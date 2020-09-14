@@ -91,6 +91,7 @@ class Empire(models.Model):
     fund_ectrolium = models.IntegerField(default=0)
     pm_message = models.CharField(max_length=300, default="Welcome to empire #" + empire_id + "!")
     relations_message = models.CharField(max_length=300, default="No relations message.")
+    empire_image = models.ImageField(upload_to='empire_images/'+empire_id +"/") 
 
 
 class UserStatus(models.Model):
