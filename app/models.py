@@ -291,6 +291,8 @@ class RoundParams(models.Model):
 
 
 class Relations(models.Model):
+    # When an empire declares a relation, its id number goes to the empire1 field, and the 
+    # other empire's id goes to empire2 field
     empire1 = models.ForeignKey(Empire, on_delete=models.SET_NULL, blank=True, null=True, default=None)
     empire2 = models.ForeignKey(Empire, on_delete=models.SET_NULL, blank=True, null=True, default=None)
     class RelationTypes(models.TextChoices): 
