@@ -31,6 +31,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
     def handle(self, *args, **options):
         start_t = time.time()
         Planet.objects.all().delete() # remove all planets
+        empire.objects.all().delete() # remove all empires
         planet_buffer = [] # MUCH quicker to save them all at once, like 100x faster
         empires_buffer = []
 
