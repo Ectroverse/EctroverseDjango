@@ -611,7 +611,59 @@ def vote(request):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect("/results")
-
+    
+    
+def set_relation(relation, current_empire, target_empire, *rel_time):
+    if relation == 'ally':
+        rel = Relations.objects.filter(empire2=current_empire, relation_type='AO')       
+        if rel is not None:
+            # if second empire allready offered an alliance, make two empires allies
+            Relations.objects.create(empire1=current_empire,
+                                     empire2=target_empire,
+                                     relation_type='A',
+                                     relation_length=rel_time)
+            rel.relation_type='A'
+        else:
+        #make an alliance offer from current_empire to target_empire
+            Relations.objects.create(empire1=current_empire,
+                                     empire2=target_empire,
+                                     relation_type='AO',
+                                     relation_length=rel_time)
+    if relation == 'war':
+        Relations.objects.create(empire1=current_empire,
+                         empire2=target_empire,
+                         relation_type='W',
+                         relation_length=war_declaration_timer)
+    if relation == 'nap':
+        rel = Relations.objects.filter(empire2=current_empire, relation_type='NO')       
+        if rel is not None and rel.relation_length == rel_time:
+            # if second empire allready offered a nap with the same timer, make two empires napped
+            Relations.objects.create(empire1=current_empire,
+                                     empire2=target_empire,
+                                     relation_type='N',
+                                     relation_length=rel_time)
+            rel.relation_type='N'
+        else:
+        #make a nap offer from current_empire to target_empire
+            Relations.objects.create(empire1=current_empire,
+                                     empire2=target_empire,
+                                     relation_type='NO',
+                                     relation_length=rel_time)
+    if relation == 'cancel_nap':
+        rel1 = Relations.objects.filter(empire1=target_empire, relation_type='N')
+        rel2 = Relations.objects.filter(empire2=current_empire, relation_type='N')  
+        if rel1.relation_length is not None:
+            #cancell timed nap for both empires, any empire of two can trigger this
+            rel1.relation_type='NC'
+            rel2.relation_type='NC'
+        else:
+            # if this is a permanent NAP both parties need to cancel it for it to be deleted
+            if rel2.relation_type='PC':
+                rel1.delete()
+                rel2.delete()
+            else:
+                rel1.relation_type='PC'
+            
 
 @login_required
 def pm_options(request):
@@ -633,6 +685,14 @@ def pm_options(request):
             user_empire.pm_message = (request.POST['empire_pm_message'])
         if request.POST['empire_relations_message']:
             user_empire.relations_message = (request.POST['empire_relations_message'])
+        if request.POST.get['empire_offer_alliance']:
+            set_relation('ally',status.empire, request.POST.get['empire_offer_alliance'] )
+        if request.POST.get['empire_offer_nap']:
+            set_relation('nap', status.empire, request.POST.get['empire_offer_nap'], request.POST.get['empire_offer_nap_hours'])
+         if request.POST.get['empire_cancel_nap']:
+            set_relation('cancel_nap', status.empire, request.POST.get['empire_offer_nap'])
+        if request.POST.get['empire_declare_war']:
+            set_relation('war',status.empire, request.POST.get['empire_declare_war'])
         user_empire.save()
         return HttpResponseRedirect("/pm_options")
     context = {"status": status,
