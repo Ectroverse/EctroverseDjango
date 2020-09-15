@@ -301,7 +301,8 @@ class Relations(models.Model):
         A = 'A', _('Alliance')
         NO = 'NO', _('Non agression pact offered')
         NC = 'NC', _('Non agression pact cancelled')
-        N = 'N', _('Non agression pact')
+        PC = 'PC', _('Permanent non agression pact cancelled')
+        N = 'N', _('Non agression pact') 
     relation_type = models.CharField(max_length=2, choices=RelationTypes.choices)
     relation_length = models.IntegerField(max_length=3)
 
