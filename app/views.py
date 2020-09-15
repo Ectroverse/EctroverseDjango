@@ -649,6 +649,7 @@ def relations(request):
     context = {"status": status,
                "page_title": "Relations",
                "relations_from_empire": relations_from_empire,
-               "relations_to_empire": relations_to_empire}
+               "relations_to_empire": relations_to_empire,
+               "empire": status.empire}
     return render(request, "pm_options.html", context)
 
