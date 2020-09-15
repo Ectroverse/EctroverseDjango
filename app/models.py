@@ -290,7 +290,17 @@ class RoundParams(models.Model):
     galaxy_size = models.IntegerField(default=100)
 
 
-
+class Relations(models.Model):
+    empire1 = models.ForeignKey(Empire, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    empire2 = models.ForeignKey(Empire, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    class RelationTypes(models.TextChoices): 
+        AO = 'AO', _('Alliance offered')
+        W = 'W', _('War declared)
+        A = 'A', _('Alliance')
+        NO = 'NO', _('Non agression pact offered')
+        N = 'N', _('Non agression pact')
+    relation_type = models.CharField(max_length=2, choices=RelationTypes.choices)
+    relation_length = models.IntegerField(max_length=3)
 
 
 
