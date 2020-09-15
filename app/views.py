@@ -615,7 +615,7 @@ def vote(request):
     
 def set_relation(relation, current_empire, target_empire, *rel_time):
     if relation == 'ally':
-        rel = Relations.objects.filter(empire2=current_empire, relation_type='AO')       
+        rel = Relations.objects.filter(empire1=target_empire, empire2=current_empire, relation_type='AO')       
         if rel is not None:
             # if second empire allready offered an alliance, make two empires allies
             Relations.objects.create(empire1=current_empire,
@@ -635,7 +635,7 @@ def set_relation(relation, current_empire, target_empire, *rel_time):
                          relation_type='W',
                          relation_length=war_declaration_timer)
     if relation == 'nap':
-        rel = Relations.objects.filter(empire2=current_empire, relation_type='NO')       
+        rel = Relations.objects.filter(empire1=target_empire, empire2=current_empire, relation_type='NO')       
         if rel is not None and rel.relation_length == rel_time:
             # if second empire allready offered a nap with the same timer, make two empires napped
             Relations.objects.create(empire1=current_empire,
@@ -650,8 +650,8 @@ def set_relation(relation, current_empire, target_empire, *rel_time):
                                      relation_type='NO',
                                      relation_length=rel_time)
     if relation == 'cancel_nap':
-        rel1 = Relations.objects.filter(empire1=target_empire, relation_type='N')
-        rel2 = Relations.objects.filter(empire2=current_empire, relation_type='N')  
+        rel1 = Relations.objects.filter(empire1=current_empire, empire2=target_empire, relation_type='N')
+        rel2 = Relations.objects.filter(empire1=target_empire, empire2=current_empire, relation_type='N')  
         if rel1.relation_length is not None:
             #cancell timed nap for both empires, any empire of two can trigger this
             rel1.relation_type='NC'
