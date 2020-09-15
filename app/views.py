@@ -579,7 +579,7 @@ def vote(request):
         print("TEST ",new_voting_for)
         if status.voting_for is not None:
             # find previous user voted for and remove one vote from him
-            voted_for_status = get_object_or_404(UserStatus, status.voting_for)
+            voted_for_status = status.voting_for
             voted_for_status.votes -= 1
             voted_for_status.save()
         voted_for_status = get_object_or_404(UserStatus, new_voting_for)
