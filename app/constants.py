@@ -247,4 +247,7 @@ race_info_list = {
     "spell_list": ["Irradiate Ectrolium", "Incandescence", "War Illusions", "Grow Planet's Size"],
     "incantation_list": ["Sense Artefact", "Survey System", "Portal Force Field", "Call to Arms"]}}
 
-
+###################
+#    Relations    #
+###################
+war_declaration_timer = 144
