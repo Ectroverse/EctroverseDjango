@@ -639,3 +639,16 @@ def pm_options(request):
                "page_title": "Prime Minister options",
                "empire": status.empire}
     return render(request, "pm_options.html", context)
+
+
+@login_required
+def relations(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    relations_from_empire = Relations.objects.filter(empire1=status.empire)
+    relations_to_empire = Relations.objects.filter(empire2=status.empire)
+    context = {"status": status,
+               "page_title": "Relations",
+               "relations_from_empire": relations_from_empire,
+               "relations_to_empire": relations_to_empire}
+    return render(request, "pm_options.html", context)
+
