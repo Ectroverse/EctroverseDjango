@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+Message from your leader:<br>
+{{empire.relations_message}}
+<br>
+<table style= "border-spacing: 10px; border-collapse: separate;" } >
+
+{% for relation in relations_from_empire %}
+	{% if relation.relation_type == 'AO' %}
+	<tr><td>You offered an empire {{relation.empire2}} an alliance!</td></tr>
+	{% endif %}
+	{% if relation.relation_type == 'A' %}
+	<tr><td>You have an alliance with empire {{relation.empire2}}!</td></tr>
+	{% endif %}
+	{% if relation.relation_type == 'W' %}
+	<tr><td>You have declared war on {{relation.empire2}}!</td></tr>
+	<tr><td>It will last for another {{relation.relation_length}} ticks!</td></tr>
+	{% endif %}
+	{% if relation.relation_type == 'NO' %}
+		{% if relation.relation_length > 0 %}
+		<tr><td>You offered an empire {{relation.empire2}} a {{relation.relation_length}} hour
+		non - agression pact!</td></tr>
+		{% else %}
+		<tr><td>You offered an empire {{relation.empire2}} a permanent 
+		non - agression pact!</td></tr>
+		{% endif %}
+	{% endif %}
+	{% if relation.relation_type == 'N' %}
+		{% if relation.relation_length > 0 %}
+		<tr><td>You have a {{relation.relation_length}} hour non - agression pact 
+		with {{relation.empire2}} !</td></tr>
+		{% else %}
+		<tr><td>You have a permanent non - agression pact with {{relation.empire2}} !</td></tr>
+		{% endif %}
+	{% endif %}
+{% endfor %}
+<tr></tr>
+{% for relation in relations_to_empire %}
+	{% if relation.relation_type == 'AO' %}
+	<tr><td>Empire {{relation.empire2}} has offered you an alliance!</td></tr>
+	{% endif %}
+	{% if relation.relation_type == 'W' %}
+	<tr><td>Empire {{relation.empire2}} has declared war!</td></tr>
+	<tr><td>It will last for another {{relation.relation_length}} ticks!</td></tr>
+	{% endif %}
+	{% if relation.relation_type == 'NO' %}
+		{% if relation.relation_length > 0 %}
+		<tr><td>An empire {{relation.empire2}} has offered a {{relation.relation_length}} hour
+		non - agression pact!</td></tr>
+		{% else %}
+		<tr><td>An empire {{relation.empire2}} has offered a permanent 
+		non - agression pact!</td></tr>
+		{% endif %}
+	{% endif %}
+{% endfor %}
+</table>
+{% endblock %}
