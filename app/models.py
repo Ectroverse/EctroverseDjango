@@ -297,7 +297,7 @@ class Relations(models.Model):
     empire2 = models.ForeignKey(Empire, on_delete=models.SET_NULL, blank=True, null=True, default=None)
     class RelationTypes(models.TextChoices): 
         AO = 'AO', _('Alliance offered')
-        W = 'W', _('War declared)
+        W = 'W', _('War declared')
         A = 'A', _('Alliance')
         NO = 'NO', _('Non agression pact offered')
         N = 'N', _('Non agression pact')
