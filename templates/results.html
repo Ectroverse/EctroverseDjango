@@ -4,12 +4,12 @@
 
 {% block content %}
 
-<ul>
-{% for player in player_list %}
-    <li>{{ player.name }} -- {{ player.votes }} vote{{ player.votes|pluralize }}</li>
-{% endfor %}
-</ul>
 
+{% for player in player_list %}
+    {{ player.user_name }} - {{ player.votes }} vote{{ player.votes|pluralize }}
+{% endfor %}
+<br>
+<br>
 <a href="/vote">Vote again?</a>
 
 

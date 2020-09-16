@@ -103,7 +103,7 @@ function changeslider(newValue,field) {
             <table style="text-align:left;" cellspacing="0" cellpadding="0">
                 <tbody><tr><td><b><font size="2" face="Tahoma">
                 <a href="/ranking">Faction Rank</a><br>
-                <a href="/ranking" style="color:red;">Empire Rank</a><br>
+                <a href="/empire_ranking">Empire Rank</a><br>
                 <a href="/account"">Account</a>
                 <br>
                 <a href="{% url 'logout'%}?next={{request.path}}">Logout</a>
@@ -158,7 +158,7 @@ function changeslider(newValue,field) {
             <li><a href="/research" style="color:red;">Research</a>
             <li><a href="/spec" style="color:red;">Operations</a>
             <li><a href="/rankings">Faction rankings</a></li>
-            <li><a href="/rankings" style="color:red;">Empire rankings</a></li>
+            <li><a href="/empire_ranking">Empire rankings</a></li>
             <li><a href="/account">Account</a></li>
             <br>
             <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
