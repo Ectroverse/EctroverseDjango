@@ -3,12 +3,20 @@
 {% load static %}
 
 {% block content %}
+{% if status.empire.id == empire.id %}
 <br>
 <a href="/vote">Change your vote</a> - 
 {% if status.empire_role == "PM" %}
 <a href="/pm_options">Prime Minister Options</a>
 {% endif %}
 <br>
+{% endif %}
+
+{% if empire.empire_image  %}
+<img src="/media/{{empire.empire_image}}"
+     style="max-width:600px;width:100%,max-height:800px,height:100%"
+     alt="empire{{empire.id}}_picture">
+{% endif %}
 
 <table style= "border-spacing: 10px; border-collapse: separate;" } >
 <tr><td></td>
@@ -30,8 +38,11 @@
 </table>
 <br>
 <br>
+{% if status.empire.id == empire.id %}
 <table style= "border-spacing: 8px; border-collapse: separate;" } >
+
 <tr>
+
 <td>Empire fund:</td>
 <td>{{empire.taxation}}</td>
 </tr>
@@ -44,6 +55,7 @@
 <td>Ectrolium: {{empire.fund_ectrolium}}</td>
 </tr>
 </table>
+{% endif %}
 
 
 {% endblock %}
