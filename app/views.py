@@ -334,6 +334,7 @@ def empire_ranking(request):
     empire = status.empire
     table = EmpireRankTable(Empire.objects.all().filter(numplayers__gt=0), order_by=("-planets"))
     context = {"table": table,
+               "status": status,
                "empire": empire}
     return render(request, "empire_ranking.html", context)
 
@@ -700,11 +701,10 @@ def pm_options(request):
     status = get_object_or_404(UserStatus, user=request.user)
     user_empire = status.empire
     if request.method == 'POST':
-        if request.POST['empire_picture']:
-            form = DocumentForm(request.POST, request.FILES)
-            if form.is_valid():
-                picture = Empire(empire_image=request.FILES['empire_picture'])
-                picture.save()
+        if request.FILES['empire_picture']:
+            picture = request.FILES['empire_picture']
+            user_empire.empire_image = picture
+            user_empire.save()
         if request.POST['empire_name']:
             user_empire.name = request.POST['empire_name']
         if request.POST['empire_pass']:
