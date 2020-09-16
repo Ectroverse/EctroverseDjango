@@ -15,6 +15,7 @@ urlpatterns = [
     url(r'^razeall(?P<planet_id>[0-9]+)/$', views.razeall, name='razeall'),
     url(r'^build(?P<planet_id>[0-9]+)/$', views.build, name='build'),
     path('ranking', views.ranking, name='ranking'),
+    path('empire_ranking', views.empire_ranking, name='empire_ranking'),
     path('account', views.account, name='account'),
     url(r'^password/$', views.change_password, name='change_password'),
     path('units', views.units, name='units'),
@@ -25,6 +26,8 @@ urlpatterns = [
     path('vote', views.vote, name='vote'),
     path('vote_results', views.vote, name='voteresults'),
     path('pm_options', views.pm_options, name='prime_minister_options'),
+    path('relations', views.relations, name='relations'),
+    path('results', views.results, name='results'),
 ]
 
 if settings.DEBUG:

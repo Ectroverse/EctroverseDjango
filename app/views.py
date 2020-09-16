@@ -329,6 +329,16 @@ def ranking(request):
 
 
 @login_required
+def empire_ranking(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    empire = status.empire
+    table = EmpireRankTable(Empire.objects.all().filter(numplayers__gt=0), order_by=("-planets"))
+    context = {"table": table,
+               "empire": empire}
+    return render(request, "empire_ranking.html", context)
+
+
+@login_required
 def account(request):
     status = get_object_or_404(UserStatus, user=request.user)
     context = {"status": status}
@@ -576,27 +586,34 @@ def vote(request):
                    "player_list": player_list}
         return render(request, "vote.html", context)
     else:
-        print("TEST ",new_voting_for)
+        print("check votiung for", status.voting_for)
         if status.voting_for is not None:
             # find previous user voted for and remove one vote from him
-            voted_for_status = status.voting_for
-            voted_for_status.votes -= 1
+            status.voting_for.votes -= 1
+            status.voting_for.save()
+            print("first status", status.voting_for.user_name, status.voting_for.votes)
+        voted_for_status = get_object_or_404(UserStatus, user=new_voting_for)
+        #check if user voted for himself, to avoid db saving conflicts
+        status = get_object_or_404(UserStatus, user=request.user)
+        if status.id == voted_for_status.id:
+            status.votes += 1
+            status.voting_for = status
+        else:
+            status.voting_for = voted_for_status
+            voted_for_status.votes += 1
             voted_for_status.save()
-        voted_for_status = get_object_or_404(UserStatus, new_voting_for)
-        voted_for_status.votes += 1
-        voted_for_status.save()
+        status.save()
+
 
         # part to check/make a new leader when someone has voted
         # if mutiple players have the same ammount of votes - the old leader stays, regarding of his votes
         # otherwise a player with max votes is chosen
 
-        leader_votes = 0
         current_leader = None
         max_votes = 0
         for player in player_list:
             if player.empire_role == 'PM':
                 current_leader = player
-                leader_votes = player.votes
             if player.votes > max_votes:
                 max_votes = player.votes
         leaders = []
@@ -604,15 +621,28 @@ def vote(request):
             if player.votes == max_votes:
                 leaders.append(player)
         if len(leaders) == 1:
-            current_leader.empire_role = 'P'
+            if current_leader is not None:
+                current_leader.empire_role = 'P'
+                current_leader.save()
             leaders[0].empire_role = 'PM'
+            leaders[0].save()
 
         # Always return an HttpResponseRedirect after successfully dealing
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect("/results")
     
-    
+
+@login_required
+def results(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    player_list = UserStatus.objects.filter(empire=status.empire)
+    context = {"status": status,
+               "page_title": "Results",
+               "player_list": player_list}
+    return render(request, "results.html", context)
+
+
 def set_relation(relation, current_empire, target_empire, *rel_time):
     if relation == 'ally':
         rel = Relations.objects.filter(empire1=target_empire, empire2=current_empire, relation_type='AO')       
@@ -658,7 +688,7 @@ def set_relation(relation, current_empire, target_empire, *rel_time):
             rel2.relation_type='NC'
         else:
             # if this is a permanent NAP both parties need to cancel it for it to be deleted
-            if rel2.relation_type='PC':
+            if rel2.relation_type=='PC':
                 rel1.delete()
                 rel2.delete()
             else:
@@ -685,14 +715,14 @@ def pm_options(request):
             user_empire.pm_message = (request.POST['empire_pm_message'])
         if request.POST['empire_relations_message']:
             user_empire.relations_message = (request.POST['empire_relations_message'])
-        if request.POST.get['empire_offer_alliance']:
-            set_relation('ally',status.empire, request.POST.get['empire_offer_alliance'] )
-        if request.POST.get['empire_offer_nap']:
-            set_relation('nap', status.empire, request.POST.get['empire_offer_nap'], request.POST.get['empire_offer_nap_hours'])
-         if request.POST.get['empire_cancel_nap']:
-            set_relation('cancel_nap', status.empire, request.POST.get['empire_offer_nap'])
-        if request.POST.get['empire_declare_war']:
-            set_relation('war',status.empire, request.POST.get['empire_declare_war'])
+        if request.POST['empire_offer_alliance']:
+            set_relation('ally',status.empire, request.POST['empire_offer_alliance'] )
+        if request.POST['empire_offer_nap']:
+            set_relation('nap', status.empire, request.POST.get['empire_offer_nap'], request.POST['empire_offer_nap_hours'])
+        if request.POST['empire_cancel_nap']:
+            set_relation('cancel_nap', status.empire, request.POST['empire_cancel_nap'])
+        if request.POST['empire_declare_war']:
+            set_relation('war',status.empire, request.POST['empire_declare_war'])
         user_empire.save()
         return HttpResponseRedirect("/pm_options")
     context = {"status": status,
@@ -711,5 +741,5 @@ def relations(request):
                "relations_from_empire": relations_from_empire,
                "relations_to_empire": relations_to_empire,
                "empire": status.empire}
-    return render(request, "pm_options.html", context)
+    return render(request, "relations.html", context)
 

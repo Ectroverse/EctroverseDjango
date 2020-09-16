@@ -293,8 +293,8 @@ class RoundParams(models.Model):
 class Relations(models.Model):
     # When an empire declares a relation, its id number goes to the empire1 field, and the 
     # other empire's id goes to empire2 field
-    empire1 = models.ForeignKey(Empire, on_delete=models.SET_NULL, blank=True, null=True, default=None)
-    empire2 = models.ForeignKey(Empire, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    empire1 = models.ForeignKey(Empire, related_name='empire1', on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    empire2 = models.ForeignKey(Empire, related_name='empire2', on_delete=models.SET_NULL, blank=True, null=True, default=None)
     class RelationTypes(models.TextChoices): 
         AO = 'AO', _('Alliance offered')
         W = 'W', _('War declared')
@@ -304,7 +304,7 @@ class Relations(models.Model):
         PC = 'PC', _('Permanent non agression pact cancelled')
         N = 'N', _('Non agression pact') 
     relation_type = models.CharField(max_length=2, choices=RelationTypes.choices)
-    relation_length = models.IntegerField(max_length=3)
+    relation_length = models.IntegerField()
 
 
 
