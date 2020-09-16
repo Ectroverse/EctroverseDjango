@@ -568,6 +568,7 @@ def empire(request, empire_id):
     status = get_object_or_404(UserStatus, user=request.user)
     player_list = UserStatus.objects.filter(empire=empire_id)
     empire1 = Empire.objects.get(pk=empire_id)
+    print(empire_id)
     context = {"status": status,
                "page_title": empire1.name + " #" + str(empire1.id),
                "player_list": player_list,
@@ -702,6 +703,8 @@ def pm_options(request):
     user_empire = status.empire
     if request.method == 'POST':
         if request.FILES['empire_picture']:
+            if user_empire.empire_image is not None:
+                user_empire.empire_image.delete(save=True)
             picture = request.FILES['empire_picture']
             user_empire.empire_image = picture
             user_empire.save()
