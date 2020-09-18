@@ -28,6 +28,7 @@ urlpatterns = [
     path('pm_options', views.pm_options, name='prime_minister_options'),
     path('relations', views.relations, name='relations'),
     path('results', views.results, name='results'),
+    path('research', views.research, name='research'),
 ]
 
 if settings.DEBUG:

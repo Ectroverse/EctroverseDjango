@@ -806,3 +806,27 @@ def relations(request):
                "empire": status.empire,
                "tick_time":tick_time}
     return render(request, "relations.html", context)
+
+
+@login_required
+def research(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    message = ''
+    print(request.POST)
+    if request.method == 'POST':
+        if request.POST['fund']:
+            if status.energy >= int(request.POST['fund']):
+                status.energy -= int(request.POST['fund'])
+                status.current_research_funding += int(request.POST['fund'])
+                message = request.POST['fund'] + " energy was funded!"
+                status.save()
+            else:
+                message = "You don't have so much energy!"
+        else:
+            pass
+
+    context = {"status": status,
+               "page_title": "Research",
+               "message": message}
+    return render(request, "research.html", context)
+

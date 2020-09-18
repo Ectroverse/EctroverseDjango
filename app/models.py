@@ -183,6 +183,7 @@ class UserStatus(models.Model):
     research_percent_population = models.IntegerField(default=0)
     research_percent_culture = models.IntegerField(default=0)
     research_percent_operations = models.IntegerField(default=0)
+    research_percent_portals = models.IntegerField(default=0)
 
     research_points_military = models.BigIntegerField(default=0)
     research_points_construction = models.BigIntegerField(default=0)
@@ -191,14 +192,16 @@ class UserStatus(models.Model):
     research_points_population = models.BigIntegerField(default=0)
     research_points_culture = models.BigIntegerField(default=0)
     research_points_operations = models.BigIntegerField(default=0)
+    research_points_portals = models.BigIntegerField(default=0)
 
-    alloc_research_military = models.IntegerField(default=14) # stored as integer, in percentage points
-    alloc_research_construction = models.IntegerField(default=14)
-    alloc_research_tech = models.IntegerField(default=14)
-    alloc_research_energy = models.IntegerField(default=15)
-    alloc_research_population = models.IntegerField(default=14)
-    alloc_research_culture = models.IntegerField(default=14)
-    alloc_research_operations = models.IntegerField(default=15)
+    alloc_research_military = models.IntegerField(default=16) # stored as integer, in percentage points
+    alloc_research_construction = models.IntegerField(default=12)
+    alloc_research_tech = models.IntegerField(default=12)
+    alloc_research_energy = models.IntegerField(default=12)
+    alloc_research_population = models.IntegerField(default=12)
+    alloc_research_culture = models.IntegerField(default=12)
+    alloc_research_operations = models.IntegerField(default=12)
+    alloc_research_portals = models.IntegerField(default=12)
 
     current_research_funding = models.BigIntegerField(default=0)
 
