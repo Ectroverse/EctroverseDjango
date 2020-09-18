@@ -116,7 +116,7 @@ for i, unit in enumerate(unit_info["unit_list"]):
 
 stockpile = 0
 settings_num_value = 1 # still not sure what this is
-
+tick_time = 600 #in seconds
 
 ###################
 # Race Attributes #
@@ -251,3 +251,4 @@ race_info_list = {
 #    Relations    #
 ###################
 war_declaration_timer = 144
+min_relation_time = 26

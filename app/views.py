@@ -15,6 +15,8 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
+from django.template import RequestContext
+from django.db.models import Q
 
 import numpy as np
 import time
@@ -27,8 +29,13 @@ from matplotlib.colors import LinearSegmentedColormap
 @login_required
 def headquarters(request):
     status = get_object_or_404(UserStatus, user=request.user)
+    tick_time = RoundStatus.objects.get().tick_number
+    week = tick_time % 52
+    year = tick_time // 52
     context = {"status": status,
-               "page_title": "Headquarters"}
+               "page_title": "Headquarters",
+               "week": week,
+               "year": year}
     return render(request, "headquarters.html", context)
 
 
@@ -368,7 +375,6 @@ def change_password(request):
 def units(request):
     status = get_object_or_404(UserStatus, user=request.user)
     if request.method == 'POST':
-        print(request.POST)
         msg = ''
         for i, unit in enumerate(unit_info["unit_list"]):
             if unit == 'phantom':
@@ -474,7 +480,7 @@ def fleets(request):
 @login_required
 def fleetsend(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    round_params = get_object_or_404(RoundParams)  # should only be one
+    round_params = get_object_or_404(RoundStatus)  # should only be one
     main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True)  # should only ever be 1
 
     if request.method != 'POST':
@@ -570,7 +576,7 @@ def empire(request, empire_id):
     empire1 = Empire.objects.get(pk=empire_id)
     print(empire_id)
     context = {"status": status,
-               "page_title": empire1.name + " #" + str(empire1.id),
+               "page_title": empire1.name_with_id,
                "player_list": player_list,
                "empire": empire1}
     return render(request, "empire.html", context)
@@ -593,9 +599,8 @@ def vote(request):
             # find previous user voted for and remove one vote from him
             status.voting_for.votes -= 1
             status.voting_for.save()
-            print("first status", status.voting_for.user_name, status.voting_for.votes)
         voted_for_status = get_object_or_404(UserStatus, user=new_voting_for)
-        #check if user voted for himself, to avoid db saving conflicts
+        # check if user voted for himself, to avoid db saving conflicts
         status = get_object_or_404(UserStatus, user=request.user)
         if status.id == voted_for_status.id:
             status.votes += 1
@@ -605,7 +610,6 @@ def vote(request):
             voted_for_status.votes += 1
             voted_for_status.save()
         status.save()
-
 
         # part to check/make a new leader when someone has voted
         # if mutiple players have the same ammount of votes - the old leader stays, regarding of his votes
@@ -633,7 +637,7 @@ def vote(request):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect("/results")
-    
+
 
 @login_required
 def results(request):
@@ -645,92 +649,147 @@ def results(request):
     return render(request, "results.html", context)
 
 
-def set_relation(relation, current_empire, target_empire, *rel_time):
+def set_relation(relation, current_empire, target_empire_nr, *rel_time_passed):
+    target_empire = Empire.objects.get(number=target_empire_nr)
+
+    if current_empire.id == target_empire.id:
+        return
+    if not rel_time_passed or rel_time_passed[0] == '':
+        rel_time = 0
+    else:
+        # rel time is given in hours in leaders options, however is stored as number of ticks internally
+        rel_time = int(rel_time_passed[0])*3600/tick_time
+
+    if current_empire is None or target_empire is None:
+        return
+
+    try:
+        tmp_rel = Relations.objects.get(empire1=current_empire, empire2=target_empire)
+    except(ObjectDoesNotExist):
+        pass
+    else:
+        if tmp_rel.relation_type == 'AO' or tmp_rel.relation_type == 'NO':
+            tmp_rel.delete()
+        # if there allready is an established relation we cant create a new offer before the last one is canclled
+        elif relation != "cancel_nap":
+            return
+
+    # check if there target empire already offered a relation:
+    try:
+        rel = Relations.objects.get(empire1=target_empire, empire2=current_empire)
+    except ObjectDoesNotExist:
+        rel = None
+
     if relation == 'ally':
-        rel = Relations.objects.filter(empire1=target_empire, empire2=current_empire, relation_type='AO')       
-        if rel is not None:
+        if rel is not None and rel.relation_type == 'AO':
             # if second empire allready offered an alliance, make two empires allies
             Relations.objects.create(empire1=current_empire,
                                      empire2=target_empire,
                                      relation_type='A',
-                                     relation_length=rel_time)
-            rel.relation_type='A'
+                                     relation_length=rel_time,
+                                     relation_creation_tick=RoundStatus.objects.get().tick_number,
+                                     relation_remaining_time=rel_time)
+            rel.relation_type = 'A'
+            rel.save()
         else:
-        #make an alliance offer from current_empire to target_empire
+            # make an alliance offer from current_empire to target_empire
             Relations.objects.create(empire1=current_empire,
                                      empire2=target_empire,
                                      relation_type='AO',
-                                     relation_length=rel_time)
+                                     relation_length=rel_time,
+                                     relation_creation_tick=RoundStatus.objects.get().tick_number,
+                                     relation_remaining_time=rel_time)
     if relation == 'war':
         Relations.objects.create(empire1=current_empire,
-                         empire2=target_empire,
-                         relation_type='W',
-                         relation_length=war_declaration_timer)
+                                 empire2=target_empire,
+                                 relation_type='W',
+                                 relation_length=war_declaration_timer,
+                                 relation_creation_tick=RoundStatus.objects.get().tick_number,
+                                 relation_remaining_time=war_declaration_timer)
     if relation == 'nap':
-        rel = Relations.objects.filter(empire1=target_empire, empire2=current_empire, relation_type='NO')       
-        if rel is not None and rel.relation_length == rel_time:
+        if rel is not None and rel.relation_type == 'NO' and rel.relation_length == rel_time:
             # if second empire allready offered a nap with the same timer, make two empires napped
             Relations.objects.create(empire1=current_empire,
                                      empire2=target_empire,
                                      relation_type='N',
-                                     relation_length=rel_time)
-            rel.relation_type='N'
+                                     relation_length=rel_time,
+                                     relation_creation_tick=RoundStatus.objects.get().tick_number,
+                                     relation_remaining_time=rel_time)
+            rel.relation_type = 'N'
+            rel.save()
         else:
-        #make a nap offer from current_empire to target_empire
+            # make a nap offer from current_empire to target_empire
             Relations.objects.create(empire1=current_empire,
                                      empire2=target_empire,
                                      relation_type='NO',
-                                     relation_length=rel_time)
-    if relation == 'cancel_nap':
-        rel1 = Relations.objects.filter(empire1=current_empire, empire2=target_empire, relation_type='N')
-        rel2 = Relations.objects.filter(empire1=target_empire, empire2=current_empire, relation_type='N')  
-        if rel1.relation_length is not None:
-            #cancell timed nap for both empires, any empire of two can trigger this
-            rel1.relation_type='NC'
-            rel2.relation_type='NC'
+                                     relation_length=rel_time,
+                                     relation_creation_tick=RoundStatus.objects.get().tick_number,
+                                     relation_remaining_time=rel_time)
+
+def cancel_relation(relation):
+    rel = Relations.objects.get(id=relation)
+    rel2 = Relations.objects.get(empire1=rel.empire2, empire2=rel.empire1)
+    if rel.relation_type == 'AO' or rel.relation_type == 'NO':
+        rel.delete()
+    elif rel.relation_type == 'A' or rel.relation_type == 'W':
+        if rel.relation_type == 'A':
+            rel2.relation_type = 'AO'
+            rel2.save()
+        if RoundStatus.objects.get().tick_number - rel.relation_creation_tick > min_relation_time:
+            rel.delete()
+    elif rel.relation_length is not None:
+        # cancel timed nap for both empires, any empire of two can trigger this
+        # this will be cancelled in process_tick when the right time comes
+        rel.relation_type = 'NC'
+        rel.relation_cancel_tick = RoundStatus.objects.get().tick_number
+        rel2.relation_type = 'NC'
+        rel2.relation_cancel_tick = RoundStatus.objects.get().tick_number
+        rel.save()
+        rel2.save()
+    else:
+        # if this is a permanent NAP both parties need to cancel it for it to be deleted
+        if rel2.relation_type == 'PC':
+            rel.delete()
+            rel2.delete()
         else:
-            # if this is a permanent NAP both parties need to cancel it for it to be deleted
-            if rel2.relation_type=='PC':
-                rel1.delete()
-                rel2.delete()
-            else:
-                rel1.relation_type='PC'
-            
+            rel.relation_type = 'PC'
+            rel.save()
+
 
 @login_required
 def pm_options(request):
     status = get_object_or_404(UserStatus, user=request.user)
     user_empire = status.empire
+    relation_empires = Relations.objects.filter(empire1=status.empire)
+
     if request.method == 'POST':
-        if request.FILES['empire_picture']:
+        print(request.POST)
+        if request.FILES:
             if user_empire.empire_image is not None:
                 user_empire.empire_image.delete(save=True)
             picture = request.FILES['empire_picture']
             user_empire.empire_image = picture
             user_empire.save()
-        if request.POST['empire_name']:
-            user_empire.name = request.POST['empire_name']
-        if request.POST['empire_pass']:
-            user_empire.password = request.POST['empire_pass']
-        if request.POST['empire_taxation']:
-            user_empire.taxation = float(request.POST['empire_taxation'])
-        if request.POST['empire_pm_message']:
-            user_empire.pm_message = (request.POST['empire_pm_message'])
-        if request.POST['empire_relations_message']:
-            user_empire.relations_message = (request.POST['empire_relations_message'])
+
+        user_empire.name = request.POST['empire_name']
+        user_empire.name_with_id = request.POST['empire_name'] + " #" + str(user_empire.number)
+        user_empire.password = request.POST['empire_pass']
+        user_empire.taxation = float(request.POST['empire_taxation'])
+        user_empire.pm_message = (request.POST['empire_pm_message'])
+        user_empire.relations_message = (request.POST['empire_relations_message'])
         if request.POST['empire_offer_alliance']:
-            set_relation('ally',status.empire, request.POST['empire_offer_alliance'] )
+            set_relation('ally', status.empire, request.POST['empire_offer_alliance'])
         if request.POST['empire_offer_nap']:
-            set_relation('nap', status.empire, request.POST.get['empire_offer_nap'], request.POST['empire_offer_nap_hours'])
-        if request.POST['empire_cancel_nap']:
-            set_relation('cancel_nap', status.empire, request.POST['empire_cancel_nap'])
+            set_relation('nap', status.empire, request.POST['empire_offer_nap'], request.POST['empire_offer_nap_hours'])
+        if request.POST['empire_cancel_relation']:
+            cancel_relation(request.POST['empire_cancel_relation'])
         if request.POST['empire_declare_war']:
-            set_relation('war',status.empire, request.POST['empire_declare_war'])
+            set_relation('war', status.empire, request.POST['empire_declare_war'])
         user_empire.save()
-        return HttpResponseRedirect("/pm_options")
     context = {"status": status,
                "page_title": "Prime Minister options",
-               "empire": status.empire}
+               "empire": status.empire,
+               "relation_empires": relation_empires}
     return render(request, "pm_options.html", context)
 
 
@@ -739,10 +798,11 @@ def relations(request):
     status = get_object_or_404(UserStatus, user=request.user)
     relations_from_empire = Relations.objects.filter(empire1=status.empire)
     relations_to_empire = Relations.objects.filter(empire2=status.empire)
+    tick_time = RoundStatus.objects.get().tick_number
     context = {"status": status,
                "page_title": "Relations",
                "relations_from_empire": relations_from_empire,
                "relations_to_empire": relations_to_empire,
-               "empire": status.empire}
+               "empire": status.empire,
+               "tick_time":tick_time}
     return render(request, "relations.html", context)
-

@@ -75,6 +75,7 @@ class Empire(models.Model):
   char name[USER_NAME_MAX];
   char password[USER_PASS_MAX];
     '''
+    number = models.IntegerField(default=0)
     x = models.IntegerField(default=0)
     y = models.IntegerField(default=0)
     rank = models.IntegerField(default=0)
@@ -82,16 +83,17 @@ class Empire(models.Model):
     planets = models.IntegerField(default=0)
     artefacts = models.IntegerField(default=0) #do we need this?
     taxation = models.FloatField(default=0.0)
-    networth = models.BigIntegerField(default=0) 
+    networth = models.BigIntegerField(default=0)
     name = models.CharField(max_length=30, default="")
-    password = models.CharField(max_length=30, default="")
+    name_with_id = models.CharField(max_length=35, default="")
+    password = models.CharField(max_length=30, default="", blank=True)
     fund_energy = models.IntegerField(default=0)
     fund_minerals = models.IntegerField(default=0)
     fund_crystals = models.IntegerField(default=0)
     fund_ectrolium = models.IntegerField(default=0)
     pm_message = models.CharField(max_length=300, default="")
     relations_message = models.CharField(max_length=300, default="No relations message.")
-    empire_image = models.ImageField(upload_to='empire_images/')
+    empire_image = models.ImageField(upload_to='empire_images/', blank=True)
 
 
 class UserStatus(models.Model):
@@ -107,9 +109,7 @@ class UserStatus(models.Model):
     # empire politics section
     class EmpireRoles(models.TextChoices):
         PM = 'PM', _('Prime Minister')
-        MD = 'MD', _('Minister of Development')
-        MW = 'MW', _('Minister of War')
-        MC = 'MC', _('Minister of Communication')
+        VM = 'VM', _('Vice Minister')
         P = 'P', _('') #normal player
         I = 'I', _('Independent')
     empire_role = models.CharField(max_length=2, choices=EmpireRoles.choices, default=EmpireRoles.P)
@@ -286,8 +286,9 @@ class UnitConstruction(models.Model):
 
 
 
-class RoundParams(models.Model):
+class RoundStatus(models.Model):
     galaxy_size = models.IntegerField(default=100)
+    tick_number = models.IntegerField(default=0)
 
 
 class Relations(models.Model):
@@ -304,7 +305,10 @@ class Relations(models.Model):
         PC = 'PC', _('Permanent non agression pact cancelled')
         N = 'N', _('Non agression pact') 
     relation_type = models.CharField(max_length=2, choices=RelationTypes.choices)
-    relation_length = models.IntegerField()
+    relation_length = models.IntegerField(blank=True, null=True, default=None)
+    relation_creation_tick = models.IntegerField(default=0)
+    relation_cancel_tick = models.IntegerField(default=0)
+    relation_remaining_time = models.IntegerField(default=0)
 
 
 
