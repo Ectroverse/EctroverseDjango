@@ -4,6 +4,7 @@ from app.models import *
 from app.calculations import *
 from app.constants import *
 import time
+from django.db.models import Q
 
 # Note- the code line numbers are for NEctroverse commit f7d73af2630f993fbe8c59fdaca31ad43e494543
 
@@ -12,6 +13,11 @@ class Command(BaseCommand): # must be called command, use file name to name the 
     def handle(self, *args, **options):
         # docs say not to use print() but instead stdout
         self.stdout.write("=== Starting process_tick ===")
+
+        #increment tick number
+        round = RoundStatus.objects.get()
+        round.tick_number += 1
+        round.save()
 
         ''' Whichever planet has Super stacker artifact increases in size by 7 per tick! not sure if it has to have been explored first to start or not
         for( a = 0 ; a < dbMapBInfoStatic[MAP_PLANETS] ; a++ )
@@ -24,6 +30,17 @@ class Command(BaseCommand): # must be called command, use file name to name the 
           }
         }
         '''
+
+        #update relations
+        start_t = time.time()
+        relations_buffer = Relations.objects.filter(Q(relation_type='W')|Q(relation_type='NC'))
+        for rel in relations_buffer:
+            rel.relation_remaining_time -= 1
+        Relations.objects.bulk_update(relations_buffer,['relation_remaining_time'])
+        #delete those which have expired
+        Relations.objects.filter(Q(relation_type='W')|Q(relation_type='NC'),relation_remaining_time__lte=0).delete()
+
+
 
         # Loop through each user
         num_users_registered = 0 # im not actually using this anywhere yet
@@ -449,9 +466,10 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             #        maind.infos[INFOS_UNITS_UPKEEP] *= pow(0.9,(double)artiUpkeepReduction);
 
 
+
             status.population_upkeep_reduction = (1.0/35.0) * status.population
             #Population Reduction changed to include portals + units
-            status.portals_upkeep = max(0.0, (status.total_portals - 1)**1.2736 * 10000.0 / (1.0 + status.research_percent_culture/100.0))
+            status.portals_upkeep = max(0.0, (max(1,status.total_portals) - 1)**1.2736 * 10000.0 / (1.0 + status.research_percent_culture/100.0))
             status.population_upkeep_reduction = min(status.population_upkeep_reduction, (status.buildings_upkeep + status.units_upkeep + status.portals_upkeep))
 
 
@@ -625,8 +643,26 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             # TODO
 
             # Save objects to database
-            status.save()
+            # status.save()
 
-            print("Seconds taken to process user:", time.time() - start_t)
+            print("Seconds taken to process users:", time.time() - start_t)
+
+        # update empires
+        start_e = time.time()
+        empires_buffer = Empire.objects.filter(numplayers__gt=0)
+        for emp in empires_buffer:
+            print(emp.id)
+            users = UserStatus.objects.filter(empire=emp.id)
+            nw = 0
+            planets = 0
+            for user in users:
+                print("test",user.user_name, user.num_planets )
+                nw += user.networth
+                planets += user.num_planets
+            emp.networth = nw
+            emp.planets = planets
+
+        Empire.objects.bulk_update(empires_buffer, ['networth','planets'])
+        print("Seconds taken to process empires:", time.time() - start_e)
 
         self.stdout.write("=== Ending process_tick ===")

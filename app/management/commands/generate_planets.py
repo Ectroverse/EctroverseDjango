@@ -31,9 +31,14 @@ class Command(BaseCommand): # must be called command, use file name to name the 
     def handle(self, *args, **options):
         start_t = time.time()
         Planet.objects.all().delete() # remove all planets
-        empire.objects.all().delete() # remove all empires
+        Empire.objects.all().delete() # remove all empires
+        RoundStatus.objects.all().delete()
+        Relations.objects.all().delete()
         planet_buffer = [] # MUCH quicker to save them all at once, like 100x faster
         empires_buffer = []
+        RoundStatus.objects.create()
+
+        # We also need to purge all the non-needed info of players, without actualy deleting them!
 
         map_size = 100
 
@@ -44,10 +49,12 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             home_x = round(distance*np.sin(theta) + map_size/2)
             home_y = round(distance*np.cos(theta) + map_size/2)
             theta += 2*np.pi/num_homes
-            empires_buffer.append(Empire(x=home_x,
+            empires_buffer.append(Empire(number=j,
+                                         x=home_x,
                                          y=home_y,
                                          name="Empire",
-                                         pm_message="Welcome to empire #" + str(j+1)
+                                         name_with_id="Empire #" + str(j),
+                                         pm_message="Welcome to empire #" + str(j)
 
             ))
             for i in range(8): # max 8 players per empire/system
@@ -89,9 +96,9 @@ class Command(BaseCommand): # must be called command, use file name to name the 
         all_planets = Planet.objects.all()
         all_planets.update(owner=User.objects.get(username='admin'))
 
-        #Give empire 1 to the admin
+        #Give empire 0 to the admin
         admin = UserStatus.objects.get(id=1)
-        admin.empire = Empire.objects.get(id = 1)
+        admin.empire = Empire.objects.get(number=0)
         admin.save()
 
 
