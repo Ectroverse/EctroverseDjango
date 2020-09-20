@@ -29,6 +29,7 @@ urlpatterns = [
     path('relations', views.relations, name='relations'),
     path('results', views.results, name='results'),
     path('research', views.research, name='research'),
+    path('famaid', views.famaid, name='famaid'),
 ]
 
 if settings.DEBUG:

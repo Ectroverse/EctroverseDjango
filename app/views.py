@@ -814,19 +814,85 @@ def research(request):
     message = ''
     print(request.POST)
     if request.method == 'POST':
-        if request.POST['fund']:
-            if status.energy >= int(request.POST['fund']):
-                status.energy -= int(request.POST['fund'])
-                status.current_research_funding += int(request.POST['fund'])
-                message = request.POST['fund'] + " energy was funded!"
-                status.save()
+        if 'fund_form' in request.POST:
+            if request.POST['fund']:
+                if status.energy >= int(request.POST['fund']):
+                    status.energy -= int(request.POST['fund'])
+                    status.current_research_funding += int(request.POST['fund'])
+                    message = request.POST['fund'] + " energy was funded!"
+                    status.save()
+                else:
+                    message = "You don't have so much energy!"
+        if 'rc_alloc_form' in request.POST:
+            total = 0
+            for a, key in enumerate(request.POST.items()):
+                if a > 0 and key[0] != 'rc_alloc_form':
+                    print("key",a,key[1])
+                    total += int(key[1])
+            if total != 100:
+                message = "Research allocation percentages must be equal to 100% in total!"
             else:
-                message = "You don't have so much energy!"
-        else:
-            pass
+                status.alloc_research_military = request.POST['military']
+                status.alloc_research_construction = request.POST['construction']
+                status.alloc_research_tech = request.POST['technology']
+                status.alloc_research_energy = request.POST['energy']
+                status.alloc_research_population = request.POST['population']
+                status.alloc_research_culture = request.POST['culture']
+                status.alloc_research_operations = request.POST['operations']
+                status.alloc_research_portals = request.POST['portals']
+                status.save()
 
     context = {"status": status,
                "page_title": "Research",
                "message": message}
     return render(request, "research.html", context)
 
+
+@login_required
+def famaid(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    player_list = UserStatus.objects.filter(empire=status.empire)
+    num_players = len(player_list)
+    message = ''
+    if request.method == 'POST':
+        status2 = get_object_or_404(UserStatus, user=request.POST['player'])
+        if request.POST['energy']:
+            e = int(request.POST['energy'])
+            if e > status.energy:
+                message += "You don't have so much energy!<br>"
+            else:
+                status.energy -= e
+                status2.energy += e
+                message += str(e) + " Energy was transferred!<br>"
+        if request.POST['minerals']:
+            m = int(request.POST['minerals'])
+            if m > status.minerals:
+                message += "You don't have so much minerals!<br>"
+            else:
+                status.minerals -= m
+                status2.minerals += m
+                message += str(m) + " Minerals was transferred!<br>"
+        if request.POST['crystals']:
+            c = int(request.POST['crystals'])
+            if c > status.crystals:
+                message += "You don't have so much crystals!<br>"
+            else:
+                status.crystals -= c
+                status2.crystals += c
+                message += str(c) + " Crystals was transferred!<br>"
+        if request.POST['ectrolium']:
+            e = int(request.POST['ectrolium'])
+            if e > status.ectrolium:
+                message += "You don't have so much ectrolium!<br>"
+            else:
+                status.ectrolium -= e
+                status2.ectrolium += e
+                message += str(e) + " Ectrolium was transferred!<br>"
+        status.save()
+        status2.save()
+    context = {"status": status,
+               "num_players": num_players,
+               "page_title": "Send aid",
+               "player_list": player_list,
+               "message": message}
+    return render(request, "famaid.html", context)

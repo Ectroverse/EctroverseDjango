@@ -116,6 +116,13 @@ class UserStatus(models.Model):
     votes =  models.IntegerField(default=0) #number of people voting for this user to be a leader of their empire
     voting_for =  models.ForeignKey('self', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
+    # empire aid
+    class EmpireAid(models.TextChoices):
+        PM = 'PM', _('Prime minister')
+        VM = 'VM', _('Prime minister and vice ministers')
+        A = 'A', _('All players') #normal player
+        N = 'N', _('Nobody')
+    request_aid = models.CharField(max_length=2, choices=EmpireAid.choices, default=EmpireAid.N)
 
     # Race
     class Races(models.TextChoices):
