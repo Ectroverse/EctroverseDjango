@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+{% if message != '' %}
+{{message|safe}}
+{% endif %}
+
+{% if num_players > 1 %}
+	<table  style= "border-spacing: 8px; border-collapse: separate;">
+	<tr><td>Name</td><td>Energy</td><td>Minerals</td><td>Crystals</td><td>Ectrolium</td></tr>
+	{% for player in player_list %}
+		{% if player.id != status.id %}
+		<tr><td>{{player.user_name}}</td><td>{{player.energy}}</td><td>{{player.minerals}}</td><td>{{player.crystals}}</td><td>{{player.ectrolium}}</td></tr>
+		{% endif %}
+	{% endfor %}
+	<table>
+	<br>
+	<form method="post" >
+	{% csrf_token %}	
+	<table style= "border-spacing: 8px; border-collapse: separate;">
+	<tr><td>Name</td>
+	<td>
+	<select name="player">
+	{% for player in player_list %}
+		{% if player.id != status.id %}
+			<option value="{{player.id}}"> {{player.user_name}}
+		{% endif %}
+	{% endfor %}
+	</select>
+	</td>
+	<tr><td>Energy</td><td><input type="text" pattern="[0-9]+" maxlength="12" name="energy" size="11"></td></tr>
+	<tr><td>Minerals</td><td><input type="text" pattern="[0-9]+" maxlength="12" name="minerals" size="11"></td></tr>
+	<tr><td>Crystals</td><td><input type="text" pattern="[0-9]+" maxlength="12" name="crystals" size="11"></td></tr>
+	<tr><td>Ectrolium</td><td><input type="text" pattern="[0-9]+" maxlength="12" name="ectrolium" size="11"></td></tr>
+	<tr><td><input type="submit" name ="receive_aid" value="Receive aid"><td></tr>
+	</table>
+	</form>
+	
+	<br>
+	Your aid settings:
+	<br>
+	<form method="POST">
+	{% csrf_token %}
+	<select name="settings">
+		<option value="PM" {% if status.request_aid == 'PM' %}selected{% endif %}>Aid open to prime minister only
+		<option value="VM" {% if status.request_aid == 'VM' %}selected{% endif %}>Aid open to prime minister and vice ministers
+		<option value="A" {% if status.request_aid == 'A' %}selected{% endif %}>Aid open to everyone
+		<option value="N" {% if status.request_aid == 'N' %}selected{% endif %}>Aid closed
+	</select>
+	<input type="submit" name="aid_settings" value="Change settings">
+	</form>
+
+	
+{% else %}
+There is noone else in your empire to get aid from!
+{% endif %}
+
+
+{% endblock %}
