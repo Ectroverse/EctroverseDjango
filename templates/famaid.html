@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+{% if message != '' %}
+{{message|safe}}
+{% endif %}
+
+{% if num_players > 1 %}
+	<form method="post">
+	{% csrf_token %}	
+	<table style= "border-spacing: 8px; border-collapse: separate;">
+	<tr><td>Name</td>
+	<td>
+	<select name="player">
+	{% for player in player_list %}
+		{% if player.id != status.id %}
+			<option value="{{player.id}}"> {{player.user_name}}
+		{% endif %}
+	{% endfor %}
+	</select>
+	</td>
+	<tr><td>Energy</td><td><input type="text" pattern="[0-9]+" maxlength="12" name="energy" size="11"></td></tr>
+	<tr><td>Minerals</td><td><input type="text" pattern="[0-9]+" maxlength="12" name="minerals" size="11"></td></tr>
+	<tr><td>Crystals</td><td><input type="text" pattern="[0-9]+" maxlength="12" name="crystals" size="11"></td></tr>
+	<tr><td>Ectrolium</td><td><input type="text" pattern="[0-9]+" maxlength="12" name="ectrolium" size="11"></td></tr>
+	<tr><td><input type="submit" value="Send aid"><td></tr>
+	</table>
+	</form>
+{% else %}
+There is noone else in your empire to send aid to!
+{% endif %}
+
+
+{% endblock %}
