@@ -30,6 +30,7 @@ urlpatterns = [
     path('results', views.results, name='results'),
     path('research', views.research, name='research'),
     path('famaid', views.famaid, name='famaid'),
+    path('famgetaid', views.famgetaid, name='famgetaid'),
 ]
 
 if settings.DEBUG:

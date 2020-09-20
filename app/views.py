@@ -896,3 +896,61 @@ def famaid(request):
                "player_list": player_list,
                "message": message}
     return render(request, "famaid.html", context)
+
+
+@login_required
+def famgetaid(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    player_list = UserStatus.objects.filter(empire=status.empire)
+    num_players = len(player_list)
+    message = ''
+    if 'receive_aid' in request.POST:
+        status2 = get_object_or_404(UserStatus, user=request.POST['player'])
+        if status2.request_aid == 'A' or (status2.request_aid == 'PM' and status.empire_role == 'PM') or \
+            (status2.request_aid == 'VM' and (status.empire_role == 'PM' or status.empire_role == 'VM')):
+            if request.POST['energy']:
+                e = int(request.POST['energy'])
+                if e > status2.energy:
+                    message += status2.user_name + " doesn't have so much energy!<br>"
+                else:
+                    status.energy += e
+                    status2.energy -= e
+                    message += str(e) + " Energy was transferred!<br>"
+            if request.POST['minerals']:
+                m = int(request.POST['minerals'])
+                if m > status2.minerals:
+                    message += status2.user_name + " doesn't have so much minerals!<br>"
+                else:
+                    status.minerals += m
+                    status2.minerals -= m
+                    message += str(m) + " Minerals was transferred!<br>"
+            if request.POST['crystals']:
+                c = int(request.POST['crystals'])
+                if c > status2.crystals:
+                    message += status2.user_name + " doesn't have so much crystals!<br>"
+                else:
+                    status.crystals += c
+                    status2.crystals -= c
+                    message += str(c) + " Crystals was transferred!<br>"
+            if request.POST['ectrolium']:
+                e = int(request.POST['ectrolium'])
+                if e > status2.ectrolium:
+                    message += status2.user_name + " doesn't have so much ectrolium!<br>"
+                else:
+                    status.ectrolium += e
+                    status2.ectrolium -= e
+                    message += str(e) + " Ectrolium was transferred!<br>"
+            status.save()
+            status2.save()
+        else:
+            message = "You are not authorised to take aid from this faction!"
+    if 'aid_settings' in request.POST:
+        status.request_aid = request.POST['settings']
+        message = "Settings changed!"
+        status.save()
+    context = {"status": status,
+               "num_players": num_players,
+               "page_title": "Receive aid",
+               "player_list": player_list,
+               "message": message}
+    return render(request, "famgetaid.html", context)
