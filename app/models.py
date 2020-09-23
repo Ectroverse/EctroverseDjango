@@ -321,5 +321,11 @@ class Relations(models.Model):
     relation_remaining_time = models.IntegerField(default=0)
 
 
+class Messages(models.Model):
+    user1 = models.ForeignKey(UserStatus, related_name='user1', on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    user2 = models.ForeignKey(UserStatus, related_name='user2', on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    message = models.CharField(max_length=1000, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    date_and_time = models.DateTimeField(blank=True)
 
+    
 
