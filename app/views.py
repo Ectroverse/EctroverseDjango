@@ -954,3 +954,14 @@ def famgetaid(request):
                "player_list": player_list,
                "message": message}
     return render(request, "famgetaid.html", context)
+
+
+@login_required
+def messages(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    messages_from = Messages.objects.filter(user2=status.id).order_by('-date_and_time')
+    context = {"status": status,
+               "page_title": "Inbox",
+               "messages_from": messages_from,
+                }
+    return render(request, "messages.html", context)

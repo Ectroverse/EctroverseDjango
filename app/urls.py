@@ -31,6 +31,7 @@ urlpatterns = [
     path('research', views.research, name='research'),
     path('famaid', views.famaid, name='famaid'),
     path('famgetaid', views.famgetaid, name='famgetaid'),
+    path('messages', views.messages, name='messages'),
 ]
 
 if settings.DEBUG:
