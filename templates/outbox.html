@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+<br>
+
+<table>
+<tr>
+<td ><a href="/messages">Inbox</a></td>
+<td style=" border-left:solid 40px transparent"> <a href="/compose_message">Compose a message</a></td>
+<td style=" border-left:solid 40px transparent"><a href="/delete_all_messages_outbox">Delete all messages</a></td>
+</tr>
+</table>
+<br>
+
+<table width = "80%">
+{% for message in messages_to %}
+<tr><td align="left"><b>To:</b> {{message.user2.user_name}} of Empire #{{message.user2.empire.number}}
+</td><td align ="right"><a href="/delete_message_outbox{{message.id}}">Delete</a></td>
+<tr><td align="left"><b>Sent:</b> {{message.date_and_time}}</td><td align ="right"><a href="/compose_message{{message.user2_id}}">Write again</td></tr>
+<tr><td align="left">{{message.message}}</td></tr>
+<tr><td><br></td></tr>
+{% endfor %}
+</table>
+
+
+{% endblock %}

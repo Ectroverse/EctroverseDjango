@@ -7,16 +7,19 @@
 
 <table>
 <tr>
-<td >Outbox</td>
-<td style=" border-left:solid 40px transparent"> Compose a message</td>
-<td style=" border-left:solid 40px transparent">Delete all</td>
+<td><a href="/outbox">Outbox</a></td>
+<td style=" border-left:solid 40px transparent"><a href="/compose_message">Compose a message</a></td>
+<td style=" border-left:solid 40px transparent"><a href="/delete_all_messages_inbox">Delete all messages</a></td>
 </tr>
 </table>
+<br>
 
 <table width = "80%">
 {% for message in messages_from %}
-<tr><td align="left"><b>From:</b> {{message.user1.user_name}} of Empire #{{message.user1.empire.number}} </td><td align ="right"><a href="/delete">Delete</a></td><br>
-<tr><td align="left"><b>Received:</b> {{message.date_and_time}}</td> <td align ="right"><a href="/reply">Reply</a></td></tr>
+<tr><td align="left"><b>From:</b> {{message.user1.user_name}} of <a href="/empire{{message.user1.empire.id}}">Empire #{{message.user1.empire.number}}</a> 
+</td><td align ="right"><a href="/delete_message_inbox{{message.id}}">Delete</a></td>
+
+<tr><td align="left"><b>Received:</b> {{message.date_and_time}}</td> <td align ="right"><a href="/compose_message{{message.user1_id}}">Reply</a></td></tr>
 <tr><td align="left">{{message.message}}</td></tr>
 <tr><td><br></td></tr>
 {% endfor %}
