@@ -32,6 +32,12 @@ urlpatterns = [
     path('famaid', views.famaid, name='famaid'),
     path('famgetaid', views.famgetaid, name='famgetaid'),
     path('messages', views.messages, name='messages'),
+    path('outbox', views.outbox, name='outbox'),
+    url(r'^compose_message(?P<user_id>[0-9]*)/$', views.compose_message, name='compose_message'),
+    url(r'^delete_message_inbox(?P<message_id>[0-9]+)/$', views.del_message_in, name='del_inbox'),
+    url(r'^delete_message_outbox(?P<message_id>[0-9]+)/$', views.del_message_out, name='del_outbox'),
+    path('delete_all_messages_inbox', views.bulk_del_message_in, name='delete_all_messages_inbox'),
+    path('delete_all_messages_outbox', views.bulk_del_message_out, name='delete_all_messages_outbox'),
 ]
 
 if settings.DEBUG:

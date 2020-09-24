@@ -18,11 +18,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.template import RequestContext
 from django.db.models import Q
 
+
 import numpy as np
 import time
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
-
+from datetime import datetime
 
 # Remember that Django uses the word View to mean the Controller in MVC.  Django's "Views" are the HTML templates. Models are models.
 
@@ -959,9 +960,120 @@ def famgetaid(request):
 @login_required
 def messages(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    messages_from = Messages.objects.filter(user2=status.id).order_by('-date_and_time')
+    messages_from = Messages.objects.filter(user2=status.id, user2_deleted=False).order_by('-date_and_time')
     context = {"status": status,
                "page_title": "Inbox",
                "messages_from": messages_from,
+                }
+    return render(request, "messages.html", context)
+
+
+@login_required
+def outbox(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    messages_to = Messages.objects.filter(user1=status.id, user1_deleted=False).order_by('-date_and_time')
+    context = {"status": status,
+               "page_title": "Outbox",
+               "messages_to": messages_to,
+                }
+    return render(request, "outbox.html", context)
+
+
+@login_required
+def compose_message(request, user_id):
+    status = get_object_or_404(UserStatus, user=request.user)
+    msg_on_top = ''
+    user_found = True
+    if request.method == 'POST':
+        if UserStatus.objects.filter(user_name=request.POST['recipient']).exists():
+            status2 = UserStatus.objects.get(user_name=request.POST['recipient'])
+        else:
+            if UserStatus.objects.filter(id=request.POST['recipient']).exists():
+                status2 = UserStatus.objects.get(id=request.POST['recipient'])
+            else:
+                msg_on_top = 'This player is not found, try again!'
+                user_found = False
+
+        if user_found:
+            msg = request.POST['message']
+            if len(msg) > 0:
+                Messages.objects.create(user1 = status,
+                                        user2 = status2,
+                                        message = msg,
+                                        date_and_time = datetime.now())
+                msg_on_top = 'Message sent!'
+            else:
+                msg_on_top = 'You cannot send an empty message!'
+
+    context = {"status": status,
+               "page_title": "Compose message",
+               "msg_on_top": msg_on_top,
+               "user_id": user_id,
+                }
+    return render(request, "compose_message.html", context)
+
+
+@login_required
+def del_message_in(request, message_id):
+    status = get_object_or_404(UserStatus, user = request.user)
+    message = get_object_or_404(Messages, id = message_id, user2 = status.id)
+    if message.user1_deleted:
+        message.delete()
+    else:
+        message.user2_deleted = True
+        message.save()
+    messages_from = Messages.objects.filter(user2=status.id, user2_deleted=False).order_by('-date_and_time')
+    context = {"status": status,
+               "page_title": "Inbox",
+               "messages_from": messages_from,
+                }
+    return render(request, "messages.html", context)
+
+
+@login_required
+def del_message_out(request, message_id):
+    status = get_object_or_404(UserStatus, user = request.user)
+    message = get_object_or_404(Messages, id = message_id, user1 = status.id)
+    if message.user2_deleted:
+        message.delete()
+    else:
+        message.user1_deleted = True
+        message.save()
+    messages_to = Messages.objects.filter(user1=status.id, user1_deleted=False).order_by('-date_and_time')
+    context = {"status": status,
+               "page_title": "Outbox",
+               "messages_to": messages_to,
+                }
+    return render(request, "outbox.html", context)
+
+
+@login_required
+def bulk_del_message_out(request):
+    status = get_object_or_404(UserStatus, user = request.user)
+    messages_buffer = Messages.objects.filter(user1 = status.id)
+    for message in messages_buffer:
+        message.user1_deleted = True
+    Messages.objects.bulk_update(messages_buffer, ['user1_deleted'])
+    Messages.objects.filter(user1_deleted = True, user2_deleted = True).delete()
+    messages_to = ''
+    context = {"status": status,
+               "page_title": "Outbox",
+               "messages_to": messages_to,
+                }
+    return render(request, "outbox.html", context)
+
+
+@login_required
+def bulk_del_message_in(request):
+    status = get_object_or_404(UserStatus, user = request.user)
+    messages_buffer = Messages.objects.filter(user2 = status.id)
+    for message in messages_buffer:
+        message.user2_deleted = True
+    Messages.objects.bulk_update(messages_buffer, ['user2_deleted'])
+    Messages.objects.filter(user1_deleted = True, user2_deleted = True).delete()
+    messages_from = ''
+    context = {"status": status,
+               "page_title": "Inbox",
+               "messages_to": messages_from,
                 }
     return render(request, "messages.html", context)
