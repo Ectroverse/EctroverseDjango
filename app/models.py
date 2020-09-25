@@ -8,6 +8,9 @@ from django.db.models.signals import post_save # used to auto create UserStatus 
 # Is there any reason to have a model for solar system?  That would then contain N planet objects
 
 class Planet(models.Model):
+    class Meta:
+        db_table = 'PLANET'
+
     # Static
     x = models.IntegerField()
     y = models.IntegerField()
