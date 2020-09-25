@@ -5,6 +5,7 @@ from app.calculations import *
 from app.constants import *
 import time
 from django.db.models import Q
+from django.db import connection
 
 # Note- the code line numbers are for NEctroverse commit f7d73af2630f993fbe8c59fdaca31ad43e494543
 
@@ -191,8 +192,12 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             status.total_portals = 0
             # Pull out x,y values of planets that have portals, for battlePortalCalc
             portal_xy_list = Planet.objects.filter(portal=True).values_list('x', 'y')
+
+            planets_buffer = Planet.objects.filter(owner=status.user.id)
+
             start_t_planets = time.time()
-            for planet in Planet.objects.filter(owner=status.user.id):
+
+            for planet in planets_buffer:
                 status.num_planets += 1
 
                 # Update Population
@@ -272,9 +277,36 @@ class Command(BaseCommand): # must be called command, use file name to name the 
                 planet.overbuilt = calc_overbuild(planet.size, planet.total_buildings + planet.buildings_under_construction)
                 planet.overbuilt_percent = (planet.overbuilt-1.0)*100 # came from html_gameplay.c line 5541
                 # The above isnt even the correct formula im pretty sure
+                # Planet.objects.filter(id = planet.id).update(max_population = planet.max_population,
+                #                                     current_population= planet.current_population,
+                #                                     protection=planet.protection,
+                #                                     total_buildings=planet.total_buildings,
+                #                                     overbuilt = planet.overbuilt,
+                #                                     overbuilt_percent = planet.overbuilt_percent)
+                # planet.save()
+                with connection.cursor() as cursor:
+                    cursor.execute("UPDATE PLANET SET max_population = %s, "
+                                   "current_population = %s, "
+                                   "protection = %s, "
+                                   "total_buildings = %s, "
+                                   "overbuilt = %s, "
+                                   "overbuilt_percent=%s WHERE id = %s",
+                                   (planet.max_population,
+                                    planet.current_population,
+                                    planet.protection,
+                                    planet.total_buildings,
+                                    planet.overbuilt,
+                                    planet.overbuilt_percent,
+                                    planet.id))
 
-                planet.save()
-
+            bulk_update_time = time.time()
+            # Planet.objects.bulk_update(planets_buffer, ['max_population',
+            #                                             'current_population',
+            #                                             'protection',
+            #                                             'total_buildings',
+            #                                             'overbuilt',
+            #                                             'overbuilt_percent'])
+            print("bulk update took", time.time() - bulk_update_time, "seconds")
             print("Planet loop took", time.time() - start_t_planets, "seconds")
 
             # Calc total buildings for user
