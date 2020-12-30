@@ -1,0 +1,61 @@
+{% extends "front_page.html" %}
+
+{% load static %}
+
+{% block content %}
+
+{% if form.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+            <div class="alert alert-danger ">
+                <p style="text-align:center">{{ error|escape }}</p>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+        <div class="alert alert-danger ">
+            <p style="text-align:center">{{ error|escape }}</p>
+        </div>
+    {% endfor %}
+{% endif %}
+  
+
+<div class="display_box_wrapper " style =" margin: 10px auto; width:360px; ">
+	<div class="display_box" >
+		<div class="display_box_header">
+			<div class="display_box_header_left"></div>
+			<div class="display_box_header_center">
+				<div class="display_box_header_center_content">Register</div>
+			</div>
+			<div class="display_box_header_right"></div>
+		</div>
+		<div class="display_box_content"  >
+			<div class="display_box_content_left"></div>
+			<div class="display_box_content_center"  >
+					
+				<form method="post" style =" margin: 0 5px;">
+				  {% csrf_token %}
+				  <div style="width:300px"> {{ form }} </div>
+				  <button type="submit" class="btn btn-success">Register</button>
+				</form> 
+
+			</div>
+			<div class="display_box_content_right"></div>
+		</div>
+
+		<div class="display_box_footer">
+			<div class="display_box_footer_left"></div>
+			<div class="display_box_footer_center"></div>
+			<div class="display_box_footer_right"></div>
+		</div>
+	</div>
+</div>
+
+
+  
+{% endblock %}
+
+  
+
+  
+

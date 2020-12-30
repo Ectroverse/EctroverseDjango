@@ -1,0 +1,48 @@
+{% load static %}
+
+
+	<div style="padding: 0 0 0 12px">
+	<a target="_blank" rel="noopener noreferrer" href="https://www.djangoproject.com/">
+	<img id="footer_img_left" src="{% static 'dj.png' %}" alt="dj">
+	</a>
+	<a target="_blank" rel="noopener noreferrer" href="https://www.python.org/">
+	<img id="footer_img_left" src="{% static 'python.png' %}" alt="py">
+	</a>
+	
+	<input type="image" src="{% static 'upIcon2.png' %}" onclick="topFunction()" id="goUpBtn" title="Go to top" style= "display: none;"/>
+
+	<a target="_blank" rel="noopener noreferrer" href="https://github.com/Ectroverse/EctroverseDjango">
+	<img id="footer_img_right" src="{% static 'github.svg' %}" alt="git">
+	</a>
+	<a target="_blank" rel="noopener noreferrer" href="https://www.facebook.com/groups/803616616363658">
+	<img id="footer_img_right" src="{% static 'facebook.svg' %}" alt="fb">
+	</a>
+	<a target="_blank" rel="noopener noreferrer" href="https://discord.com/channels/723138213702664232/723138213702664237">
+	<img id="footer_img_right" src="{% static 'discord.svg' %}" alt="ds">
+	</a>
+
+	<div>
+	
+
+	
+	<script>
+//Get the button
+var mybutton = document.getElementById("goUpBtn");
+
+// When the user scrolls down 20px from the top of the document, show the button
+window.onscroll = function() {scrollFunction()};
+
+function scrollFunction() {
+  if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+    mybutton.style.display = "block";
+  } else {
+    mybutton.style.display = "none";
+  }
+}
+
+// When the user clicks on the button, scroll to the top of the document
+function topFunction() {
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+}
+</script>

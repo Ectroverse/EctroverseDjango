@@ -1,0 +1,94 @@
+{% extends "front_page.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<!-- script to show empire password if an empire has one and to hide it if it has none -->
+<script>
+function showEmpirePass() {
+
+	var empireNum =  document.getElementById("chose_emp").value;
+	var empires = JSON.parse('{{empires_json | safe}}');
+	
+	if (empires[empireNum] == true ){
+		document.getElementById('fampass_block').style.display = '';
+	}
+	else{
+		document.getElementById('fampass_block').style.display = 'none';
+	}
+}
+</script>
+
+
+
+{% if error %}
+	<p align = "center" > {{error}} </p>
+{% else %}
+	<br>
+{% endif %}
+
+
+<div class="display_box" style="width:220px;" >
+	<div class="display_box_header">
+		<div class="display_box_header_left"></div>
+		<div class="display_box_header_center">
+			<div class="display_box_header_center_content">Login</div>
+		</div>
+		<div class="display_box_header_right"></div>
+	</div>
+	<div class="display_box_content" style =" margin: 0 auto;" >
+		<div class="display_box_content_left"></div>
+		<div class="display_box_content_center"  >
+				
+			<form method="post" name="empire_race_choice" action="{% url 'choose_empire_race' %}" style =" margin: 0 5px;">
+			  {% csrf_token %}
+			  
+
+
+				Choose your race:<br>
+				<select name="chose_race">
+				{% for r in races %}
+				<option value="{{r.0}}"> {{r.1}}</option>
+				{% endfor %}
+				</select>
+				<br><br>
+
+				Choose your empire:<br>
+				<select name="chose_emp" id="chose_emp" onchange="showEmpirePass()">
+				{% for key, value in empires.items %}
+				<option value="{{key}}"> {{key}} </option>
+				{% endfor %}
+				</select>
+				<br><br>
+				
+				<div style="display:none" id="fampass_block">
+				Empire password:
+				<br><i>This empire has a password set, you must enter it here to be allowed entry!</i><br>
+				<input type="text" name="fampass" id="fampass">
+				</div>
+
+			  <input type="submit" value="Select" style="margin-top: 10px">
+			</form> 
+
+		</div>
+		<div class="display_box_content_right"></div>
+	</div>
+
+	<div class="display_box_footer">
+		<div class="display_box_footer_left"></div>
+		<div class="display_box_footer_center"></div>
+		<div class="display_box_footer_right"></div>
+	</div>
+</div>
+
+  
+
+
+  
+{% endblock %}
+
+  
+
+  
+

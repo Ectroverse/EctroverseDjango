@@ -1,35 +1,26 @@
+
 {% extends "front_page.html" %}
 
 {% load static %}
 
 {% block content %}
 
-	{% if form.email.errors %}
-	{{ form.email.errors }}
-  {% endif %}
 
-  <div class="display_box_wrapper " style =" margin: 10px auto; width:260px; ">
+ <div class="display_box_wrapper front_login" style =" width:100%; margin: 10px auto;">
 	<div class="display_box" >
 		<div class="display_box_header">
 			<div class="display_box_header_left"></div>
 			<div class="display_box_header_center">
-				<div class="display_box_header_center_content">Recover password</div>
+				<div class="display_box_header_center_content">FAQ</div>
 			</div>
 			<div class="display_box_header_right"></div>
 		</div>
-		<div class="display_box_content"  >
+		<div class="display_box_content" style =" margin: 0 auto;" >
 			<div class="display_box_content_left"></div>
-			<div class="display_box_content_center"  >
-					
-				  <form action="" method="post" style =" margin: 0 5px;">
-				  {% csrf_token %}
+			<div class="display_box_content_center" style="text-align:center">	
 
-					  <p>Email:{{ form.email }}</p> 
-					<input type="submit" class="btn btn-default btn-lg" value="Reset password">
-				  </form>
-				  
-
-
+				FAQ is under construction!
+	
 			</div>
 			<div class="display_box_content_right"></div>
 		</div>
@@ -41,6 +32,5 @@
 		</div>
 	</div>
 </div>
-
+	
 {% endblock %}
-
