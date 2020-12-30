@@ -10,10 +10,10 @@ Put your name after an item if you want to reserve it for yourself, not all item
 - news
 - auto tick update via cronjob (Rexer)
 - 2 players registered into 1 empire?
+- when a player is deleted from an empire decrease its number of players
 
 #### v0.2 Remaining Items
 
-- when aplayer is deleted from an empire decrease its number of players
 - add proper design to rankings tables
 - add deletion possibility to account
 - improve html design inside, some parts are shown badly on phone
@@ -24,6 +24,7 @@ Put your name after an item if you want to reserve it for yourself, not all item
 
 #### v0.3 Remaining Items
 
+- new player tutorial
 - map bonuses? ancients
 - do we need the market?
 - other operations, as well as spells and incantations
