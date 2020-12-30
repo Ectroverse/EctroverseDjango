@@ -196,7 +196,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             planets_buffer = Planet.objects.filter(owner=status.user.id)
 
             start_t_planets = time.time()
-
+            
             for planet in planets_buffer:
                 status.num_planets += 1
 
