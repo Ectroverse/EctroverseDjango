@@ -4,6 +4,7 @@ from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _ # for the enumeration's labels
 from .constants import *
 from django.db.models.signals import post_save # used to auto create UserStatus and fleet after a new user is created
+from app.map_settings import *
 
 # Is there any reason to have a model for solar system?  That would then contain N planet objects
 
@@ -135,7 +136,7 @@ class UserStatus(models.Model):
         SB = 'SB', _('Spacebornes')
         DW = 'DW', _('Dreamweavers')
         WK = 'WK', _('Wookiees')
-    race = models.CharField(max_length=2, choices=Races.choices)
+    race = models.CharField(max_length=2, choices=Races.choices, blank=True, default=None, null=True)
 
     # Resources
     energy = models.BigIntegerField(default=0, validators = [MinValueValidator(0)])
@@ -160,7 +161,7 @@ class UserStatus(models.Model):
     ectrolium_income = models.IntegerField(default=0)
 
     # Misc info that must be recalculated
-    num_planets = models.IntegerField(default=0) # number of planets, will get calculated
+    num_planets = models.IntegerField(default=1) # number of planets, will get calculated
     population = models.IntegerField(default=0)
     networth = models.BigIntegerField(default=1)
     buildings_upkeep = models.IntegerField(default=0) # stored as a positive number
@@ -168,22 +169,22 @@ class UserStatus(models.Model):
     portals_upkeep = models.IntegerField(default=0) # stored as a positive number
     population_upkeep_reduction = models.IntegerField(default=0)
 
-    total_solar_collectors = models.IntegerField(default=0) # all of these are across all planets (which is why its in status and not planet)
+    total_solar_collectors = models.IntegerField(default=staring_solars) # all of these are across all planets (which is why its in status and not planet)
     total_fission_reactors = models.IntegerField(default=0)
-    total_mineral_plants = models.IntegerField(default=0)
-    total_crystal_labs = models.IntegerField(default=0)
-    total_refinement_stations = models.IntegerField(default=0)
-    total_cities = models.IntegerField(default=0)
+    total_mineral_plants = models.IntegerField(default=starting_meral_planets)
+    total_crystal_labs = models.IntegerField(default=starting_crystal_labs)
+    total_refinement_stations = models.IntegerField(default=starting_ectrolium_refs)
+    total_cities = models.IntegerField(default=starting_cities)
     total_research_centers = models.IntegerField(default=0)
     total_defense_sats = models.IntegerField(default=0)
     total_shield_networks = models.IntegerField(default=0)
     total_portals = models.IntegerField(default=1)
-    total_buildings = models.IntegerField(default=1)
+    total_buildings = models.IntegerField(default=starting_total)
 
     # Readiness
-    fleet_readiness = models.IntegerField(default=0)
-    psychic_readiness = models.IntegerField(default=0)
-    agent_readiness = models.IntegerField(default=0)
+    fleet_readiness = models.IntegerField(default=100)
+    psychic_readiness = models.IntegerField(default=100)
+    agent_readiness = models.IntegerField(default=100)
 
     # Research (names might seem verbose but it makes various spots in the code way less confusing to read)
     research_percent_military = models.IntegerField(default=0) # stored as integer, in percentage points
@@ -302,6 +303,7 @@ class UnitConstruction(models.Model):
 class RoundStatus(models.Model):
     galaxy_size = models.IntegerField(default=100)
     tick_number = models.IntegerField(default=0)
+    is_running = models.BooleanField(default=False)
 
 
 class Relations(models.Model):
@@ -331,3 +333,10 @@ class Messages(models.Model):
     date_and_time = models.DateTimeField(blank=True)
     user1_deleted = models.BooleanField(default=False)
     user2_deleted = models.BooleanField(default=False)
+
+
+class NewsFeed(models.Model):
+    date_and_time = models.DateTimeField(blank=True)
+    message = models.TextField()
+
+

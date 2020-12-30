@@ -6,7 +6,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', views.headquarters, name='headquarters'), # root page
+    path('', views.index, name='index'), # root page
+    path('headquarters', views.headquarters, name='headquarters'),
     path('council', views.council, name='council'),
     path('map', views.map, name='map'),
     path('planets', views.planets, name='planets'),
@@ -38,6 +39,13 @@ urlpatterns = [
     url(r'^delete_message_outbox(?P<message_id>[0-9]+)/$', views.del_message_out, name='del_outbox'),
     path('delete_all_messages_inbox', views.bulk_del_message_in, name='delete_all_messages_inbox'),
     path('delete_all_messages_outbox', views.bulk_del_message_out, name='delete_all_messages_outbox'),
+    path('guide', views.guide, name='guide'),
+    path('faq', views.faq, name='faq'),
+    path("registration/register", views.register, name="register" ),
+    path('logout', views.custom_logout, name='logout'),
+    path('login', views.custom_login, name='login'),
+    path('choose_empire_race', views.choose_empire_race, name='choose_empire_race'),
+
 ]
 
 if settings.DEBUG:

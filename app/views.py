@@ -12,13 +12,17 @@ from io import BytesIO
 import base64
 from django_tables2 import SingleTableView
 from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash, logout, authenticate, login
+from .forms import RegisterForm
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.template import RequestContext
 from django.db.models import Q
+from django.contrib.auth.decorators import user_passes_test
+from app.map_settings import *
+from app.helper_functions import *
 
-
+import json
 import numpy as np
 import time
 import matplotlib.pyplot as plt
@@ -27,7 +31,66 @@ from datetime import datetime
 
 # Remember that Django uses the word View to mean the Controller in MVC.  Django's "Views" are the HTML templates. Models are models.
 
+
+def race_check(user):
+    if not user.userstatus.race or not user.userstatus.empire:
+        return False
+    else:
+        return True
+
+def reverse_race_check(user):
+    if not user.userstatus.race or not user.userstatus.empire:
+        return True
+    else:
+        return False
+
+def index(request):
+    context = {"news_feed": NewsFeed.objects.all().order_by('-date_and_time')}
+    return render(request, "login.html", context)
+
+def guide(request):
+    return render(request, "guide.html")
+
+def faq(request):
+    return render(request, "faq.html")
+
+def custom_login(request):
+    username = request.POST['username']
+    password = request.POST['password']
+
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        return redirect("/choose_empire_race")
+    else:
+        context = {"news_feed": NewsFeed.objects.all().order_by('-date_and_time'),
+                   "errors": "Wrong username/password!"}
+        return render(request, "login.html", context)
+
+# In contrast to HttpRequest objects, which are created automatically by Django, HttpResponse objects are your responsibility. Each view you write is responsible for instantiating, populating, and returning an HttpResponse.
+# The HttpResponse class lives in the django.http module.
+def register(response):
+    if response.method == "POST":
+        form = RegisterForm(response.POST)
+        if form.is_valid():
+            form.save()
+            new_user = authenticate(username=form.cleaned_data['username'],
+                                    password=form.cleaned_data['password1'],
+                                    )
+            print(new_user.userstatus.user_name)
+            status = get_object_or_404(UserStatus, user=new_user)
+            status.user_name = form.cleaned_data['game_name']
+            status.save()
+            print(status.user_name, form.cleaned_data['game_name'])
+            login(response, new_user)
+            return redirect("/headquarters")
+    else:
+        form = RegisterForm()
+    return render(response, "register.html", {"form":form})
+
+
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def headquarters(request):
     status = get_object_or_404(UserStatus, user=request.user)
     tick_time = RoundStatus.objects.get().tick_number
@@ -39,8 +102,57 @@ def headquarters(request):
                "year": year}
     return render(request, "headquarters.html", context)
 
+@login_required
+@user_passes_test(reverse_race_check, login_url="/headquarters")
+def choose_empire_race(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    error = None
+    if request.POST and 'chose_race' in request.POST and 'chose_emp' in request.POST:
+        if request.POST['chose_emp'] == 'Random':
+            empires = Empire.objects.filter(numplayers__lt=players_per_empire)
+            emp_choice = np.random.randint(0, empires.count())
+            # empire1 = Empire.objects.get(number=emp_choice)
+            empire1 = empires[emp_choice]
+        else:
+            empire1 = Empire.objects.get(number=int(request.POST['chose_emp']))
+            if empire1.password or not ('fampass' in request.POST and empire1.password == request.POST['fampass']):
+                if empire1.password != request.POST['fampass']:
+                    error = "Wrong pass enterted!"
+                empire1 = None
+
+        if empire1 is not None:
+            empire1.numplayers += 1
+            empire1.save()
+            status.race = request.POST['chose_race']
+            status.empire = empire1
+            status.save()
+            for p in Planet.objects.filter(x=empire1.x, y=empire1.y):
+                if p.owner is None:
+                    give_first_planet(request.user, status, p)
+                    break
+            return render(request, "headquarters.html")
+
+    races = status.Races.choices
+    empires = Empire.objects.filter(numplayers__lt=players_per_empire)
+    empires_have_pass = None
+    if empires.count() < 1:
+        error = "Sorry, the galaxy is full! Try writing to the admin on discord that he needs to enlarge the map!"
+    else:
+        empires_have_pass = {'Random': False}
+        for emp in empires:
+            if not emp.password:
+                empires_have_pass[emp.number] = False
+            else:
+                empires_have_pass[emp.number] = True
+
+    context = {"races": races,
+               "empires": empires_have_pass,
+               'empires_json': json.dumps(empires_have_pass),
+               'error': error}
+    return render(request, "choose_empire_race.html", context)
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def council(request):
     status = get_object_or_404(UserStatus, user=request.user)
     constructions = Construction.objects.filter(user=request.user)
@@ -57,6 +169,7 @@ def council(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def map(request):
     if request.GET.get('heatmap', None):
         start_t = time.time()
@@ -77,7 +190,7 @@ def map(request):
         colors = [(0.0, 0.0, 0.0), (0.0, 0.0, 1.0)]  # black to blue colormap
         cm = LinearSegmentedColormap.from_list('custom-cmap', colors, N=20)
         plt.imsave(static('heatmap.png'), heatmap, cmap=cm)
-        print("Heatmap generation took this many seconds:", time.time() - start_t)
+        # print("Heatmap generation took this many seconds:", time.time() - start_t)
         show_heatmap = True
     else:
         show_heatmap = False
@@ -90,6 +203,7 @@ def map(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def planets(request):
     status = get_object_or_404(UserStatus, user=request.user)
     order_by = request.GET.get('order_by', 'planet')
@@ -111,6 +225,7 @@ def planets(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def planet(request, planet_id):
     status = get_object_or_404(UserStatus, user=request.user)
     planet = get_object_or_404(Planet, pk=planet_id)
@@ -128,6 +243,7 @@ def planet(request, planet_id):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def raze(request, planet_id):
     status = get_object_or_404(UserStatus, user=request.user)
     planet = get_object_or_404(Planet, pk=planet_id)
@@ -185,6 +301,7 @@ def raze(request, planet_id):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def razeall(request, planet_id):  # TODO still need an html template for this page
     status = get_object_or_404(UserStatus, user=request.user)
     planet = get_object_or_404(Planet, pk=planet_id)
@@ -216,6 +333,7 @@ def razeall(request, planet_id):  # TODO still need an html template for this pa
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def build(request, planet_id):
     # This entire view + template is reproducing iohtmlFunc_build()
 
@@ -328,15 +446,19 @@ def build(request, planet_id):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def ranking(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    table = UserRankTable(UserStatus.objects.all(), order_by=("-num_planets"))
+    table = UserRankTable(UserStatus.objects.exclude(race__isnull=True).exclude(race__exact='')
+                          .exclude(empire__isnull=True)
+                          , order_by=("-num_planets"))
     context = {"table": table,
                "status": status}
     return render(request, "ranking.html", context)
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def empire_ranking(request):
     status = get_object_or_404(UserStatus, user=request.user)
     empire = status.empire
@@ -348,6 +470,7 @@ def empire_ranking(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def account(request):
     status = get_object_or_404(UserStatus, user=request.user)
     context = {"status": status}
@@ -355,6 +478,7 @@ def account(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def change_password(request):
     if request.method == 'POST':
         form = PasswordChangeForm(request.user, request.POST)
@@ -373,6 +497,7 @@ def change_password(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def units(request):
     status = get_object_or_404(UserStatus, user=request.user)
     if request.method == 'POST':
@@ -448,6 +573,7 @@ def units(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def fleets(request):
     status = get_object_or_404(UserStatus, user=request.user)
 
@@ -479,6 +605,7 @@ def fleets(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def fleetsend(request):
     status = get_object_or_404(UserStatus, user=request.user)
     round_params = get_object_or_404(RoundStatus)  # should only be one
@@ -565,12 +692,14 @@ def fleetsend(request):
 
 # TODO, COPY FROM RAZE VIEW
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def fleetdisband(request):
     status = get_object_or_404(UserStatus, user=request.user)
     return HttpResponse("GOT HERE")
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def empire(request, empire_id):
     status = get_object_or_404(UserStatus, user=request.user)
     player_list = UserStatus.objects.filter(empire=empire_id)
@@ -584,6 +713,7 @@ def empire(request, empire_id):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def vote(request):
     status = get_object_or_404(UserStatus, user=request.user)
     player_list = UserStatus.objects.filter(empire=status.empire)
@@ -641,6 +771,7 @@ def vote(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def results(request):
     status = get_object_or_404(UserStatus, user=request.user)
     player_list = UserStatus.objects.filter(empire=status.empire)
@@ -649,7 +780,8 @@ def results(request):
                "player_list": player_list}
     return render(request, "results.html", context)
 
-
+@login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def set_relation(relation, current_empire, target_empire_nr, *rel_time_passed):
     target_empire = Empire.objects.get(number=target_empire_nr)
 
@@ -726,7 +858,8 @@ def set_relation(relation, current_empire, target_empire_nr, *rel_time_passed):
                                      relation_length=rel_time,
                                      relation_creation_tick=RoundStatus.objects.get().tick_number,
                                      relation_remaining_time=rel_time)
-
+@login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def cancel_relation(relation):
     rel = Relations.objects.get(id=relation)
     rel2 = Relations.objects.get(empire1=rel.empire2, empire2=rel.empire1)
@@ -758,6 +891,7 @@ def cancel_relation(relation):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def pm_options(request):
     status = get_object_or_404(UserStatus, user=request.user)
     user_empire = status.empire
@@ -795,6 +929,7 @@ def pm_options(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def relations(request):
     status = get_object_or_404(UserStatus, user=request.user)
     relations_from_empire = Relations.objects.filter(empire1=status.empire)
@@ -810,6 +945,7 @@ def relations(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def research(request):
     status = get_object_or_404(UserStatus, user=request.user)
     message = ''
@@ -850,6 +986,7 @@ def research(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def famaid(request):
     status = get_object_or_404(UserStatus, user=request.user)
     player_list = UserStatus.objects.filter(empire=status.empire)
@@ -900,6 +1037,7 @@ def famaid(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def famgetaid(request):
     status = get_object_or_404(UserStatus, user=request.user)
     player_list = UserStatus.objects.filter(empire=status.empire)
@@ -958,6 +1096,7 @@ def famgetaid(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def messages(request):
     status = get_object_or_404(UserStatus, user=request.user)
     messages_from = Messages.objects.filter(user2=status.id, user2_deleted=False).order_by('-date_and_time')
@@ -969,6 +1108,7 @@ def messages(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def outbox(request):
     status = get_object_or_404(UserStatus, user=request.user)
     messages_to = Messages.objects.filter(user1=status.id, user1_deleted=False).order_by('-date_and_time')
@@ -980,6 +1120,7 @@ def outbox(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def compose_message(request, user_id):
     status = get_object_or_404(UserStatus, user=request.user)
     msg_on_top = ''
@@ -1014,6 +1155,7 @@ def compose_message(request, user_id):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def del_message_in(request, message_id):
     status = get_object_or_404(UserStatus, user = request.user)
     message = get_object_or_404(Messages, id = message_id, user2 = status.id)
@@ -1031,6 +1173,7 @@ def del_message_in(request, message_id):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def del_message_out(request, message_id):
     status = get_object_or_404(UserStatus, user = request.user)
     message = get_object_or_404(Messages, id = message_id, user1 = status.id)
@@ -1048,6 +1191,7 @@ def del_message_out(request, message_id):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def bulk_del_message_out(request):
     status = get_object_or_404(UserStatus, user = request.user)
     messages_buffer = Messages.objects.filter(user1 = status.id)
@@ -1064,6 +1208,7 @@ def bulk_del_message_out(request):
 
 
 @login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def bulk_del_message_in(request):
     status = get_object_or_404(UserStatus, user = request.user)
     messages_buffer = Messages.objects.filter(user2 = status.id)
@@ -1077,3 +1222,13 @@ def bulk_del_message_in(request):
                "messages_to": messages_from,
                 }
     return render(request, "messages.html", context)
+
+@login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
+def custom_logout(request):
+    logout(request)
+    return HttpResponseRedirect('/')
+
+
+
+

@@ -5,6 +5,7 @@ from app.constants import *
 import time
 import matplotlib.pyplot as plt
 import random
+from app.map_settings import *
 
 def random_combination(iterable, r):
     pool = tuple(iterable)
@@ -39,12 +40,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
         RoundStatus.objects.create()
 
         # We also need to purge all the non-needed info of players, without actualy deleting them!
-
-        map_size = 100
-
-        num_homes = 20
         theta = 0
-        distance = int(map_size*0.4)
         for j in range(num_homes):
             home_x = round(distance*np.sin(theta) + map_size/2)
             home_y = round(distance*np.cos(theta) + map_size/2)
@@ -57,7 +53,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
                                          pm_message="Welcome to empire #" + str(j)
 
             ))
-            for i in range(8): # max 8 players per empire/system
+            for i in range(players_per_empire): # max 8 players per empire/system
                 planet_buffer.append(Planet(home_planet=True,
                                             x=home_x,
                                             y=home_y,
@@ -94,11 +90,14 @@ class Command(BaseCommand): # must be called command, use file name to name the 
 
         # TEMPORARY - assign all planets to admin user, for debugging sake
         all_planets = Planet.objects.all()
-        all_planets.update(owner=User.objects.get(username='admin'))
+        # all_planets.update(owner=User.objects.get(username='admin'))
 
         #Give empire 0 to the admin
         admin = UserStatus.objects.get(id=1)
         admin.empire = Empire.objects.get(number=0)
+        empire1 = Empire.objects.get(number=0)
+        empire1.numplayers = 1
+        empire1.save()
         admin.save()
 
 

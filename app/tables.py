@@ -6,19 +6,19 @@ from django_tables2 import SingleTableView
 # User rank table
 class UserRankTable(tables.Table):
     user_name = tables.Column(verbose_name='Player')
-    empire_id  = tables.Column(verbose_name='Empire')
+    empire_number  = tables.Column(accessor='empire.number', verbose_name='Empire')
     num_planets = tables.Column(verbose_name='Planets')
     networth = tables.Column(verbose_name='Networth')
     race = tables.Column(verbose_name='Race')
     class Meta:
         model = UserStatus
         attrs = {'class': 'table table-condensed'} # uses bootstrap table style
-        fields = ("user_name", "empire_id", "num_planets", "networth", "race")
+        fields = ("user_name", "empire_number", "num_planets", "networth", "race")
 
 # Empire rank table
 class EmpireRankTable(tables.Table):
     empire_names = tables.TemplateColumn('<a href="/empire{{record.id}}/">{{record.name_with_id}}</a>',verbose_name='Empire Name')
-    planets  = tables.Column(verbose_name='Planets')
+    planets = tables.Column(verbose_name='Planets')
     numplayers = tables.Column(verbose_name='Players')
     networth = tables.Column(verbose_name='Networth')
     class Meta:

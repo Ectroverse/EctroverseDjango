@@ -1,6 +1,7 @@
 import numpy as np
 from .constants import *
 
+
 # This is where longer formulas should go, 1-3 liners can go inside process_tick.py
 
 def explore_FR_cost(num_planets, num_explos_traveling):
