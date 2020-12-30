@@ -675,7 +675,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             # TODO
 
             # Save objects to database
-            # status.save()
+            status.save()
 
             print("Seconds taken to process users:", time.time() - start_t)
 
