@@ -58,7 +58,9 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'),
+                 os.path.join(BASE_DIR, 'templates/registration')],
+
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -107,7 +109,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -136,5 +137,8 @@ STATICFILES_DIRS = [
 ]
 # Login-system related
 
-LOGIN_REDIRECT_URL = '/' # Redirect to home URL after login (Default redirects to /accounts/profile/)
+LOGIN_URL = '/'
+LOGIN_REDIRECT_URL = '/choose_empire_race' # Redirect to home URL after login (Default redirects to /accounts/profile/)
+LOOUT_REDIRECT_URL = '/'
 
+DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap.html"

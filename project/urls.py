@@ -16,8 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+# from register import views as v
+
 urlpatterns = [
     path('', include('app.urls')), # root page
+    path('registration', include('app.urls')), # root page
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')), # adds built-in login/logout/etc views, you have to use accounts/
+    
+    
+    
 ]
