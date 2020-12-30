@@ -277,13 +277,15 @@ class Command(BaseCommand): # must be called command, use file name to name the 
                 planet.overbuilt = calc_overbuild(planet.size, planet.total_buildings + planet.buildings_under_construction)
                 planet.overbuilt_percent = (planet.overbuilt-1.0)*100 # came from html_gameplay.c line 5541
                 # The above isnt even the correct formula im pretty sure
+                
                 # Planet.objects.filter(id = planet.id).update(max_population = planet.max_population,
                 #                                     current_population= planet.current_population,
                 #                                     protection=planet.protection,
                 #                                     total_buildings=planet.total_buildings,
                 #                                     overbuilt = planet.overbuilt,
                 #                                     overbuilt_percent = planet.overbuilt_percent)
-                # planet.save()
+                planet.save()
+                '''
                 with connection.cursor() as cursor:
                     cursor.execute("UPDATE PLANET SET max_population = %s, "
                                    "current_population = %s, "
@@ -298,7 +300,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
                                     planet.overbuilt,
                                     planet.overbuilt_percent,
                                     planet.id))
-
+                '''
             bulk_update_time = time.time()
             # Planet.objects.bulk_update(planets_buffer, ['max_population',
             #                                             'current_population',

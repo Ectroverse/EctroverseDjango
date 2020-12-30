@@ -55,7 +55,8 @@ building_production_ectrolium = 1
 building_production_cities = 1000
 building_production_research = 6
 
-population_size_factor = 20
+population_size_factor = 20 # determines max pop
+population_base_factor = 2 # determines starting pop
 
 ################
 # Unit Related #

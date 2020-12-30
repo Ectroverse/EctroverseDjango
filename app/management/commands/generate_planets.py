@@ -19,12 +19,14 @@ def fill_system(x,y):
     planets_in_system = np.random.randint(1,9) # max of 8 planets per system with the way we are visualizing it
     positions = random_combination(range(8), planets_in_system)
     for i in range(planets_in_system):
+        size = planet_size_distribution()
         planet_buffer_fill.append(Planet(home_planet=False,
                                          x=x,
                                          y=y,
                                          i=i,
                                          pos_in_system=positions[i],
-                                         size=planet_size_distribution())) # create is the same as new() and add()
+                                         current_population=size*population_base_factor,
+                                         size=size)) # create is the same as new() and add()
     return planet_buffer_fill
 
 
@@ -54,12 +56,14 @@ class Command(BaseCommand): # must be called command, use file name to name the 
 
             ))
             for i in range(players_per_empire): # max 8 players per empire/system
+                size = 400
                 planet_buffer.append(Planet(home_planet=True,
                                             x=home_x,
                                             y=home_y,
                                             i=i,
                                             pos_in_system=i,
-                                            size=400)) # create is the same as new() and add()
+                                            current_population=size*population_base_factor,
+                                            size=size)) # create is the same as new() and add()
 
 
             # Now add N planets in a small area around the home planet
