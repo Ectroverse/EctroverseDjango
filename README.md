@@ -10,8 +10,9 @@
 5. `python manage.py createsuperuser` create a user named admin, with whatever pass you want, you can skip email
 6. `python manage.py collectstatic --noinput`
 7. `python manage.py generate_planets` (can take a while if its a big galaxy with a lot of planets)
-8. FOR NOW- go to http://127.0.0.1:8000/admin and edit the Userstatus for admin, set race and home planet, then go back and go to planets and pick a planet and add a portal, else there's a calc error
+8. go to http://127.0.0.1:8000, log in as admin, and choose a race
 9. `python manage.py process_tick` (will eventually get called every 10 minutes with a cronjob)
+10. go to http://127.0.0.1:8000 and it should work now
 
 ## Starting up server once its setup
 
@@ -40,7 +41,7 @@ Watch Django's console (i.e. the uwsgi log) with
 Nginx log:
 `docker logs -f ectroversedjango_nginx_1`
 
-MySQL log:
+Database log:
 `docker logs -f ectroversedjango_db_1`
 
 ## Console into the python container (which runs the Django app) to poke around or debug something

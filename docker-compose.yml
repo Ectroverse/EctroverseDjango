@@ -13,20 +13,17 @@ services:
         - python
 
   db:
-      image: mysql:5.7 # 8.X causes this issue https://stackoverflow.com/questions/50469587/django-db-utils-operationalerror-2059-authentication-plugin-caching-sha2-pas
-      command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+      image: postgres:12.0-alpine
       ports:
-        - "3306:3306"
+        - "5432:5432"
       env_file:
         - .env # copy .env.template to .env and change passwords/keys
-      environment:
-        MYSQL_ROOT_PASSWORD: root
-        MYSQL_DATABASE: djangodatabase
-        MYSQL_USER: dbadmin
-        MYSQL_PASSWORD: ${MYSQLPASS} # defined in .env
-        TZ: 'America/New_York'
       volumes:
-        - ./project/sql:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data/
+      environment:
+        POSTGRES_DB: djangodatabase
+        POSTGRES_USER: dbadmin
+        POSTGRES_PASSWORD: ${DBPASS} # defined in .env
 
   python:
       build: ./project
@@ -38,3 +35,7 @@ services:
         - "8001" # this is used for the uwsgi to nginx interface, not the actual website
       depends_on:
         - db
+
+# To persist the data beyond the life of the container we configured a volume. This config will bind postgres_data to the "/var/lib/postgresql/data/" directory in the container.
+volumes:
+  postgres_data:
