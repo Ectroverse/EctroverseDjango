@@ -1,3 +1,33 @@
+## TODO
+
+Put your name after an item if you want to reserve it for yourself, not all items need assignments though
+
+#### v0.1 Remaining Items
+
+- fleets move/exploration/attack
+- battle sequence (Rexer already started it)
+- operations- just scouting for now
+- news
+- auto tick update via cronjob (Rexer)
+- 2 players registered into 1 empire?
+
+#### v0.2 Remaining Items
+
+- when aplayer is deleted from an empire decrease its number of players
+- add proper design to rankings tables
+- add deletion possibility to account
+- improve html design inside, some parts are shown badly on phone
+- forum
+- round reset function
+- email password recovery
+- round ranks for part rounds
+
+#### v0.3 Remaining Items
+
+- map bonuses? ancients
+- do we need the market?
+- other operations, as well as spells and incantations
+
 ## Getting it setup on a new machine:
 
 (you'll need docker and docker-compose installed, google how to do it for your OS)
