@@ -14,6 +14,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
     def handle(self, *args, **options):
         # docs say not to use print() but instead stdout
         self.stdout.write("=== Starting process_tick ===")
+        start_t = time.time()
 
         #increment tick number
         round = RoundStatus.objects.get()
@@ -33,7 +34,6 @@ class Command(BaseCommand): # must be called command, use file name to name the 
         '''
 
         #update relations
-        start_t = time.time()
         relations_buffer = Relations.objects.filter(Q(relation_type='W')|Q(relation_type='NC'))
         for rel in relations_buffer:
             rel.relation_remaining_time -= 1
@@ -46,7 +46,6 @@ class Command(BaseCommand): # must be called command, use file name to name the 
         # Loop through each user
         num_users_registered = 0 # im not actually using this anywhere yet
         for status in UserStatus.objects.all():
-            start_t = time.time()
             self.stdout.write("User: " + status.user_name)
             self.stdout.write("id: " + str(status.user.id))
 
@@ -196,7 +195,6 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             planets_buffer = Planet.objects.filter(owner=status.user.id)
 
             start_t_planets = time.time()
-            
             for planet in planets_buffer:
                 status.num_planets += 1
 
@@ -301,14 +299,12 @@ class Command(BaseCommand): # must be called command, use file name to name the 
                                     planet.overbuilt_percent,
                                     planet.id))
                 '''
-            bulk_update_time = time.time()
             # Planet.objects.bulk_update(planets_buffer, ['max_population',
             #                                             'current_population',
             #                                             'protection',
             #                                             'total_buildings',
             #                                             'overbuilt',
             #                                             'overbuilt_percent'])
-            print("bulk update took", time.time() - bulk_update_time, "seconds")
             print("Planet loop took", time.time() - start_t_planets, "seconds")
 
             # Calc total buildings for user
@@ -679,10 +675,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             # Save objects to database
             status.save()
 
-            print("Seconds taken to process users:", time.time() - start_t)
-
         # update empires
-        start_e = time.time()
         empires_buffer = Empire.objects.filter(numplayers__gt=0)
         for emp in empires_buffer:
             print(emp.id)
@@ -690,13 +683,13 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             nw = 0
             planets = 0
             for user in users:
-                print("test",user.user_name, user.num_planets )
                 nw += user.networth
                 planets += user.num_planets
             emp.networth = nw
             emp.planets = planets
 
         Empire.objects.bulk_update(empires_buffer, ['networth','planets'])
-        print("Seconds taken to process empires:", time.time() - start_e)
 
-        self.stdout.write("=== Ending process_tick ===")
+        print("process_tick took", time.time() - start_t, "seconds")
+        
+        print("=== Ending process_tick ===")
