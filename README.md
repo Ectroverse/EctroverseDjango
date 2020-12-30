@@ -23,10 +23,6 @@ that's it!  without docker this would be a dozen steps
 
 `docker-compose up -d --no-deps --build`
 
-## Initialize Map (required to be able to test out the web interfacea)
-
-`docker-compose run python ./manage.py generate_planets`
-
 ## Check it's running
 
 `docker ps` should list all three containers as Up
