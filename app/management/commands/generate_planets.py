@@ -94,11 +94,11 @@ class Command(BaseCommand): # must be called command, use file name to name the 
         all_planets_without_home.update(owner=User.objects.get(username='admin'))
 
         #Give empire 0 to the admin
-        admin = UserStatus.objects.get(id=1)
+        admin = UserStatus.objects.get(user=User.objects.get(username='admin'))
         admin.empire = Empire.objects.get(number=0)
-        empire1 = Empire.objects.get(number=0)
-        empire1.numplayers = 1
-        empire1.save()
+        empire0 = Empire.objects.get(number=0)
+        empire0.numplayers = 1
+        empire0.save()
         admin.save()
 
 
