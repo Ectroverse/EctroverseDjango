@@ -9,8 +9,8 @@ Put your name after an item if you want to reserve it for yourself, not all item
 - operations- just scouting for now
 - news
 - auto tick update via cronjob (Rexer)
-- 2 players registered into 1 empire?
-- when a player is deleted from an empire decrease its number of players
+- 2 players registered into 1 empire? (Vladimir)
+- when a player is deleted from an empire decrease its number of players (Vladimir)
 
 #### v0.2 Remaining Items
 
