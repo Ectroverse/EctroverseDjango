@@ -1,11 +1,10 @@
-from django.core.management.base import BaseCommand, CommandError
-from app.models import *
-from app.calculations import *
-from app.constants import *
-import time
+from django.core.management.base import BaseCommand
 import matplotlib.pyplot as plt
 
-class Command(BaseCommand): # must be called command, use file name to name the functionality
+from app.calculations import planet_size_distribution
+
+
+class Command(BaseCommand):  # must be called command, use file name to name the functionality
     def handle(self, *args, **options):
         samples = []
         for i in range(100000):
@@ -13,5 +12,3 @@ class Command(BaseCommand): # must be called command, use file name to name the 
         print(samples)
         count, bins, ignored = plt.hist(samples, 50)
         plt.show()
-
-

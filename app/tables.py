@@ -1,32 +1,38 @@
 import django_tables2 as tables
-from .models import *
-from django_tables2.utils import A  # alias for Accessor
-from django_tables2 import SingleTableView
+from .models import UserStatus, Empire
+
 
 # User rank table
 class UserRankTable(tables.Table):
-    user_name = tables.Column(verbose_name='Player')
-    empire_number  = tables.Column(accessor='empire.number', verbose_name='Empire')
-    num_planets = tables.Column(verbose_name='Planets')
-    networth = tables.Column(verbose_name='Networth')
-    race = tables.Column(verbose_name='Race')
+    user_name = tables.Column(verbose_name="Player")
+    empire_number = tables.Column(accessor="empire.number", verbose_name="Empire")
+    num_planets = tables.Column(verbose_name="Planets")
+    networth = tables.Column(verbose_name="Networth")
+    race = tables.Column(verbose_name="Race")
+
     class Meta:
         model = UserStatus
-        attrs = {'class': 'table table-condensed'} # uses bootstrap table style
+        attrs = {"class": "table table-condensed"}  # uses bootstrap table style
         fields = ("user_name", "empire_number", "num_planets", "networth", "race")
+
 
 # Empire rank table
 class EmpireRankTable(tables.Table):
-    empire_names = tables.TemplateColumn('<a href="/empire{{record.id}}/">{{record.name_with_id}}</a>',verbose_name='Empire Name')
-    planets = tables.Column(verbose_name='Planets')
-    numplayers = tables.Column(verbose_name='Players')
-    networth = tables.Column(verbose_name='Networth')
+    empire_names = tables.TemplateColumn(
+        '<a href="/empire{{record.id}}/">{{record.name_with_id}}</a>',
+        verbose_name="Empire Name",
+    )
+    planets = tables.Column(verbose_name="Planets")
+    numplayers = tables.Column(verbose_name="Players")
+    networth = tables.Column(verbose_name="Networth")
+
     class Meta:
         model = Empire
-        attrs = {'class': 'table table-condensed'} # uses bootstrap table style
+        attrs = {"class": "table table-condensed"}  # uses bootstrap table style
         fields = ("empire_names", "planets", "numplayers", "networth")
 
-''' NEVER ENDED UP USING THIS
+
+""" NEVER ENDED UP USING THIS
 class PlanetTable(tables.Table):
     name = tables.TemplateColumn('<a href="{% url \'ootlist:oot_page\' record.id %}">{{record.name}}</a>') # links to oot_page
     tags = tables.Column(verbose_name='Categories')
@@ -50,4 +56,4 @@ class PlanetTable(tables.Table):
         fields = ('planet', 'size', 'total_buildings', 'overbuilt', '
         fields = ('name', 'last_commit', 'description', 'tags', 'gr_supported_version') # fields to display
         attrs = {'class': 'table table-condensed'} # uses bootstrap table style
-'''
+"""

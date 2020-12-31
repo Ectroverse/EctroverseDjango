@@ -1,6 +1,4 @@
 from background_task import background
-import datetime
-from django.utils.timezone import make_aware
 
 
 @background()

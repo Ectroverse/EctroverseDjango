@@ -1,5 +1,10 @@
-from .models import *
-from app.helper_functions import *
+from .models import (
+    staring_solars,
+    starting_meral_planets,
+    starting_ectrolium_refs,
+    starting_crystal_labs,
+    starting_cities,
+)
 
 
 def give_first_planet(user, status, planet):
@@ -13,4 +18,3 @@ def give_first_planet(user, status, planet):
     status.home_planet = planet
     status.num_planets = 1
     status.save()
-
