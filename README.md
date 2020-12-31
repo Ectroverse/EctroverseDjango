@@ -28,6 +28,7 @@ Put your name after an item if you want to reserve it for yourself, not all item
 - map bonuses? ancients
 - do we need the market?
 - other operations, as well as spells and incantations
+- move the menu button to the main header and perhaps draw it nicely
 
 ## Getting it setup on a new machine:
 
