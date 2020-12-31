@@ -15,12 +15,12 @@ Put your name after an item if you want to reserve it for yourself, not all item
 #### v0.2 Remaining Items
 
 - add proper design to rankings tables
-- add deletion possibility to account
+- add deletion possibility to account (Vladimir)
 - improve html design inside, some parts are shown badly on phone
 - forum
 - round reset function
 - email password recovery
-- round ranks for part rounds
+- round ranks for past rounds
 
 #### v0.3 Remaining Items
 
