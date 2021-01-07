@@ -3,82 +3,84 @@
 {% load static %}
 
 {% block content %}
-<br>
-<table width="100%">
-<tr>
-<td width="50%" align="center" valign="top">
-<b>Main Fleet</b>
-<br>
-<table>
-{% for unit in main_fleet_list %}
-<tr>
-    <td>{{unit.name}}</td>
-    <td>&nbsp;&nbsp;</td>
-    <td align="right">{{unit.value}}</td>
-</tr>
-{% endfor %}
-</table>
-<br>
-<a href="fleetdisband">Disband units</a></td>
 
 
-<td width="50%" align="center" valign="top">
-<b>Fleets orders</b>
-<br>
-<form action="/fleets" method="POST">
-{% csrf_token %}
-<table cellspacing="8">
-<tr><td align="center">Order after an attack</td></tr>
-<tr><td align="center">
-<select name="attack">
-<option value="0" {% if status.post_attack_order == 0 %}selected{% endif %}>Station fleet on planet
-<option value="1" {% if status.post_attack_order == 1 %}selected{% endif %}>Wait in system
-<option value="2" {% if status.post_attack_order == 2 %}selected{% endif %}>Recall to main fleet
-</select></td></tr>
-<tr><td align="center">Approximations of enemy forces to flee battles, 0 - 9999%<tr><td align="center">
-<table>
-<tr><td align="right" nowrap>Long-range attack</td>
-<td><input type="text" pattern="[0-9]+" maxlength="4" size ="5"  name="f0" size="4" value="{{status.long_range_attack_percent}}"> %</td></tr>
-<tr><td align="right" nowrap>Air vs air</td>
-<td><input type="text" pattern="[0-9]+" maxlength="4" size ="5"  name="f1" size="4" value="{{status.air_vs_air_percent}}"> %</td></tr>
-<tr><td align="right" nowrap>Ground vs air</td>
-<td><input type="text" pattern="[0-9]+" maxlength="4" size ="5" name="f2" size="4" value="{{status.ground_vs_air_percent}}"> %</td></tr>
-<tr><td align="right" nowrap>Ground vs ground</td>
-<td><input type="text" pattern="[0-9]+" maxlength="4" size ="5" name="f3" size="4" value="{{status.ground_vs_ground_percent}}"> %</td></tr>
-</table>
-<tr><td align="center"><input type="submit" value="Change"></td></tr>
-</table></form></td></tr>
-</table>
+
+<div style="width:100%; float:left ">
+	<div class ="left_box" >
+		<div style="width: 50%; margin:0 auto; text-align: left;">
+		<b>Main Fleet</b><br>
+		{% for unit in main_fleet_list %}
+
+		{{unit.name}}
+		&nbsp;&nbsp;
+		{{unit.value}}
+		<br>
+		{% endfor %}
+		<br>
+		<a href="fleetdisband">Disband units</a></td>
+		</div>
+		
+	</div>
+	<div class ="right_box" >
+		<div style="width: 50%; margin:0 auto; text-align: left;">
+		<b>Fleets orders</b>
+		<form action="/fleets" method="POST">
+			{% csrf_token %}
+			Order after an attack
+			<select name="attack">
+			<option value="0" {% if status.post_attack_order == 0 %}selected{% endif %}>Station fleet on planet
+			<option value="1" {% if status.post_attack_order == 1 %}selected{% endif %}>Wait in system
+			<option value="2" {% if status.post_attack_order == 2 %}selected{% endif %}>Recall to main fleet
+			</select>
+			<br>Approximations of enemy forces to flee battles, 0 - 9999%
+			<table class="styled-table" cellpadding="20">
+			<tr class="spaceUnder"><td style="padding-right: 10px;">Long-range attack</td>
+			<td><input type="text" pattern="[0-9]+" maxlength="4" size ="5"  name="f0" size="4" value="200"> %</td></tr>
+			<tr class="spaceUnder"><td  >Air vs air</td>
+			<td><input type="text" pattern="[0-9]+" maxlength="4" size ="5"  name="f1" size="4" value="200"> %</td></tr>
+			<tr class="spaceUnder"><td  >Ground vs air</td>
+			<td><input type="text" pattern="[0-9]+" maxlength="4" size ="5" name="f2" size="4" value="200"> %</td></tr>
+			<tr class="spaceUnder"><td >Ground vs ground</td>
+			<td><input type="text" pattern="[0-9]+" maxlength="4" size ="5" name="f3" size="4" value="200"> %</td></tr>
+			</table>
+			<input type="submit" value="Change">
+		</form>
+		</div>
+	</div>
+	
+</div>
 
 
-<br>
-<b>Traveling fleets</b>
-<br><br>None<br><br><br>
-<b>Dispatch a new fleet</b>
-<br><br>
-<form action="fleetsend" method="POST">
-{% csrf_token %}
-<select name="order">
-<option value="0" selected>Attack the planet
-<option value="1">Station on planet
-<option value="2">Move to system
-</select>
-<table cellspacing="8">
-{% for unit in send_fleet_list %}
-<tr>
-    <td align="right">{{unit.value}}&nbsp;&nbsp;</td>
-    <td align="right">{{unit.name}}&nbsp;&nbsp;</td>
-    <td><input type="text" pattern="[0-9]+" maxlength="12" size ="13" name="u{{unit.i}}" size="12"></td>
-</tr>
-{% endfor %}
-</table>
-X:<input type="text" name="X" size="4">
-Y:<input type="text" name="Y" size="4"> 
-Planet:<input type="text" name="I" size="4">
-<br><br>
-<input type="submit" value="Send">
-</form>
-
+<div class="center_box">
+	<div class="center_box_inside" >
+		<b class="spaceUnder">Traveling fleets</b><br>
+		<p > None </p>
+		<b class="spaceUnder">Dispatch a new fleet</b><br>
+		<form action="fleetsend" method="POST">
+		{% csrf_token %}
+		<select name="order" class="spaceUnder">
+		<option value="0" selected>Attack the planet
+		<option value="1">Station on planet
+		<option value="2">Move to system
+		</select>
+		<table class="spaceUnder" cellspacing="8" align="center">
+		{% for unit in send_fleet_list %}
+		<tr class="spaceUnder">
+			<td align="right">{{unit.value}}&nbsp;&nbsp;</td>
+			<td align="right">{{unit.name}}&nbsp;&nbsp;</td>
+			<td><input type="text" pattern="[0-9]+" maxlength="12" size ="13" name="u{{unit.i}}" size="12"></td>
+		</tr>
+		{% endfor %}
+		</table>
+		X:<input class="spaceUnder" type="text" name="X" size="4">
+		Y:<input class="spaceUnder" type="text" name="Y" size="4"> 
+		Planet:<input class="spaceUnder" type="text" name="I" size="4">
+		<br>
+		<input type="submit" value="Send">
+		</form>
+	<div>
+</div>
 
 
 

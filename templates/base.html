@@ -31,6 +31,16 @@ body
     background-image:url("/static/background.gif");
 
 }
+
+ @media only screen and (max-width : 660px) {
+	.left_box, .right_box {
+		width: 100%;
+		}
+		
+	.center_box_inside {
+		text-align: left;
+	}
+ }
 </style>
 
 <!-- Tick Timer Script -->
@@ -234,45 +244,10 @@ onload="startTime()">
 
 
         <!-- Main area content -->
-        <table width="90%" cellspacing="0" cellpadding="0" border="0" background="{% static 'files_021' %}" align="center">
-            <tbody>
-            <tr>
-            <td width="22" height="24" background="{% static 'files_011' %}"></td><td nowrap="nowrap" align="center"><b><font size="2" face="verdana">{{ page_title }}</font></b></td>
-            <td width="62" height="24" background="{% static 'files_003' %}" align="right"></td>
-            </tr>
-            </tbody>
-        </table>
-
-        <table width="90%" cellspacing="0" cellpadding="0" border="0" align="center">
-            <tbody>
-            <tr>
-            <td width="7" background="{% static 'files_020.jpg' %}">&nbsp;</td>
-            <td bgcolor="#0b1119" align="center">
-
+		{% include "box_top.html" with heading=page_title minwidth="360px" textalign="center"  %}
             {% block content %}
             {% endblock %}
-
-            </td>
-            <td width="7" background="{% static 'i43.jpg' %}">&nbsp;</td>
-            </tr>
-            </tbody>
-        </table>
-
-        <table width="90%" cellspacing="0" cellpadding="0" border="0" align="center">
-            <tbody>
-            <tr>
-            <td width="62">
-                <img src="{% static 'files_019' %}" height="12">
-            </td>
-            <td width="100%" background="{% static 'i47.jpg' %}">
-                <img src="{% static 'i47.jpg' %}" height="12">
-            </td>
-            <td width="62">
-                <img src="{% static 'files_012' %}" height="12">
-            </td>
-            </tr>
-            </tbody>
-        </table>
+		{% include "box_bottom.html" %}
 
 	</div>
 

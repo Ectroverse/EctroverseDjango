@@ -10,8 +10,9 @@
 {% endif %}
 
 Increase fundings
+<div align="center">
 <br>
-<form action="/research" method="POST">
+<form action="/research" method="POST" 
 {% csrf_token %}
 <input type="text" pattern="[0-9]+" maxlength="12" name="fund" size="12">&nbsp;
 <input type="submit" name="fund_form" value="Fund">
@@ -19,7 +20,7 @@ Increase fundings
 <br>
 
 Current research fundings : {{status.current_research_funding}}
-<form action="/research" method="POST">
+<form action="/research" method="POST" >
 {% csrf_token %}
 <table style = "border-collapse:separate;border-spacing:10px;">
 <tr><td>Military</td> <td>{{status.research_points_military}} Points</td> <td>{{status.research_percent_military}}%</td> <td>Increases your units attack and defense strength</td>
@@ -39,7 +40,7 @@ Current research fundings : {{status.current_research_funding}}
 <tr><td>Portals</td> <td>{{status.research_percent_portals}} Points</td> <td>{{status.research_points_portals}}%</td> <td>Increases portal coverage and reduces their upkeep cost</td>
 <td><input type="text" pattern="100|[0-9]{1,2}" maxlength="10" name="portals" size="10"  value ="{{status.alloc_research_portals}}"><td></tr>
 </table>
-<input type="submit" name="rc_alloc_form" value="Change">
+<input type="submit" name="rc_alloc_form" value="Change" >
 </form>
-
+</div>
 {% endblock %}
