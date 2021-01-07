@@ -6,7 +6,7 @@
 
 
 
-<div style="width:100%; float:left ">
+<div style="width:100%; float:left; ">
 	<div class ="left_box" >
 		<div style="width: 50%; margin:0 auto; text-align: left;">
 		<b>Main Fleet</b><br>
@@ -49,39 +49,40 @@
 		</div>
 	</div>
 	
+
+
+
+	<div class="center_box">
+		<div class="center_box_inside">
+			<b class="spaceUnder">Traveling fleets</b><br>
+			<p > None </p>
+			<b class="spaceUnder">Dispatch a new fleet</b><br>
+			<form action="fleetsend" method="POST">
+			{% csrf_token %}
+			<select name="order" class="spaceUnder">
+			<option value="0" selected>Attack the planet
+			<option value="1">Station on planet
+			<option value="2">Move to system
+			</select>
+			<table class="spaceUnder" cellspacing="8" align="center">
+			{% for unit in send_fleet_list %}
+			<tr class="spaceUnder">
+				<td align="right">{{unit.value}}&nbsp;&nbsp;</td>
+				<td align="right">{{unit.name}}&nbsp;&nbsp;</td>
+				<td><input type="text" pattern="[0-9]+" maxlength="12" size ="13" name="u{{unit.i}}" size="12"></td>
+			</tr>
+			{% endfor %}
+			</table>
+			X:<input class="spaceUnder" type="text" name="X" size="4">
+			Y:<input class="spaceUnder" type="text" name="Y" size="4"> 
+			Planet:<input class="spaceUnder" type="text" name="I" size="4">
+			<br>
+			<input type="submit" value="Send">
+			</form>
+		</div>
+	</div>
+
 </div>
-
-
-<div class="center_box">
-	<div class="center_box_inside" >
-		<b class="spaceUnder">Traveling fleets</b><br>
-		<p > None </p>
-		<b class="spaceUnder">Dispatch a new fleet</b><br>
-		<form action="fleetsend" method="POST">
-		{% csrf_token %}
-		<select name="order" class="spaceUnder">
-		<option value="0" selected>Attack the planet
-		<option value="1">Station on planet
-		<option value="2">Move to system
-		</select>
-		<table class="spaceUnder" cellspacing="8" align="center">
-		{% for unit in send_fleet_list %}
-		<tr class="spaceUnder">
-			<td align="right">{{unit.value}}&nbsp;&nbsp;</td>
-			<td align="right">{{unit.name}}&nbsp;&nbsp;</td>
-			<td><input type="text" pattern="[0-9]+" maxlength="12" size ="13" name="u{{unit.i}}" size="12"></td>
-		</tr>
-		{% endfor %}
-		</table>
-		X:<input class="spaceUnder" type="text" name="X" size="4">
-		Y:<input class="spaceUnder" type="text" name="Y" size="4"> 
-		Planet:<input class="spaceUnder" type="text" name="I" size="4">
-		<br>
-		<input type="submit" value="Send">
-		</form>
-	<div>
-</div>
-
 
 
 {% endblock %}
