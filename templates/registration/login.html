@@ -22,97 +22,53 @@
   <p align="center">{{errors}}</p>
   {% endif %}
 
-
-
   
 <div style="width:100%; float:left ">
 
 
 	<div class="display_box_wrapper front_login" style =" margin: 10px auto;">
-		<div class="display_box" style="width:220px;" >
-			<div class="display_box_header">
-				<div class="display_box_header_left"></div>
-				<div class="display_box_header_center">
-					<div class="display_box_header_center_content">Login</div>
-				</div>
-				<div class="display_box_header_right"></div>
-			</div>
-			<div class="display_box_content" style =" margin: 0 auto;" >
-				<div class="display_box_content_left"></div>
-				<div class="display_box_content_center"  >
-						
-					<form method="post" action="/login" style =" margin: 0 5px;">
-					  {% csrf_token %}
-					  <div class="login_form" >
-						  <label>
-						  Username:
-						  <input id="id_username" maxlength="60" name="username" type="text" style="width:100%">
-						  </label>
-						  
-						  <label>
-						  Password:
-						  <input id="id_password" name="password" type="password" style="width:100%">
-						  </label>
-					  </div>
+		{% include "box_top.html" with heading="Login" width="220px" textalign="left" %}
+	
+		<form method="post" action="/login" style =" margin: 0 5px;">
+		  {% csrf_token %}
+		  <div class="login_form" >
+			  <label>
+			  Username:
+			  <input id="id_username" maxlength="60" name="username" type="text" style="width:100%">
+			  </label>
+			  
+			  <label>
+			  Password:
+			  <input id="id_password" name="password" type="password" style="width:100%">
+			  </label>
+		  </div>
 
-					  <input type="submit" value="Login" style="margin-top: 10px">
-					  <input type="hidden" name="next" value="{{ next }}" />
-					</form> 
-					{# Assumes you setup the password_reset view in your URLconf #}
-					<p><a href="{% url 'password_reset' %}" style ="margin: 0 5px;">Lost password?</a></p>
+		  <input type="submit" value="Login" style="margin-top: 10px">
+		  <input type="hidden" name="next" value="{{ next }}" />
+		</form> 
+		{# Assumes you setup the password_reset view in your URLconf #}
+		<p><a href="{% url 'password_reset' %}" style ="margin: 0 5px;">Lost password?</a></p>
 
-				</div>
-				<div class="display_box_content_right"></div>
-			</div>
-
-			<div class="display_box_footer">
-				<div class="display_box_footer_left"></div>
-				<div class="display_box_footer_center"></div>
-				<div class="display_box_footer_right"></div>
-			</div>
-		</div>
+		{% include "box_bottom.html" %}
 	</div>
 	
   <div class="front_news" style ="margin: 0 auto; text-align:center;">
-	
-	 {% for news in news_feed %}
-	 
-	 <div class="display_box_wrapper" style =" width:100%; margin: 10px auto;">
-		<div class="display_box" >
-			<div class="display_box_header">
-				<div class="display_box_header_left"></div>
-				<div class="display_box_header_center">
-					<div class="display_box_header_center_content">{{news.date_and_time}}</div>
-				</div>
-				<div class="display_box_header_right"></div>
-			</div>
-			<div class="display_box_content" style =" margin: 0 auto;" >
-				<div class="display_box_content_left"></div>
-				<div class="display_box_content_center"  >	
-					<div style="padding-left:10px;">{{news.message | safe | linebreaks}}</div>
-				</div>
-				<div class="display_box_content_right"></div>
-			</div>
+	{% for news in news_feed %}
 
-			<div class="display_box_footer">
-				<div class="display_box_footer_left"></div>
-				<div class="display_box_footer_center"></div>
-				<div class="display_box_footer_right"></div>
-			</div>
+	 {% include "box_top.html" with heading=news.date_and_time %}
+		
+		<div style="padding-left:10px;">{{news.message | safe | linebreaks}}</div>
+		{% include "box_bottom.html" %}
+
+		{% if forloop.counter == 3 %}
+		<a onclick="showNews()" id="news_button" style="margin: 0 auto;">Read more</a>
+		<div id = "news_more" style= "display: none;">
+		
+		{% endif %}
+		
+		{% if forloop.last %}
 		</div>
-	</div>
-	
-
-	
-	{% if forloop.counter == 3 %}
-	<a onclick="showNews()" id="news_button" style="margin: 0 auto;">Read more</a>
-	<div id = "news_more" style= "display: none;">
-	
-	{% endif %}
-	
-	{% if forloop.last %}
-	</div>
-	{% endif %}
+		{% endif %}
 	
 	{% endfor %}
 
