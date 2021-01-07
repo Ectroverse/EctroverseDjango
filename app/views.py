@@ -453,6 +453,7 @@ def ranking(request):
                           .exclude(empire__isnull=True)
                           , order_by=("-num_planets"))
     context = {"table": table,
+               "page_title": "Faction ranking",
                "status": status}
     return render(request, "ranking.html", context)
 
@@ -464,6 +465,7 @@ def empire_ranking(request):
     empire = status.empire
     table = EmpireRankTable(Empire.objects.all().filter(numplayers__gt=0), order_by=("-planets"))
     context = {"table": table,
+               "page_title": "Empire ranking",
                "status": status,
                "empire": empire}
     return render(request, "empire_ranking.html", context)
@@ -473,7 +475,8 @@ def empire_ranking(request):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def account(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    context = {"status": status}
+    context = {"status": status,
+               "page_title": "Account",}
     return render(request, "account.html", context)
 
 
@@ -567,6 +570,7 @@ def units(request):
         d["i"] = unit_info[unit]['i']
         unit_dict.append(d)
     context = {"status": status,
+               "page_title":"Units",
                "unit_dict": unit_dict,
                "msg": msg}
     return render(request, "units.html", context)
@@ -599,6 +603,7 @@ def fleets(request):
     # TODO Generate list of traveling and stationed fleets (in old game i dont see anywhere a list of stationed fleets is shown)
 
     context = {"status": status,
+               "page_title": "Fleets",
                "main_fleet_list": main_fleet_list,
                "send_fleet_list": send_fleet_list}
     return render(request, "fleets.html", context)
