@@ -4,7 +4,7 @@ Put your name after an item if you want to reserve it for yourself, not all item
 
 #### v0.1 Remaining Items
 
-- fleets move/exploration/attack
+- fleets move/exploration/attack (Vladimir)
 - battle sequence (Rexer already started it)
 - operations- just scouting for now
 - news
