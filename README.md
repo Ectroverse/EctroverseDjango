@@ -31,6 +31,7 @@ Put your name after an item if you want to reserve it for yourself, not all item
 - other operations, as well as spells and incantations
 - move the menu button to the main header and perhaps draw it nicely
 - add device fingerprinting to prevent double accounts
+- add sliders for mobile version forms
 
 ## Getting it setup on a new machine:
 
