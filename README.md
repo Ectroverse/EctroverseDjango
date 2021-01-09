@@ -59,6 +59,9 @@ that's it!  without docker this would be a dozen steps
 
 `docker-compose up -d --no-deps --build`
 
+To rebuild only the python container:
+`docker-compose up -d --no-deps --build python`
+
 ## Check it's running
 
 `docker ps` should list all three containers as Up
