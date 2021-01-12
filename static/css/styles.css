@@ -445,7 +445,15 @@ font-color: white;
 	text-align: center;
 }
 
+.wide_box_inside{
+	width: 100%; 
+	margin:20 auto; 
+	text-align: center;
+}
+
+
 input {
+	color:black;
     display: inline;
 }
 
