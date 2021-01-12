@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+{% if disband_info %}
+	Disbanded:<br>
+	{% for key, values in disband_info.items %}
+	{{key}} - {{values}}<br>
+	{% endfor %}
+	<br>
+{% endif %}
+
+
+<div style="width: 100%; text-align: left;">
+	<div style="width: 90%; margin:0 auto; text-align: center;">
+		<form action="fleets_disband" method="POST">
+		{% csrf_token %}
+			<b>Main Fleet</b><br>
+			{% for unit in main_fleet %}
+			{{unit.name}}
+			&nbsp;&nbsp;
+			{{unit.value}}
+
+			<div class="show_only_on_wide_scrn" >
+			<input id="u{{unit.i}}" min="0" max="{{unit.value}}" type="number"	name="{{unit.db_name}}" value="0" 
+			onchange="changeslider(this.value,'b{{unit.i}}'),changeslider(this.value,'f{{unit.i}}')" style="width: 100px; margin-bottom:7px;">
+			
+			</div>
+			<div class="show_only_on_mobile" >
+			<input type="text" READONLY id="f{{unit.i}}" size="10" value="0">
+			<input id="b{{unit.i}}" type="range" min="0" max="{{unit.value}}" value="0"
+			onchange="changeslider(this.value,'f{{unit.i}}'),changeslider(this.value,'u{{unit.i}}')" style="margin-bottom:7px;">
+			</div>
+			
+			{% endfor %}
+			<br>
+		<input type="submit" value="Disband">
+		</form>
+	</div>
+</div>
+
+
+
+{% endblock %}
+

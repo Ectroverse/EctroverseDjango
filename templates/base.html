@@ -35,11 +35,21 @@ body
  @media only screen and (max-width : 660px) {
 	.left_box, .right_box {
 		width: 100%;
-		}
-		
-	.center_box_inside {
+		}	
 	
+	.center_box_inside {
 		text-align: left;
+	}
+	
+	.show_only_on_wide_scrn{
+		display: none;
+	}	
+ }
+ 
+ @media only screen and (min-width : 661px) {
+		.show_only_on_mobile{
+			display: none;
+		}
 	}
  }
 </style>
@@ -63,7 +73,7 @@ function fixTimeDigits(i) {
 }
 
 // Toggle check boxes, used on various pages
-function toggleForm(id) { 
+function toggleForm2(id) { 
 
 	var inputs = document.getElementsByTagName("input");
 	for(var i = 0; i < inputs.length; i++) {
@@ -72,8 +82,10 @@ function toggleForm(id) {
 		}  
 	}
 	
-	
+
 }
+
+function toggle_form(id) { for(i=0;i<_(id).length;i++) if(_(id).elements[i].type == "checkbox") _(id).elements[i].click(); }	
 
 function changeslider(newValue,field) {
 	window.document.getElementById(field).value=newValue;
