@@ -22,7 +22,6 @@ urlpatterns = [
     path('units', views.units, name='units'),
     path('fleets', views.fleets, name='fleets'),
     path('fleetsend', views.fleetsend, name='fleetsend'),
-    path('fleetdisband', views.fleetdisband, name='fleetdisband'),
     url(r'^empire(?P<empire_id>[0-9]+)/$', views.empire, name='empire'),
     path('vote', views.vote, name='vote'),
     path('vote_results', views.vote, name='voteresults'),
@@ -47,6 +46,7 @@ urlpatterns = [
     path('choose_empire_race', views.choose_empire_race, name='choose_empire_race'),
     path('fleets_orders', views.fleets_orders, name='fleets_orders'),
     path('fleets_orders_process', views.fleets_orders_process, name='fleets_orders_process'),
+    path('fleets_disband', views.fleets_disband, name='fleets_disband'),
 ]
 
 if settings.DEBUG:

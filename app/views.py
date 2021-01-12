@@ -771,6 +771,36 @@ def fleets(request):
                "error":error}
     return render(request, "fleets.html", context)
 
+@login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
+def fleets_disband(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True)  # should only ever be 1
+    main_fleet_list = []
+    print("main_fleet",main_fleet)
+
+    disband_info = {}
+
+    if request.method == 'POST':
+        for unit in unit_info["unit_list"]:
+            if unit in request.POST:
+                setattr(main_fleet, unit, getattr(main_fleet, unit) - int(request.POST.get(unit)))
+                if int(request.POST.get(unit)) > 0:
+                    disband_info[unit_info[unit]["label"]] = request.POST.get(unit)
+        main_fleet.save()
+
+    for unit in unit_info["unit_list"]:
+        num = getattr(main_fleet, unit)
+        if num:
+            main_fleet_list.append({"name": unit_info[unit]["label"], "value": num, "i": unit_info[unit]["i"], "db_name": unit})
+
+    context = {"status": status,
+               "page_title": "Fleets disband",
+               "main_fleet": main_fleet_list,
+               "disband_info" : disband_info,
+                }
+    return render(request, "fleets_disband.html", context)
+
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
