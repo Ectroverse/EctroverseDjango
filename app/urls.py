@@ -45,7 +45,8 @@ urlpatterns = [
     path('logout', views.custom_logout, name='logout'),
     path('login', views.custom_login, name='login'),
     path('choose_empire_race', views.choose_empire_race, name='choose_empire_race'),
-
+    path('fleets_orders', views.fleets_orders, name='fleets_orders'),
+    path('fleets_orders_process', views.fleets_orders_process, name='fleets_orders_process'),
 ]
 
 if settings.DEBUG:

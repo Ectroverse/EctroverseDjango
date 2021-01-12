@@ -264,16 +264,23 @@ class Fleet(models.Model):
     on_planet = models.ForeignKey(Planet, null=True, blank=True, default=None, on_delete=models.SET_NULL) # planet object if stationed, or None
     ticks_remaining = models.IntegerField(default=0) # for traveling
 
+    current_position_x = models.FloatField(default=0.0)  # for traveling
+    current_position_y = models.FloatField(default=0.0)  # for traveling
+
     # Order (if fleet is being sent somewhere)
     class CommandOrder(models.IntegerChoices):
         ATTACK_PLANET     = 0
         STATION_ON_PLANET = 1
         MOVE_TO_SYSTEM    = 2
+        MERGE_IN_SYSTEM   = 3
+        MERGE_IN_SYSTEM_A = 4
+        JOIN_MAIN_FLEET   = 5
     command_order = models.IntegerField(choices=CommandOrder.choices, default=0)
 
     # Destination coords for when its traveling
     x = models.IntegerField(null=True, blank=True, default=None)
     y = models.IntegerField(null=True, blank=True, default=None)
+    i = models.IntegerField(null=True, blank=True, default=None)
 
     # Number of each type of unit
     bomber      = models.IntegerField(default=0, verbose_name="Bombers")

@@ -179,3 +179,27 @@ def planet_size_distribution():
     # while still capping the size to 500 for visualization sake
     return int(min(500, 100 + 50*np.random.chisquare(1.25)))
 
+
+def x_move_calc(speed, x, current_position_x, y, current_position_y):
+    dist_x = x - current_position_x
+    dist_y = y - current_position_y
+    if dist_x == 0:
+        return x
+    move_x = speed / np.sqrt(1+(dist_y/dist_x)**2)
+    print("move_x", move_x)
+    if x < current_position_x:
+        return current_position_x - move_x
+    else:
+        return current_position_x + move_x
+
+def y_move_calc(speed, x, current_position_x, y, current_position_y):
+    dist_x = x - current_position_x
+    dist_y = y - current_position_y
+    if dist_y == 0:
+        return y
+    move_y = speed / np.sqrt(1+(dist_x/dist_y)**2)
+    print("move_y",move_y)
+    if y < current_position_y:
+        return current_position_y - move_y
+    else:
+        return current_position_y + move_y
