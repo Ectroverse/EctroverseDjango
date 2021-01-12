@@ -6,6 +6,7 @@ from app.constants import *
 import time
 from django.db.models import Q
 from django.db import connection
+from app.helper_functions import *
 
 # Note- the code line numbers are for NEctroverse commit f7d73af2630f993fbe8c59fdaca31ad43e494543
 
@@ -33,6 +34,32 @@ class Command(BaseCommand): # must be called command, use file name to name the 
         }
         '''
 
+        start_fleet_t = time.time()
+        # update fleets on the move
+        # check if the portal still exists at the location where the fleet is returning to main fleet
+        # what if no portal exist at all?
+        # do the fleet travelling before updating users!
+        # because we will chose specific user's fleets for merging/joining main fleet in user's loop
+        fleets_buffer = Fleet.objects.filter(main_fleet=False)
+        for fleet in fleets_buffer:
+            if fleet.ticks_remaining > 0:
+                print(fleet.id)
+                user = UserStatus.objects.get(user=fleet.owner)
+                speed = race_info_list[user.get_race_display()]["travel_speed"]
+                fleet.ticks_remaining -= 1
+                if fleet.ticks_remaining == 0:
+                    fleet.current_position_x = fleet.x #becomes an int value as fleet.x and fleet.y are ints and curr_pos are floats
+                    fleet.current_position_y = fleet.y
+                else:
+                    tmp = fleet.current_position_x
+                    fleet.current_position_x = x_move_calc(speed, fleet.x, fleet.current_position_x, fleet.y,
+                                                           fleet.current_position_y)
+                    fleet.current_position_y = y_move_calc(speed, fleet.x, tmp, fleet.y, fleet.current_position_y)
+
+        Fleet.objects.bulk_update(fleets_buffer, ['current_position_x', 'current_position_y', 'ticks_remaining'])
+
+        print("fleets procesing took", time.time() - start_fleet_t, "seconds")
+
         #update relations
         relations_buffer = Relations.objects.filter(Q(relation_type='W')|Q(relation_type='NC'))
         for rel in relations_buffer:
@@ -40,8 +67,6 @@ class Command(BaseCommand): # must be called command, use file name to name the 
         Relations.objects.bulk_update(relations_buffer,['relation_remaining_time'])
         #delete those which have expired
         Relations.objects.filter(Q(relation_type='W')|Q(relation_type='NC'),relation_remaining_time__lte=0).delete()
-
-
 
         # Loop through each user
         num_users_registered = 0 # im not actually using this anywhere yet
@@ -57,6 +82,17 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             # better not error out or someone was set to an invalid race somehow
             race_info = race_info_list[status.get_race_display()]
 
+
+            # merge fleets in the same system (chosen manually)
+            fleets = Fleet.objects.filter(owner=status.user.id,command_order=3,ticks_remaining=0)
+            merge_fleets(fleets)
+            # merge fleets in the same system (chosen automatically)
+            fleets = Fleet.objects.filter(owner=status.user.id,command_order=4,ticks_remaining=0)
+            merge_fleets(fleets)
+            # fleets joining main fleet
+            main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True)
+            fleets = Fleet.objects.filter(owner=status.user.id, command_order=5, ticks_remaining=0)
+            join_main_fleet(main_fleet,fleets)
 
             '''
 	        if( ( specopnum = dbUserSpecOpList( user->id, &specopd ) )  < 0 ) {
@@ -100,6 +136,8 @@ class Command(BaseCommand): # must be called command, use file name to name the 
 			        opvirus++;
 	        }
             '''
+
+
 
 
             # The block below goes through the construction list and reduces by 1 tick, and if 0 it builds it and creates the news entry
@@ -690,6 +728,10 @@ class Command(BaseCommand): # must be called command, use file name to name the 
 
         Empire.objects.bulk_update(empires_buffer, ['networth','planets'])
 
+
+
         print("process_tick took", time.time() - start_t, "seconds")
         
         print("=== Ending process_tick ===")
+
+
