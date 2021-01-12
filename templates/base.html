@@ -73,7 +73,7 @@ function fixTimeDigits(i) {
 }
 
 // Toggle check boxes, used on various pages
-function toggleForm2(id) { 
+function toggleForm(id) { 
 
 	var inputs = document.getElementsByTagName("input");
 	for(var i = 0; i < inputs.length; i++) {
@@ -85,7 +85,6 @@ function toggleForm2(id) {
 
 }
 
-function toggle_form(id) { for(i=0;i<_(id).length;i++) if(_(id).elements[i].type == "checkbox") _(id).elements[i].click(); }	
 
 function changeslider(newValue,field) {
 	window.document.getElementById(field).value=newValue;
