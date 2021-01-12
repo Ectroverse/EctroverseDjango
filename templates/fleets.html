@@ -4,6 +4,9 @@
 
 {% block content %}
 
+{% if error %}
+{{error}}
+{% endif %}
 
 
 <div style="width:100%; float:left; ">
@@ -51,11 +54,87 @@
 	
 
 
+	<div class="center_box">
+			<b class="spaceUnder">Traveling fleets</b><br>
+			<p>
+			{% if display_fleet %}
+			<table width="100%" align="center">
+				<td>Units</td>
+				<td>Order</td>
+				<td>Status</td>
+				<td>Position</td>
+				<td><div class="href" onclick="toggleForm('massFleet');"><font size="1">Toggle</font></div></td>
+				<form action="/fleets_orders" method="POST" name="massFleet" id="massFleet" onsubmit="hide_hidden();" >
+				{% csrf_token %}
+				{% for fleet_nr, fleet_units  in display_fleet.items %}
+				
+					<tr class="spaceUnder">
+					<input type="hidden" id="fleet_nr" name="fleet_nr" value="{{fleet_nr.id}}">
+						
+						<td>
+						{% for unit_name, unit_nr in fleet_units.items %}
+							{{unit_name}}: {{unit_nr}}<br>
+						{% endfor %}
+						</td>
+						<td>
+						{% if fleet_nr.command_order == 0 %}
+							Ready to attack planet {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
+						{% elif fleet_nr.command_order == 1 %}
+							Station on planet {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
+						{% elif fleet_nr.command_order == 2 %}
+							Move to system {{fleet_nr.x}},{{fleet_nr.y}}
+						{% elif fleet_nr.command_order == 3 %} 
+							Merge in system {{fleet_nr.x}},{{fleet_nr.y}}
+						{% elif fleet_nr.command_order == 4 %} 
+							Auto merge in system {{fleet_nr.x}},{{fleet_nr.y}}
+						{% elif fleet_nr.command_order == 5 %} 
+							Join main fleet at {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
+						{% endif %}
+						
+						</td> 
+						<td>
+						{% if fleet_nr.ticks_remaining > 0 %}
+							Moving, {{fleet_nr.ticks_remaining}} week(s)
+						{% elif fleet_nr.command_order == 3 or fleet_nr.command_order == 4 %}
+							Fleet merged
+						{% elif fleet_nr.command_order == 2 %}
+							Fleet hoovering at position
+						{% elif fleet_nr.command_order == 1 %}
+							Fleet stationed at position
+						{% elif fleet_nr.command_order == 0 %}
+							<a href = "/attack" value="{{fleet_nr}}">Attack planet!</a>
+						{% endif %}
+						</td>
+						<td>{{fleet_nr.current_position_x | floatformat}}, {{fleet_nr.current_position_y | floatformat}}</td>
+						 
+						<td>
+						<input type="hidden" name="fleet_select" value="0" />
+						<input type="checkbox" name="fleet_select" value="1" />
+						<!-- do not put space/newline in below line or it will stop working!!!! -->
+						<!-- <input type="hidden" name="fleet_select" value="0"><input type="checkbox" onclick="this.previousSibling.value=1-this.previousSibling.value" > -->
+						<!-- -->
+						</td>
+						
+					</tr>
 
+				{% endfor %} 
+				
+				<tr><td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td><input type="submit" value="Order"></td></tr>
+				</form>
+			</table>
+			
+			{% else %}
+				None
+			{% endif %}
+			</p>
+	</div>	
+	
 	<div class="center_box">
 		<div class="center_box_inside">
-			<b class="spaceUnder">Traveling fleets</b><br>
-			<p > None </p>
 			<b class="spaceUnder">Dispatch a new fleet</b><br>
 			<form action="fleetsend" method="POST">
 			{% csrf_token %}
@@ -73,16 +152,18 @@
 			</tr>
 			{% endfor %}
 			</table>
-			X:<input class="spaceUnder" type="text" name="X" size="4">
-			Y:<input class="spaceUnder" type="text" name="Y" size="4"> 
-			Planet:<input class="spaceUnder" type="text" name="I" size="4">
+			X:<input class="spaceUnder" pattern="[0-9]+" type="text" name="X" size="4">
+			Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4"> 
+			Planet:<input class="spaceUnder" pattern="[0-9]+" type="text" name="I" size="4">
 			<br>
 			<input type="submit" value="Send">
 			</form>
 		</div>
 	</div>
 
+	
 </div>
+
 
 
 {% endblock %}
