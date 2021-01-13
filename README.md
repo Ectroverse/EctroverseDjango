@@ -48,6 +48,8 @@ Put your name after an item if you want to reserve it for yourself, not all item
 8. go to http://127.0.0.1:8000, log in as admin, and choose a race
 9. `python manage.py process_tick` (will eventually get called every 10 minutes with a cronjob)
 10. go to http://127.0.0.1:8000 and it should work now
+11. to start automatic ticks, type `crontab -e` and add this line to the bottom: `* * * * * /usr/local/bin/python3 /code/manage.py process_tick 2>&1 >>/tmp/tick.log`
+12. control-x to exit crontab, and it should now automatically run ticks, check status with `ls /tmp/tick.log`
 
 ## Starting up server once its setup
 
