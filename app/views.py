@@ -642,10 +642,10 @@ def fleets_orders_process(request):
     fleets_id = request.POST.getlist("fleet_select_hidden")
     order = int(request.POST.get("order"))
 
-    if order == 0 or order == 1  or order == 2 or order == 3 and not request.POST.get("X"):
+    if (order == 0 or order == 1  or order == 2 or order == 3) and not request.POST.get("X"):
         request.session['error'] = "You must enter x coordinate!"
         return fleets(request)
-    if order == 0 or order == 1  or order == 2 or order == 3 and not request.POST.get("Y"):
+    if (order == 0 or order == 1  or order == 2 or order == 3) and not request.POST.get("Y"):
         request.session['error'] = "You must enter y coordinate!"
         return fleets(request)
 

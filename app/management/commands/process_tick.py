@@ -43,8 +43,16 @@ class Command(BaseCommand): # must be called command, use file name to name the 
         fleets_buffer = Fleet.objects.filter(main_fleet=False)
         for fleet in fleets_buffer:
             if fleet.ticks_remaining > 0:
-                print(fleet.id)
+                # print(fleet.id)
+                # search if a closer portal is found/ or the previous portal was destroyed
                 user = UserStatus.objects.get(user=fleet.owner)
+                if fleet.command_order == 5:
+                    portals = Planet.objects.filter(owner=fleet.owner,portal=True)
+                    portal = find_nearest_portal(fleet.current_position_x, fleet.current_position_y, portals)
+                    if portal.x != fleet.x and portal.y != fleet.y:
+                        speed = race_info_list[user.get_race_display()]["travel_speed"]
+                        generate_fleet_order(fleet, portal.x, portal.y, speed, fleet.command_order, portal.i)
+
                 speed = race_info_list[user.get_race_display()]["travel_speed"]
                 fleet.ticks_remaining -= 1
                 if fleet.ticks_remaining == 0:

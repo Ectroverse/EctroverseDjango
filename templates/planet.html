@@ -9,6 +9,11 @@
 
 <br>
 Planet {{planet.x}},{{planet.y}}:{{planet.i}}
+
+{% if status.user.username == 'admin' %}
+<br>Planet id: {{planet.id}}
+{% endif %}
+
 <br>
 <br>
 

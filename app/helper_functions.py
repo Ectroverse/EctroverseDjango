@@ -26,7 +26,7 @@ def give_first_fleet(main_fleet):
     main_fleet.save()
 
 def find_nearest_portal(x, y, portal_list):
-    print("find_nearest_portal",x,y,portal_list)
+    # print("find_nearest_portal",x,y,portal_list)
     min_dist = (portal_list[0].x- x)**2+ (portal_list[0].y -y)**2;
     portal = portal_list[0]
     for p in portal_list:

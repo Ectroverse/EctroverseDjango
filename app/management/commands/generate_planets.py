@@ -93,17 +93,17 @@ class Command(BaseCommand): # must be called command, use file name to name the 
 
 
         # TEMPORARY - assign all planets to admin user, for debugging sake
-        all_planets = Planet.objects.all()
-        all_planets_without_home = Planet.objects.all().filter(home_planet=False)
-        all_planets_without_home.update(owner=User.objects.get(username='admin'))
+        # all_planets = Planet.objects.all()
+        # all_planets_without_home = Planet.objects.all().filter(home_planet=False)
+        # all_planets_without_home.update(owner=User.objects.get(username='admin'))
 
         #Give empire 0 to the admin
-        admin = UserStatus.objects.get(user=User.objects.get(username='admin'))
-        admin.empire = Empire.objects.get(number=0)
-        empire0 = Empire.objects.get(number=0)
-        empire0.numplayers = 1
-        empire0.save()
-        admin.save()
+        # admin = UserStatus.objects.get(user=User.objects.get(username='admin'))
+        # admin.empire = Empire.objects.get(number=0)
+        # empire0 = Empire.objects.get(number=0)
+        # empire0.numplayers = 1
+        # empire0.save()
+        # admin.save()
 
 
         num_planets = all_planets.count()
