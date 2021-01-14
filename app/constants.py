@@ -136,6 +136,7 @@ race_info_list = {
     "research_bonus_population":   1.2,
     "research_bonus_culture":      0.6,
     "research_bonus_operations":   1.2,
+    "research_bonus_portals":      1.2,
     "research_max_military": 250,   # defaults to 200
     "fighters_coeff":   1.2,        # defaults to 1.0
     "energy_production":    0.9, # defaults to 1.0
@@ -156,6 +157,7 @@ race_info_list = {
     "research_bonus_population":   0.9,
     "research_bonus_culture":      1.8,
     "research_bonus_operations":   0.9,
+    "research_bonus_portals":      0.9,
     "psychics_coeff": 1.4,
     "ghost_ships_coeff": 1.2,
     "energy_production": 1.4,
@@ -175,6 +177,7 @@ race_info_list = {
     "research_bonus_population":   1.5,
     "research_bonus_culture":      1.5,
     "research_bonus_operations":   1.5,
+    "research_bonus_portals":      1.5,
     "ghost_ships_coeff": 1.1,
     "energy_production": 0.8,
     "ectrolium_production": 1.2,
@@ -194,6 +197,7 @@ race_info_list = {
     "research_bonus_population":   1.1,
     "research_bonus_culture":      1.1,
     "research_bonus_operations":   1.1,
+    "research_bonus_portals":      1.1,
     "research_max_energy": 250,
     "soldiers_coeff": 1.1,
     "droids_coeff": 1.1,
@@ -216,6 +220,7 @@ race_info_list = {
     "research_bonus_population":   1.4,
     "research_bonus_culture":      1.4,
     "research_bonus_operations":   1.4,
+    "research_bonus_portals":      1.4,
     "research_max_military": 100,
     "research_max_construction": 250,
     "psychics_coeff": 1.5,
@@ -237,6 +242,7 @@ race_info_list = {
     "research_bonus_population":   2.0,
     "research_bonus_culture":      1.0,
     "research_bonus_operations":   1.0,
+    "research_bonus_portals":      1.0,
     "research_max_population": 250,
     "cruiser_coeff": 1.15,
     "ghost_ships_coeff": 1.15,

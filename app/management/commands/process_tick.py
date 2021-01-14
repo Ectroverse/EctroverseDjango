@@ -386,6 +386,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             status.research_points_population += race_info["research_bonus_population"] * status.alloc_research_population * (100*cmdTickProduction_research + 1.2*status.current_research_funding + artiBonus)  / 10000.0 * specopEnlightemntCalc(status.user.id, CMD_ENLIGHT_RESEARCH) + int(race_info["race_special"] == "RACE_SPECIAL_POPRESEARCH")*1.2*(status.alloc_research_population * status.population)/(600.0*100.0)
             status.research_points_culture += race_info["research_bonus_culture"] * status.alloc_research_culture * (100*cmdTickProduction_research + 1.2*status.current_research_funding + artiBonus)  / 10000.0 * specopEnlightemntCalc(status.user.id, CMD_ENLIGHT_RESEARCH) + int(race_info["race_special"] == "RACE_SPECIAL_POPRESEARCH")*1.2*(status.alloc_research_culture * status.population)/(600.0*100.0)
             status.research_points_operations += race_info["research_bonus_operations"] * status.alloc_research_operations * (100*cmdTickProduction_research + 1.2*status.current_research_funding + artiBonus)  / 10000.0 * specopEnlightemntCalc(status.user.id, CMD_ENLIGHT_RESEARCH) + int(race_info["race_special"] == "RACE_SPECIAL_POPRESEARCH")*1.2*(status.alloc_research_operations * status.population)/(600.0*100.0)
+            status.research_points_portals += race_info["research_bonus_portals"] * status.alloc_research_portals * (100*cmdTickProduction_research + 1.2*status.current_research_funding + artiBonus)  / 10000.0 * specopEnlightemntCalc(status.user.id, CMD_ENLIGHT_RESEARCH) + int(race_info["race_special"] == "RACE_SPECIAL_POPRESEARCH")*1.2*(status.alloc_research_portals * status.population)/(600.0*100.0)
 
             # Make sure none of the research points are negative (might be able to have this automatically done with a model attribute)
             status.research_points_military     = max(0.0, status.research_points_military)
@@ -395,6 +396,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             status.research_points_population   = max(0.0, status.research_points_population)
             status.research_points_culture      = max(0.0, status.research_points_culture)
             status.research_points_operations   = max(0.0, status.research_points_operations)
+            status.research_points_portals      = max(0.0, status.research_points_portals)
 
             # Research funding decay
             status.current_research_funding = max(0.0, (0.9 * status.current_research_funding))
@@ -433,17 +435,63 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             # Target is a function of research points and NW
             # Goes up or down by 1 each tick to reach target slowly
             # Note that it uses the last ticks NW for whatever reason
-            status.research_percent_military     += np.sign(race_info.get("research_max_military", 200) * (1.0 - np.exp(status.research_points_military / (-10.0 * status.networth)))) # np.sign returns a 1 or -1
-            status.research_percent_construction += np.sign(race_info.get("research_max_construction", 200) * (1.0 - np.exp(status.research_points_construction / (-10.0 * status.networth))))
-            status.research_percent_tech         += np.sign(race_info.get("research_max_tech", 200) * (1.0 - np.exp(status.research_points_tech / (-10.0 * status.networth))))
-            status.research_percent_energy       += np.sign(race_info.get("research_max_energy", 200) * (1.0 - np.exp(status.research_points_energy / (-10.0 * status.networth))))
-            status.research_percent_population   += np.sign(race_info.get("research_max_population", 200) * (1.0 - np.exp(status.research_points_population / (-10.0 * status.networth))))
-            status.research_percent_culture      += np.sign(race_info.get("research_max_culture", 200) * (1.0 - np.exp(status.research_points_culture / (-10.0 * status.networth))))
-            status.research_percent_operations   += np.sign(race_info.get("research_max_operations", 200) * (1.0 - np.exp(status.research_points_operations / (-10.0 * status.networth))))
+            research_percent_military     = int(race_info.get("research_max_military", 200) * (1.0-np.exp(status.research_points_military / (-10.0 * status.networth))))
+            research_percent_construction = int(race_info.get("research_max_construction", 200) * (1.0-np.exp(status.research_points_construction / (-10.0 * status.networth))))
+            research_percent_tech         = int(race_info.get("research_max_tech", 200) * (1.0-np.exp(status.research_points_tech / (-10.0 * status.networth))))
+            research_percent_energy       = int(race_info.get("research_max_energy", 200) * (1.0-np.exp(status.research_points_energy / (-10.0 * status.networth))))
+            research_percent_population   = int(race_info.get("research_max_population", 200) * (1.0-np.exp(status.research_points_population / (-10.0 * status.networth))))
+            research_percent_culture      = int(race_info.get("research_max_culture", 200) * (1.0-np.exp(status.research_points_culture / (-10.0 * status.networth))))
+            research_percent_operations   = int(race_info.get("research_max_operations", 200) * (1.0-np.exp(status.research_points_operations / (-10.0 * status.networth))))
+            research_percent_portals      = int(race_info.get("research_max_portals", 200) * (1.0-np.exp(status.research_points_portals / (-10.0 * status.networth))))
 
+            if status.research_percent_military > research_percent_military:
+                status.research_percent_military -= 1
+            elif status.research_percent_military < research_percent_military:
+                status.research_percent_military += 1
 
+            if status.research_percent_construction > research_percent_construction:
+                status.research_percent_military -= 1
+            elif status.research_percent_construction < research_percent_construction:
+                status.research_percent_construction += 1
 
+            if status.research_percent_tech > research_percent_tech:
+                status.research_percent_tech -= 1
+            elif status.research_percent_tech < research_percent_tech:
+                status.research_percent_tech += 1
 
+            if status.research_percent_energy > research_percent_energy:
+                status.research_percent_energy -= 1
+            elif status.research_percent_energy < research_percent_energy:
+                status.research_percent_energy += 1
+
+            if status.research_percent_population > research_percent_population:
+                status.research_percent_population -= 1
+            elif status.research_percent_population < research_percent_population:
+                status.research_percent_population += 1
+
+            if status.research_percent_culture > research_percent_culture:
+                status.research_percent_culture -= 1
+            elif status.research_percent_culture < research_percent_culture:
+                status.research_percent_culture += 1
+
+            if status.research_percent_operations > research_percent_operations:
+                status.research_percent_operations -= 1
+            elif status.research_percent_operations < research_percent_operations:
+                status.research_percent_operations += 1
+
+            if status.research_percent_portals > research_percent_portals:
+                status.research_percent_portals -= 1
+            elif status.research_percent_portals < research_percent_portals:
+                status.research_percent_portals += 1
+
+            status.research_percent_military = min(race_info.get("research_max_military", 200),status.research_percent_military)
+            status.research_percent_construction = min(race_info.get("research_max_construction", 200),status.research_percent_construction)
+            status.research_percent_tech = min(race_info.get("research_percent_tech", 200),status.research_percent_tech)
+            status.research_percent_energy = min(race_info.get("research_percent_energy", 200),status.research_percent_energy)
+            status.research_percent_population = min(race_info.get("research_percent_population", 200),status.research_percent_population )
+            status.research_percent_culture = min(race_info.get("research_percent_culture", 200),status.research_percent_culture)
+            status.research_percent_operations = min(race_info.get("research_percent_operations", 200),status.research_percent_operations )
+            status.research_percent_portals = min(race_info.get("research_percent_portals", 200),status.research_percent_portals)
 
 
 

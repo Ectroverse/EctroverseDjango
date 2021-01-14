@@ -1100,10 +1100,13 @@ def set_relation(request,relation, current_empire, target_empire_nr, *rel_time_p
                                      relation_remaining_time=rel_time)
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
-def cancel_relation(request, relation):
-    rel = Relations.objects.get(id=relation)
-    if rel.relation_type != 'W':
+def cancel_relation(request, rel):
+
+    try:
         rel2 = Relations.objects.get(empire1=rel.empire2, empire2=rel.empire1)
+    except ObjectDoesNotExist:
+        rel2 = None
+
     if rel.relation_type == 'AO' or rel.relation_type == 'NO':
         rel.delete()
     elif rel.relation_type == 'A' or rel.relation_type == 'W':
@@ -1137,6 +1140,7 @@ def pm_options(request):
     status = get_object_or_404(UserStatus, user=request.user)
     user_empire = status.empire
     relation_empires = Relations.objects.filter(empire1=status.empire)
+    error = None
 
     if request.method == 'POST':
         print(request.POST)
@@ -1157,18 +1161,22 @@ def pm_options(request):
         if request.POST['empire_offer_alliance']:
             set_relation(request,'ally', status.empire, int(request.POST['empire_offer_alliance']))
         elif request.POST['empire_offer_nap']:
-            set_relation(request,'nap', status.empire, int(request.POST['empire_offer_nap']), int(request.POST['empire_offer_nap_hours']))
+            set_relation(request,'nap', status.empire, int(request.POST['empire_offer_nap']), request.POST['empire_offer_nap_hours'])
         elif request.POST['empire_cancel_relation']:
-
-            print("request.POST['empire_cancel_relation']",request.POST['empire_cancel_relation'])
-            cancel_relation(request, request.POST['empire_cancel_relation'])
+            relation = request.POST['empire_cancel_relation']
+            rel = Relations.objects.get(id=relation)
+            if (rel.relation_type=='A' or rel.relation_type=='W') and RoundStatus.objects.get().tick_number - rel.relation_creation_tick <= min_relation_time:
+                error = "You can't cancel the relation for " +str(min_relation_time) + " ticks after creating it!"
+            else:
+                cancel_relation(request, rel)
         elif request.POST['empire_declare_war']:
             set_relation(request,'war', status.empire, int(request.POST['empire_declare_war']))
         user_empire.save()
     context = {"status": status,
                "page_title": "Prime Minister options",
                "empire": status.empire,
-               "relation_empires": relation_empires}
+               "relation_empires": relation_empires,
+               'error':error}
     return render(request, "pm_options.html", context)
 
 

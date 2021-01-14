@@ -4,8 +4,11 @@
 
 {% block content %}
 
-{% if request.method == 'POST' %}
-Options updated!
+
+{% if error %}
+{{error}}<br>
+{% elif request.method == 'POST' %}
+Options updated!<br>
 {% endif %}
 
 <form autocomplete="off action="/pm_options" enctype="multipart/form-data" method="post">

@@ -12,7 +12,7 @@
 Increase fundings
 <div align="center">
 <br>
-<form action="/research" method="POST" 
+<form action="/research" method="POST" >
 {% csrf_token %}
 <input type="text" pattern="[0-9]+" maxlength="12" name="fund" size="12">&nbsp;
 <input type="submit" name="fund_form" value="Fund">
@@ -25,19 +25,19 @@ Current research fundings : {{status.current_research_funding}}
 <table style = "border-collapse:separate;border-spacing:10px;">
 <tr><td>Military</td> <td>{{status.research_points_military}} Points</td> <td>{{status.research_percent_military}}%</td> <td>Increases your units attack and defense strength</td>
 <td><input type="text" pattern="100|[0-9]{1,2}" maxlength="10" name="military" size="10" value ="{{status.alloc_research_military}}"><td></tr>
-<tr><td>Construction</td> <td>{{status.research_percent_construction}} Points</td> <td>{{status.research_points_construction}}%</td> <td>Reduces construction costs and building time </td>
+<tr><td>Construction</td> <td>{{status.research_points_construction}} Points</td> <td>{{status.research_percent_construction}}%</td> <td>Reduces construction costs and building time </td>
 <td><input type="text" pattern="100|[0-9]{1,2}" maxlength="10" name="construction" size="10" value ="{{status.alloc_research_construction}}"><td></tr>
-<tr><td>Technology</td> <td>{{status.research_percent_tech}} Points</td> <td>{{status.research_points_tech}}%</td> <td>Allow construction of advanced units and buildings</td>
+<tr><td>Technology</td> <td>{{status.research_points_tech}} Points</td> <td>{{status.research_percent_tech}}%</td> <td>Allow construction of advanced units and buildings</td>
 <td><input type="text" pattern="100|[0-9]{1,2}" maxlength="10" name="technology" size="10"  value ="{{status.alloc_research_tech}}"><td></tr>
-<tr><td>Energy</td> <td>{{status.research_percent_energy}} Points</td> <td>{{status.research_points_energy}}%</td> <td>Increases your energy production efficency</td>
+<tr><td>Energy</td> <td>{{status.research_points_energy}} Points</td> <td>{{status.research_percent_energy}}%</td> <td>Increases your energy production efficency</td>
 <td><input type="text" pattern="100|[0-9]{1,2}" maxlength="10" name="energy" size="10"  value ="{{status.alloc_research_energy}}"><td></tr>
-<tr><td>Population</td> <td>{{status.research_percent_population}} Points</td> <td>{{status.research_points_population}}%</td> <td>Increases population capacity and rate of growth</td>
+<tr><td>Population</td> <td>{{status.research_points_population}} Points</td> <td>{{status.research_percent_population}}%</td> <td>Increases population capacity and rate of growth</td>
 <td><input type="text" pattern="100|[0-9]{1,2}" maxlength="10" name="population" size="10"  value ="{{status.alloc_research_population}}"><td></tr>
-<tr><td>Culture</td> <td>{{status.research_percent_culture}} Points</td> <td>{{status.research_points_culture}}%</td> <td>Increases psychics capabilities</td>
+<tr><td>Culture</td> <td>{{status.research_points_culture}} Points</td> <td>{{status.research_percent_culture}}%</td> <td>Increases psychics capabilities</td>
 <td><input type="text" pattern="100|[0-9]{1,2}" maxlength="10" name="culture" size="10"  value ="{{status.alloc_research_culture}}"><td></tr>
-<tr><td>Operations</td> <td>{{status.research_percent_operations}} Points</td> <td>{{status.research_points_operations}}%</td> <td>Increases the effectiveness of your agents</td>
+<tr><td>Operations</td> <td>{{status.research_points_operations}} Points</td> <td>{{status.research_percent_operations}}%</td> <td>Increases the effectiveness of your agents</td>
 <td><input type="text" pattern="100|[0-9]{1,2}" maxlength="10" name="operations" size="10"  value ="{{status.alloc_research_operations}}"><td></tr>
-<tr><td>Portals</td> <td>{{status.research_percent_portals}} Points</td> <td>{{status.research_points_portals}}%</td> <td>Increases portal coverage and reduces their upkeep cost</td>
+<tr><td>Portals</td> <td>{{status.research_points_portals}} Points</td> <td>{{status.research_percent_portals}}%</td> <td>Increases portal coverage and reduces their upkeep cost</td>
 <td><input type="text" pattern="100|[0-9]{1,2}" maxlength="10" name="portals" size="10"  value ="{{status.alloc_research_portals}}"><td></tr>
 </table>
 <input type="submit" name="rc_alloc_form" value="Change" >
