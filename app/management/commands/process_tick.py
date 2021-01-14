@@ -273,7 +273,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
                 if planet.portal:
                     planet.protection = 100
                 else:
-	                planet.protection = int(100.0 * battlePortalCalc(planet.x, planet.y, portal_xy_list, status.research_percent_culture))
+	                planet.protection = int(100.0 * battlePortalCalc(planet.x, planet.y, portal_xy_list, status.research_percent_portals))
 
                 # Add planet pop to total pop
                 status.population += planet.current_population
