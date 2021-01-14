@@ -60,6 +60,8 @@ strikeout {
 	border-spacing: 0px;
 	border-width: 0px;
 	padding: 0px;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 .styled-table {	

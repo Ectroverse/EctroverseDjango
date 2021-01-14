@@ -10,7 +10,7 @@
 {% endif %}
 
 <br>
-<table>
+<table align="center">
 <tr>
 <td ><a href="/messages">Inbox</a></td>
 <td style=" border-left:solid 40px transparent"><a href="/outbox">Outbox</a></td>
@@ -20,11 +20,12 @@
 To specify the player to send the message to, enter either the exact faction name or the user ID.
 <br>
 <br>
-<table style= "border-spacing: 8px; border-collapse: separate;">
+<table style= "border-spacing: 8px; border-collapse: separate;" align="center">
 <form method="post">
 {% csrf_token %}
 <tr><td>Recipient: </td><td style=" border-left:solid 30px transparent"><input type="text" size="30" maxlength="30" name="recipient" value ="{{user_id}}"></input></td>
-<tr><td valign = "top" >Message: </td><td style=" border-left:solid 30px transparent"><textarea  rows="10" cols="45" maxlength="5000" name="message"></textarea></td>
+<tr><td valign = "top" >Message: </td><td style=" border-left:solid 30px transparent">
+<textarea  style="color:black;"  rows="10" cols="45" maxlength="5000" name="message"></textarea></td>
 <tr><td></td><td style=" border-left:solid 30px transparent"><input type="submit" value="Send"></td></tr>
 </form>
 </table>

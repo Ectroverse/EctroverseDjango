@@ -5,7 +5,7 @@
 {% block content %}
 <br>
 
-<table>
+<table align="center">
 <tr>
 <td ><a href="/messages">Inbox</a></td>
 <td style=" border-left:solid 40px transparent"> <a href="/compose_message">Compose a message</a></td>
@@ -14,7 +14,7 @@
 </table>
 <br>
 
-<table width = "80%">
+<table width = "80%" align="center">
 {% for message in messages_to %}
 <tr><td align="left"><b>To:</b> {{message.user2.user_name}} of Empire #{{message.user2.empire.number}}
 </td><td align ="right"><a href="/delete_message_outbox{{message.id}}">Delete</a></td>

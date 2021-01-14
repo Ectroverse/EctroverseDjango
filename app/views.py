@@ -1004,7 +1004,7 @@ def results(request):
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
-def set_relation(relation, current_empire, target_empire_nr, *rel_time_passed):
+def set_relation(request,relation, current_empire, target_empire_nr, *rel_time_passed):
     target_empire = Empire.objects.get(number=target_empire_nr)
 
     if current_empire.id == target_empire.id:
@@ -1082,9 +1082,10 @@ def set_relation(relation, current_empire, target_empire_nr, *rel_time_passed):
                                      relation_remaining_time=rel_time)
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
-def cancel_relation(relation):
+def cancel_relation(request, relation):
     rel = Relations.objects.get(id=relation)
-    rel2 = Relations.objects.get(empire1=rel.empire2, empire2=rel.empire1)
+    if rel.relation_type != 'W':
+        rel2 = Relations.objects.get(empire1=rel.empire2, empire2=rel.empire1)
     if rel.relation_type == 'AO' or rel.relation_type == 'NO':
         rel.delete()
     elif rel.relation_type == 'A' or rel.relation_type == 'W':
@@ -1134,14 +1135,17 @@ def pm_options(request):
         user_empire.taxation = float(request.POST['empire_taxation'])
         user_empire.pm_message = (request.POST['empire_pm_message'])
         user_empire.relations_message = (request.POST['empire_relations_message'])
+
         if request.POST['empire_offer_alliance']:
-            set_relation('ally', status.empire, request.POST['empire_offer_alliance'])
-        if request.POST['empire_offer_nap']:
-            set_relation('nap', status.empire, request.POST['empire_offer_nap'], request.POST['empire_offer_nap_hours'])
-        if request.POST['empire_cancel_relation']:
-            cancel_relation(request.POST['empire_cancel_relation'])
-        if request.POST['empire_declare_war']:
-            set_relation('war', status.empire, request.POST['empire_declare_war'])
+            set_relation(request,'ally', status.empire, int(request.POST['empire_offer_alliance']))
+        elif request.POST['empire_offer_nap']:
+            set_relation(request,'nap', status.empire, int(request.POST['empire_offer_nap']), int(request.POST['empire_offer_nap_hours']))
+        elif request.POST['empire_cancel_relation']:
+
+            print("request.POST['empire_cancel_relation']",request.POST['empire_cancel_relation'])
+            cancel_relation(request, request.POST['empire_cancel_relation'])
+        elif request.POST['empire_declare_war']:
+            set_relation(request,'war', status.empire, int(request.POST['empire_declare_war']))
         user_empire.save()
     context = {"status": status,
                "page_title": "Prime Minister options",

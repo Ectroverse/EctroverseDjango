@@ -60,12 +60,13 @@ function startTime() {
   var today = new Date();
   var m = today.getMinutes();
   var s = today.getSeconds();
-  m_left = 9 - (m % 10);
+  <!--m_left = 9 - (m % 10); -->
+  m_left = 0;
   s_left = 59 - (s % 60);
   s_left = fixTimeDigits(s_left);
   document.getElementById('txt').innerHTML =
   m_left + ":" + s_left;
-  var t = setTimeout(startTime, 500);
+  var t = setTimeout(startTime, 60);
 }
 function fixTimeDigits(i) {
   if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
