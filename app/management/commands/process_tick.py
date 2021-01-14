@@ -450,7 +450,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
                 status.research_percent_military += 1
 
             if status.research_percent_construction > research_percent_construction:
-                status.research_percent_military -= 1
+                status.research_percent_construction -= 1
             elif status.research_percent_construction < research_percent_construction:
                 status.research_percent_construction += 1
 
