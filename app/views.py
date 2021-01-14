@@ -642,19 +642,23 @@ def fleets_orders_process(request):
     fleets_id = request.POST.getlist("fleet_select_hidden")
     order = int(request.POST.get("order"))
 
-    if order != 4 and order != 5 and not request.POST.get("X"):
+    if order == 0 or order == 1  or order == 2 or order == 3 and not request.POST.get("X"):
         request.session['error'] = "You must enter x coordinate!"
         return fleets(request)
-    if order != 4 and order != 5 and not request.POST.get("Y"):
+    if order == 0 or order == 1  or order == 2 or order == 3 and not request.POST.get("Y"):
         request.session['error'] = "You must enter y coordinate!"
         return fleets(request)
 
-    if order != 4 and order != 5:
+    if order == 0 or order == 1  or order == 2 or order == 3:
         x = int(request.POST.get("X"))
         y = int(request.POST.get("Y"))
 
     if (order == 0 or order == 1) and not request.POST.get("I"):
         request.session['error'] = "You must enter planets number!"
+        return fleets(request)
+
+    if (order == 6) and not request.POST.get("split_pct"):
+        request.session['error'] = "You must enter fleet split %!"
         return fleets(request)
 
     if order == 0 or order == 1:  # if attack planet or station on planet, make sure planet exists and get planet object
@@ -670,7 +674,7 @@ def fleets_orders_process(request):
             return fleets(request)
 
     fleets_id2 = Fleet.objects.filter(id__in=fleets_id)
-    print("fleets_id2",fleets_id2)
+    # print("fleets_id2",fleets_id2)
 
     # option value="0" Attack the planet
     # option value="1" Station on planet
@@ -678,6 +682,7 @@ def fleets_orders_process(request):
     # option value="3" Merge in system (chose system yourself)
     # option value="4" Merge in system (auto/optimal)
     # option value="5" Join main fleet
+    # option value="6" Split fleet
 
     speed = race_info_list[status.get_race_display()]["travel_speed"]
     if order == 0 or order == 1:
@@ -715,6 +720,13 @@ def fleets_orders_process(request):
         main_fleet = Fleet.objects.get(owner=request.user, main_fleet=True)
         fleets_id3 = Fleet.objects.filter(id__in=fleets_id, ticks_remaining=0)
         join_main_fleet(main_fleet, fleets_id3)
+    if order == 6:
+        split_pct = int(request.POST.get("split_pct"))
+        total_fleets = Fleet.objects.filter(owner=status.user.id, main_fleet=False)
+        if len(total_fleets) >= 50 :
+            request.session['error'] = "You cant have more than 50 fleets out at the same time!"
+            return fleets(request)
+        split_fleets(fleets_id2, split_pct)
 
     return fleets(request)
 
@@ -812,6 +824,11 @@ def fleetsend(request):
     if request.method != 'POST':
         return HttpResponse("You shouldnt be able to get to this page!")
 
+    total_fleets = Fleet.objects.filter(owner=status.user.id, main_fleet=False)
+    if len(total_fleets) >= 50:
+        request.session['error'] = "You cant send more than 50 fleets out at the same time!"
+        return fleets(request)
+
     # Process POST
     print(request.POST)
     x = int(request.POST['X']) if request.POST['X'] else None
@@ -821,7 +838,7 @@ def fleetsend(request):
     send_unit_dict = {}  # contains how many of each unit to send, dict so its quick to look up different unit counts
     total_sent_units = 0
     for i, unit in enumerate(unit_info["unit_list"][0:9]):
-        print('u' + str(i))
+        # print('u' + str(i))
         if 'u' + str(i) in request.POST:
             if request.POST['u' + str(i)]:
                 num = int(request.POST['u' + str(i)])
@@ -830,7 +847,8 @@ def fleetsend(request):
         else:
             num = 0
         if getattr(main_fleet, unit) < num:
-            return HttpResponse("Don't have enough" + unit_info[unit]["label"])
+            request.session['error'] = "Don't have enough" + unit_info[unit]["label"]
+            return fleets(request)
         send_unit_dict[unit] = num
         total_sent_units += num
 

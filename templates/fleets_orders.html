@@ -12,16 +12,24 @@
   function show_orders() {
 		var val = document.getElementById('order').value;
 		if (val == '0' || val == '1') {
-			document.getElementById('coord_X_Y').style.display = 'block';
-			document.getElementById('coord_I').style.display = 'block';
+			document.getElementById('coord_X_Y').style.display = 'inline';
+			document.getElementById('coord_I').style.display = 'inline';
+			document.getElementById('split_fleet').style.display = 'none';
 		}
 		else if (val == '2' || val == '3'){
-			document.getElementById('coord_X_Y').style.display = 'block';
+			document.getElementById('coord_X_Y').style.display = 'inline';
 			document.getElementById('coord_I').style.display = 'none';
+			document.getElementById('split_fleet').style.display = 'none';
+		}
+		else if (val == '6'){
+			document.getElementById('coord_X_Y').style.display = 'none';
+			document.getElementById('coord_I').style.display = 'none';
+			document.getElementById('split_fleet').style.display = 'inline';
 		}
 		else {
 			document.getElementById('coord_X_Y').style.display = 'none';
 			document.getElementById('coord_I').style.display = 'none';
+			document.getElementById('split_fleet').style.display = 'none';
 		}
 	}
 </script>
@@ -97,6 +105,7 @@
 			<option value="3">Merge in system (chose system yourself)
 			<option value="4">Merge in system (auto/optimal)
 			<option value="5">Join main fleet
+			<option value="6">Split fleets
 			</select>
 
 			{% for fl in hidden_fleet_id %}
@@ -104,13 +113,17 @@
 			{% endfor %}
 			<br>
 			
-			<div id="coord_X_Y" style="block">
+			<div id="coord_X_Y" style="display:inline">
 			X:<input class="spaceUnder" id="fleet_select_X"  pattern="[0-9]+" type="text" name="X" size="4">
 			Y:<input class="spaceUnder" id="fleet_select_Y"  pattern="[0-9]+" type="text" name="Y" size="4"> 
 			</div>
 			
-			<div id="coord_I" style="block">
+			<div id="coord_I" style="display:inline">
 			Planet:<input class="spaceUnder" id="fleet_select_I"  pattern="[0-9]+" type="text" name="I" size="4">
+			</div>
+			
+			<div id="split_fleet" style="display:none">
+			Fleet split:<input class="spaceUnder" id="split_pct" min = "0" max = "100" type="number" name="split_pct" size="4"> %
 			</div>
 			
 			<br>

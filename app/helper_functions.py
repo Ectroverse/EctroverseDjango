@@ -89,3 +89,24 @@ def join_main_fleet(main_fleet, fleets):
             setattr(main_fleet, unit, getattr(main_fleet, unit) + getattr(fl, unit))
         fl.delete()
     main_fleet.save()
+
+def split_fleets(fleets, split_pct):
+    for fl in fleets:
+        fl2 = {}
+        total_fl2 = 0
+        for i, unit in enumerate(unit_info["unit_list"]):
+            unit_num = int(getattr(fl, unit)*split_pct/100)
+            fl2[unit] = unit_num
+            setattr(fl, unit, getattr(fl, unit) - unit_num)
+            total_fl2 += unit_num
+            fl.save()
+        if total_fl2 > 0:
+            Fleet.objects.create(owner=fl.owner,
+                                 command_order=fl.command_order,
+                                 x=fl.x,
+                                 y=fl.y,
+                                 i=fl.i,
+                                 ticks_remaining=fl.ticks_remaining,
+                                 current_position_x=fl.current_position_x,
+                                 current_position_y=fl.current_position_y,
+                                 **fl2)
