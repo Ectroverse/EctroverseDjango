@@ -26,8 +26,13 @@ Planet {{planet.x}},{{planet.y}}:{{planet.i}}
     {% else %}
         No one owns this planet, it is free to explore.
         <br><br>
-        <a href="/explore{{planet.id}}">Explore this planet</a>
-        <br><br>
+
+		<form action="/fleets" id="explore_form" action="showMessage.jsp" method="post">
+			{% csrf_token %}
+			<input type="submit" value="Explore the planet">
+			<input type="hidden" name="explore_planet" value="{{planet.id}}">
+		</form>
+		<br>
         <a href="/operation{{planet.id}}">Special operation</a>
     {% endif %}
 {% elif planet.owner.id != status.user.id %}

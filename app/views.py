@@ -757,6 +757,14 @@ def fleets(request):
     if 'error' in request.session:
         error = request.session['error']
         request.session['error'] = ''
+        
+    planet_to_template = None
+    if request.method == 'POST' and 'explore_planet' in request.POST:
+        try:
+            pl_id = request.POST.get('explore_planet')
+            planet_to_template = Planet.objects.get(id=pl_id)
+        except Planet.DoesNotExist:
+            planet_to_template = None
 
     # If user changed order after attack or percentages
     if request.method == 'POST' and 'attack' in request.POST:
@@ -802,7 +810,8 @@ def fleets(request):
                "display_fleet":display_fleet,
                "display_fleet_exploration": display_fleet_exploration,
                "explo_ships": explo_ships,
-               "error":error}
+               "error":error,
+               "planet_to_template":planet_to_template}
     return render(request, "fleets.html", context)
 
 @login_required
@@ -843,9 +852,9 @@ def fleetsend(request):
     round_params = get_object_or_404(RoundStatus)  # should only be one
     main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True)  # should only ever be 1
 
-
     if request.method != 'POST':
         return HttpResponse("You shouldnt be able to get to this page!")
+
 
     total_fleets = Fleet.objects.filter(owner=status.user.id, main_fleet=False)
     if len(total_fleets) >= 50:
