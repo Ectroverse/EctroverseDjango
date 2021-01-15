@@ -74,18 +74,15 @@ function fixTimeDigits(i) {
 }
 
 // Toggle check boxes, used on various pages
-function toggleForm(id) { 
-
-	var inputs = document.getElementsByTagName("input");
-	for(var i = 0; i < inputs.length; i++) {
-		if(inputs[i].type == "checkbox") {
-			inputs[i].checked = !inputs[i].checked; 
-		}  
+	function toggleForm(form_name) { 
+			
+		var selectElements = document.forms[form_name].elements;
+		for(var i = 0; i < selectElements.length; i++) {
+			if(selectElements[i].type == "checkbox") {
+				selectElements[i].checked = !selectElements[i].checked; 
+			}  
+		}
 	}
-	
-
-}
-
 
 function changeslider(newValue,field) {
 	window.document.getElementById(field).value=newValue;
@@ -150,8 +147,8 @@ onload="startTime()">
                 <br>
                 <a href="/logout">Logout</a>
                 <br><br>
-                <form action="search?2fix" method="POST"><input type="text" name="search" size="8"><br>
-                <input type="submit" size="2" value="OK"></form><br>
+                <!---<form action="search?2fix" method="POST"><input type="text" name="search" size="8"><br>
+                <input type="submit" size="2" value="OK"></form><br> -->
                 <a href="https://discord.gg/"  style="color:red;" target="_blank">Discord</a><br>
                 <a href="guide" style="color:red;">Guide</a><br>
                 <a href="facebook"  style="color:red;" target="_blank">Facebook</a><br></font></b>
@@ -206,8 +203,8 @@ onload="startTime()">
             <br>
             <li><a href="/?next={{request.path}}">Logout</a></li>
             <br>
-            <form action="search?2fix" method="POST"><input type="text" name="search" size="8"><br>
-            <input type="submit" size="2" value="OK"></form></li>
+            <!--  <form action="search?2fix" method="POST"><input type="text" name="search" size="8"><br>
+            <input type="submit" size="2" value="OK"></form></li> -->
             <li><a href="https://discord.gg/"  style="color:red;" target="_blank">Discord</a></li>
             <li><a href="guide" style="color:red;">Guide</a></li>
             <li><a href="facebook"  style="color:red;" target="_blank">Facebook</a></b></li>

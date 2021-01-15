@@ -66,6 +66,9 @@ class Command(BaseCommand): # must be called command, use file name to name the 
 
         Fleet.objects.bulk_update(fleets_buffer, ['current_position_x', 'current_position_y', 'ticks_remaining'])
 
+        fleets_buffer = Fleet.objects.filter(main_fleet=False,ticks_remaining=0,command_order=10)
+        explore_planets(fleets_buffer)
+
         print("fleets procesing took", time.time() - start_fleet_t, "seconds")
 
         #update relations
@@ -79,6 +82,8 @@ class Command(BaseCommand): # must be called command, use file name to name the 
         # Loop through each user
         num_users_registered = 0 # im not actually using this anywhere yet
         for status in UserStatus.objects.all():
+            if status.networth == 0 or not status.empire:
+                continue
             self.stdout.write("User: " + status.user_name)
             self.stdout.write("id: " + str(status.user.id))
 

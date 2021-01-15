@@ -63,6 +63,7 @@ def generate_fleet_order(fleet, target_x, target_y, speed, order_type, *args):
     print(fleet.current_position_x,fleet.current_position_y)
     min_dist = np.sqrt((fleet.current_position_x - float(target_x)) ** 2 +
                        (fleet.current_position_y - float(target_y)) ** 2)
+    prit("------------------------------------------------------")
     print("min_dist",min_dist,speed)
     fleet.ticks_remaining = int(np.ceil((min_dist / speed) - 0.001))  # due to rounding and
     # floating points the fleet travel time becomes more than it should, hence the subtraction
@@ -110,3 +111,15 @@ def split_fleets(fleets, split_pct):
                                  current_position_x=fl.current_position_x,
                                  current_position_y=fl.current_position_y,
                                  **fl2)
+
+def explore_planets(fleets):
+    for fl in fleets:
+        try:
+            planet = Planet.objects.get(x=fl.x, y=fl.y, i=fl.i)
+        except Planet.DoesNotExist:
+            planet = None
+        if planet:
+            if not planet.home_planet and planet.owner == None:
+                planet.owner = fl.owner
+                fl.delete()
+                planet.save()

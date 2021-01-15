@@ -106,6 +106,6 @@ class Command(BaseCommand): # must be called command, use file name to name the 
         # admin.save()
 
 
-        num_planets = all_planets.count()
-        print("Num planets:", num_planets)
+        # num_planets = all_planets.count()
+        # print("Num planets:", num_planets)
         print("Generating planets took " + str(time.time() - start_t) + "seconds")

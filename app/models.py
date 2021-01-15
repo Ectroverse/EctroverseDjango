@@ -275,6 +275,7 @@ class Fleet(models.Model):
         MERGE_IN_SYSTEM   = 3
         MERGE_IN_SYSTEM_A = 4
         JOIN_MAIN_FLEET   = 5
+        EXPLORE_PLANET    = 10
     command_order = models.IntegerField(choices=CommandOrder.choices, default=0)
 
     # Destination coords for when its traveling

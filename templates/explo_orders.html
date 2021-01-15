@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+{% if disband_info %}
+{{error}}
+{% endif %}
+
+<script>
+  function show_orders() {
+		var val = document.getElementById('order').value;
+		if (val == '10' ) {
+			document.getElementById('coord_X_Y').style.display = 'inline';
+			document.getElementById('coord_I').style.display = 'inline';
+
+		}
+		else if (val == '2' ){
+			document.getElementById('coord_X_Y').style.display = 'inline';
+			document.getElementById('coord_I').style.display = 'none';
+		}
+		else {
+			document.getElementById('coord_X_Y').style.display = 'none';
+			document.getElementById('coord_I').style.display = 'none';
+		}
+	}
+</script>
+
+<div style="width:100%; float:left; ">
+
+	<div class="center_box">
+			<b class="spaceUnder">Selected fleets</b><br>
+			<p>
+			{% if display_fleet %}
+			<table width="100%" align="center">
+				<td>Units</td>
+				<td>Order</td>
+				<td>Status</td>
+				<td>Position</td>
+				
+				{% for fleet_nr, fleet_units  in display_fleet.items %}
+				
+					<tr class="spaceUnder">
+
+						<td>
+						
+						{% for unit_name, unit_nr in fleet_units.items %}
+							{{unit_name}}: {{unit_nr}}<br>
+						{% endfor %}
+						</td>
+						<td>
+						
+						{% if fleet_nr.command_order == 10 %}
+							Explore planet {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
+						{% elif fleet_nr.command_order == 2 %}
+							Move to system {{fleet_nr.x}},{{fleet_nr.y}}
+						{% endif %}
+						
+						</td> 
+						<td>
+						{% if fleet_nr.ticks_remaining > 0 %}
+							Moving, {{fleet_nr.ticks_remaining}} week(s)
+						{% else %}
+							Fleet arrived at position
+						{% endif %}
+						</td>
+						<td>{{fleet_nr.current_position_x | floatformat}}, {{fleet_nr.current_position_y | floatformat}}</td>
+						
+					</tr>
+
+				{% endfor %} 
+				
+			</table>
+			
+			{% else %}
+				None
+			{% endif %}
+			</p>
+	</div>
+	
+	{% if display_fleet %}
+	<div class="center_box">
+		<div class="center_box_inside">
+			<b class="spaceUnder">Order fleets</b><br>
+			<form action="fleets_orders_process" method="POST">
+			{% csrf_token %}
+			
+			<select name="order" id="order" class="spaceUnder" onclick="show_orders()">
+			<option value="10" selected>Explore planet
+			<option value="2">Move to system
+			<option value="5">Join main fleet
+			</select>
+
+			{% for fl in hidden_fleet_id %}
+			<input type="hidden" name="fleet_select_hidden" value="{{fl}}" />
+			{% endfor %}
+			<br>
+			
+			<div id="coord_X_Y" style="display:inline">
+			X:<input class="spaceUnder" id="fleet_select_X"  pattern="[0-9]+" type="text" name="X" size="4">
+			Y:<input class="spaceUnder" id="fleet_select_Y"  pattern="[0-9]+" type="text" name="Y" size="4"> 
+			</div>
+			
+			<div id="coord_I" style="display:inline">
+			Planet:<input class="spaceUnder" id="fleet_select_I"  pattern="[0-9]+" type="text" name="I" size="4">
+			</div>
+			
+			<br>
+			<input type="submit" value="Send">
+			</form>
+		</div>
+	</div>
+	{% endif %}
+
+	
+</div>
+
+
+
+{% endblock %}
+

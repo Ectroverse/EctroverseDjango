@@ -59,12 +59,14 @@
 			<p>
 			{% if display_fleet %}
 			<table width="100%" align="center">
+			<tr>
 				<td>Units</td>
 				<td>Order</td>
 				<td>Status</td>
 				<td>Position</td>
-				<td><div class="href" onclick="toggleForm('massFleet');"><font size="1">Toggle</font></div></td>
-				<form action="/fleets_orders" method="POST" name="massFleet" id="massFleet" onsubmit="hide_hidden();" >
+				<td><div class="href" onclick="toggleForm('massFleet')";"><font size="1">Toggle</font></div></td>
+				</tr>
+				<form action="/fleets_orders" method="POST" name="massFleet" id="form0" onsubmit="hide_hidden();" >
 				{% csrf_token %}
 				{% for fleet_nr, fleet_units  in display_fleet.items %}
 				
@@ -78,7 +80,7 @@
 						</td>
 						<td>
 						{% if fleet_nr.command_order == 0 %}
-							Ready to attack planet {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
+							Attack planet {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
 						{% elif fleet_nr.command_order == 1 %}
 							Station on planet {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
 						{% elif fleet_nr.command_order == 2 %}
@@ -155,6 +157,102 @@
 			X:<input class="spaceUnder" pattern="[0-9]+" type="text" name="X" size="4">
 			Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4"> 
 			Planet:<input class="spaceUnder" pattern="[0-9]+" type="text" name="I" size="4">
+			<br>
+			<input type="submit" value="Send">
+			</form>
+		</div>
+	</div>
+	
+	
+	<div class="center_box">
+			<b class="spaceUnder">Exploration teams</b><br>
+			<p>
+			{% if display_fleet_exploration %}
+			<table width="100%" align="center">
+			<tr>
+				<td>Units</td>
+				<td>Order</td>
+				<td>Status</td>
+				<td>Position</td>
+				<td><div class="href" id="1" onclick="toggleForm('massExplo');"><font size="1">Toggle</font></div></td>
+				</tr>
+				<form action="/fleets_orders" method="POST" name="massExplo" id="1" onsubmit="hide_hidden();" >
+				{% csrf_token %}
+				
+				
+				{% for fleet_nr in display_fleet_exploration %}
+				
+					<tr class="spaceUnder">
+					<input type="hidden" id="fleet_nr" name="fleet_nr" value="{{fleet_nr.id}}">
+						
+						<td>
+						Exploration ships: {{fleet_nr.exploration}}
+						</td>
+						<td>
+						{% if fleet_nr.command_order == 10 %}
+							Explore planet {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
+						{% elif fleet_nr.command_order == 2 %}
+							Hoover at {{fleet_nr.x}},{{fleet_nr.y}}
+						{% elif fleet_nr.command_order == 5 %}
+							Join main fleet at {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
+						{% endif %}
+						
+						</td> 
+						<td>
+						{% if fleet_nr.ticks_remaining > 0 %}
+							Moving, {{fleet_nr.ticks_remaining}} week(s)
+						{% else %}
+							Reached position
+						{% endif %}
+						</td>
+						<td>{{fleet_nr.current_position_x | floatformat}}, {{fleet_nr.current_position_y | floatformat}}</td>
+						 
+						<td>
+						<input type="hidden" name="fleet_select" value="0" />
+						<input type="checkbox" name="fleet_select" value="1" />
+						<!-- do not put space/newline in below line or it will stop working!!!! -->
+						<!-- <input type="hidden" name="fleet_select" value="0"><input type="checkbox" onclick="this.previousSibling.value=1-this.previousSibling.value" > -->
+						<!-- -->
+						</td>
+						
+					</tr>
+
+				{% endfor %} 
+				
+				<input type="hidden" id="massExplo1" name="massExplo1" value="1">
+				
+				<tr><td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td><input type="submit" value="Order"></td></tr>
+				</form>
+			</table>
+			
+			{% else %}
+				None
+			{% endif %}
+			</p>
+	</div>	
+	
+	
+
+	
+	<div class="center_box">
+		<div class="center_box_inside">
+			<b class="spaceUnder">Dispatch a new exploration ship</b><br>
+			{{explo_ships}} ships availible<br>
+			<form action="fleetsend" method="POST">
+			{% csrf_token %}
+			<select name="order" class="spaceUnder">
+			<option value="10" selected>Explore the planet
+			<option value="11">Move to system
+			</select>
+			<br>
+			X:<input class="spaceUnder" pattern="[0-9]+" type="text" name="X" size="4">
+			Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4"> 
+			Planet:<input class="spaceUnder" pattern="[0-9]+" type="text" name="I" size="4">
+			<input type="hidden" name="exploration" value='1'>
 			<br>
 			<input type="submit" value="Send">
 			</form>

@@ -29,10 +29,10 @@
 <td width="20%"><a href="?order_by=total_buildings">Buildings</a> - <a href="?order_by=overbuilt">Overbuilding</a></td>
 <td width="25%"><a href="?order_by=current_population">Population</a></td>
 <td width="28%">Build - <a href="?order_by=protection">Protection</a></td>
-<td width="2%"><div class="href" onclick="javascript:toggleForm('mass_build');"><font size="1">Toggle</font></div></td>
+<td width="2%"><div class="href" onclick="toggleForm('massbuild');"><font size="1">Toggle</font></div></td>
 </tr>
 
-
+<form action="/mass_build" method="POST" name="massbuild">
 {% for planet in planets %}
 <tr>
 <td><a href="/planet{{planet.id}}">{{planet.x}},{{planet.y}}:{{planet.i}}</a></td>
@@ -81,8 +81,18 @@
 
 <td align="center"><input type="checkbox" name="m4298"></td>
 </tr>
+
 {% endfor %}
+<tr><td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>
+<input type="submit" value="Mass Build">
+</td></tr>
 </table>
+</form>
 
 {% endblock %}
 

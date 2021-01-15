@@ -576,6 +576,7 @@ def units(request):
                "msg": msg}
     return render(request, "units.html", context)
 
+
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def fleets_orders(request):
@@ -615,12 +616,20 @@ def fleets_orders(request):
                 display_fleet_inner[unit_info[unit]["label"]] = num
         display_fleet[fleet] = display_fleet_inner
 
-    context = {"status": status,
-               "page_title": "Fleets orders",
-               "display_fleet": display_fleet,
-               "hidden_fleet_id":fleets_id2,
-               }
-    return render(request, "fleets_orders.html", context)
+    if 'massExplo1' in request.POST:
+        context = {"status": status,
+                   "page_title": "Exploration orders",
+                   "display_fleet": display_fleet,
+                   "hidden_fleet_id":fleets_id2,
+                   }
+        return render(request, "explo_orders.html", context)
+    else:
+        context = {"status": status,
+                   "page_title": "Fleets orders",
+                   "display_fleet": display_fleet,
+                   "hidden_fleet_id":fleets_id2,
+                   }
+        return render(request, "fleets_orders.html", context)
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -642,18 +651,18 @@ def fleets_orders_process(request):
     fleets_id = request.POST.getlist("fleet_select_hidden")
     order = int(request.POST.get("order"))
 
-    if (order == 0 or order == 1  or order == 2 or order == 3) and not request.POST.get("X"):
+    if (order == 0 or order == 1  or order == 2 or order == 3 or order == 10) and not request.POST.get("X"):
         request.session['error'] = "You must enter x coordinate!"
         return fleets(request)
-    if (order == 0 or order == 1  or order == 2 or order == 3) and not request.POST.get("Y"):
+    if (order == 0 or order == 1  or order == 2 or order == 3 or order == 10) and not request.POST.get("Y"):
         request.session['error'] = "You must enter y coordinate!"
         return fleets(request)
 
-    if order == 0 or order == 1  or order == 2 or order == 3:
+    if order == 0 or order == 1  or order == 2 or order == 3 or order == 10:
         x = int(request.POST.get("X"))
         y = int(request.POST.get("Y"))
 
-    if (order == 0 or order == 1) and not request.POST.get("I"):
+    if (order == 0 or order == 1 or order == 10) and not request.POST.get("I"):
         request.session['error'] = "You must enter planets number!"
         return fleets(request)
 
@@ -661,7 +670,7 @@ def fleets_orders_process(request):
         request.session['error'] = "You must enter fleet split %!"
         return fleets(request)
 
-    if order == 0 or order == 1:  # if attack planet or station on planet, make sure planet exists and get planet object
+    if order == 0 or order == 1 or order == 10:  # if attack planet or station on planet, make sure planet exists and get planet object
         i = request.POST.get("I")
         try:
             planet = Planet.objects.get(x=x, y=y, i=i)
@@ -727,6 +736,12 @@ def fleets_orders_process(request):
             request.session['error'] = "You cant have more than 50 fleets out at the same time!"
             return fleets(request)
         split_fleets(fleets_id2, split_pct)
+    if order == 10:
+        for f in fleets_id2:
+            generate_fleet_order(f, x, y, speed, order, i)
+        # instant explore
+        fleets_buffer = Fleet.objects.filter(main_fleet=False, ticks_remaining=0, command_order=10)
+        explore_planets(fleets_buffer)
 
     return fleets(request)
 
@@ -735,6 +750,7 @@ def fleets_orders_process(request):
 def fleets(request):
     status = get_object_or_404(UserStatus, user=request.user)
     other_fleets = Fleet.objects.filter(owner=status.user.id, main_fleet=False)
+    display_fleet_exploration = Fleet.objects.filter(owner=status.user.id, main_fleet=False, exploration=1)
 
     # show errors from fleetsend such as not having enough transports for droids, etc
     error = None
@@ -754,6 +770,8 @@ def fleets(request):
     main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True)  # should only ever be 1
     main_fleet_list = []
     send_fleet_list = []  # need to have a separate list that doesnt include agents/psycics/ghosts/explos
+    explo_ships = main_fleet.exploration
+
     for unit in unit_info["unit_list"]:
         num = getattr(main_fleet, unit)
         if num:
@@ -767,12 +785,14 @@ def fleets(request):
     for fleet in other_fleets:
         display_fleet_inner = {}
         for unit in unit_info["unit_list"]:
-            num = getattr(fleet, unit)
-            if num > 0:
-                display_fleet_inner[unit_info[unit]["label"]] = num
-        display_fleet[fleet] = display_fleet_inner
+            if unit not in ['wizard', 'agent', 'ghost', 'exploration']:
+                num = getattr(fleet, unit)
+                if num > 0:
+                    print(unit, num)
+                    display_fleet_inner[unit_info[unit]["label"]] = num
+                    display_fleet[fleet] = display_fleet_inner
 
-    # print("display_fleet", display_fleet)
+    print("display_fleet", display_fleet)
 
     context = {"status": status,
                "page_title": "Fleets",
@@ -780,6 +800,8 @@ def fleets(request):
                "send_fleet_list": send_fleet_list,
                "other_fleets": other_fleets,
                "display_fleet":display_fleet,
+               "display_fleet_exploration": display_fleet_exploration,
+               "explo_ships": explo_ships,
                "error":error}
     return render(request, "fleets.html", context)
 
@@ -821,6 +843,7 @@ def fleetsend(request):
     round_params = get_object_or_404(RoundStatus)  # should only be one
     main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True)  # should only ever be 1
 
+
     if request.method != 'POST':
         return HttpResponse("You shouldnt be able to get to this page!")
 
@@ -837,20 +860,28 @@ def fleetsend(request):
     order = int(request.POST['order'])
     send_unit_dict = {}  # contains how many of each unit to send, dict so its quick to look up different unit counts
     total_sent_units = 0
-    for i, unit in enumerate(unit_info["unit_list"][0:9]):
-        # print('u' + str(i))
-        if 'u' + str(i) in request.POST:
-            if request.POST['u' + str(i)]:
-                num = int(request.POST['u' + str(i)])
+
+    if 'exploration' in request.POST:
+        if getattr(main_fleet, 'exploration') < 1:
+            request.session['error'] = "You don't have any exploration ships!"
+            return fleets(request)
+        send_unit_dict['exploration'] = 1
+        total_sent_units = 1
+    else:
+        for i, unit in enumerate(unit_info["unit_list"][0:9]):
+            # print('u' + str(i))
+            if 'u' + str(i) in request.POST:
+                if request.POST['u' + str(i)]:
+                    num = int(request.POST['u' + str(i)])
+                else:
+                    num = 0
             else:
                 num = 0
-        else:
-            num = 0
-        if getattr(main_fleet, unit) < num:
-            request.session['error'] = "Don't have enough" + unit_info[unit]["label"]
-            return fleets(request)
-        send_unit_dict[unit] = num
-        total_sent_units += num
+            if getattr(main_fleet, unit) < num:
+                request.session['error'] = "Don't have enough" + unit_info[unit]["label"]
+                return fleets(request)
+            send_unit_dict[unit] = num
+            total_sent_units += num
 
     if total_sent_units == 0:
         request.session['error'] = "You must send some units to make a fleet"
@@ -858,28 +889,27 @@ def fleetsend(request):
 
 
     # The rest mostly comes from cmdExecSendFleet in cmdexec.c
-    if order == 0 or order == 1:  # if attack planet or station on planet, make sure planet exists and get planet object
+    if order == 0 or order == 1 or order == 10:  # if attack planet or station on planet orexplore, make sure planet exists and get planet object
         try:
             planet = Planet.objects.get(x=x, y=y, i=planet_i)
         except Planet.DoesNotExist:
             request.session['error'] = "This planet doesn't exist"
             return fleets(request)
     else:  # if move to system, make sure x and y are actual coords
-
         if not x or not y or x < 0 or x >= round_params.galaxy_size or y < 0 or y >= round_params.galaxy_size:
             request.session['error'] = "Coordinates aren't valid"
             return fleets(request)
 
-
-    # Carrier/transport check
-    if send_unit_dict['carrier'] * 100 < (
-            send_unit_dict['bomber'] + send_unit_dict['fighter'] + send_unit_dict['transport']):
-        request.session['error'] = "You are not sending enough carriers, each carrier can hold 100 fighters, bombers or transports"
-        return fleets(request)
-    if send_unit_dict['transport'] * 100 < (
-            send_unit_dict['soldier'] + send_unit_dict['droid'] + 4 * send_unit_dict['goliath']):
-        request.session['error'] = "You are not sending enough transports, each transport can hold 100 soldiers or droids, or 25 goliaths"
-        return fleets(request)
+    if not 'exploration' in request.POST:
+        # Carrier/transport check
+        if send_unit_dict['carrier'] * 100 < (
+                send_unit_dict['bomber'] + send_unit_dict['fighter'] + send_unit_dict['transport']):
+            request.session['error'] = "You are not sending enough carriers, each carrier can hold 100 fighters, bombers or transports"
+            return fleets(request)
+        if send_unit_dict['transport'] * 100 < (
+                send_unit_dict['soldier'] + send_unit_dict['droid'] + 4 * send_unit_dict['goliath']):
+            request.session['error'] = "You are not sending enough transports, each transport can hold 100 soldiers or droids, or 25 goliaths"
+            return fleets(request)
 
 
     # Find closest portal and its distance away, which is done in specopVortexListCalc in cmd.c in the C code
@@ -902,13 +932,15 @@ def fleetsend(request):
     # fa *= 0.8
     fleet_time = int(np.ceil(min_dist / speed))  # in ticks
 
+    if not 'exploration' in request.POST:
     # Remove units from main fleet
-    for unit in unit_info["unit_list"][0:9]:
-        print("unit", unit, send_unit_dict[unit])
-        setattr(main_fleet, unit, getattr(main_fleet, unit) - send_unit_dict[unit])
+        for unit in unit_info["unit_list"][0:9]:
+            setattr(main_fleet, unit, getattr(main_fleet, unit) - send_unit_dict[unit])
+    else:
+        setattr(main_fleet, 'exploration', getattr(main_fleet, 'exploration') - 1)
 
     # Create new Fleet object
-    Fleet.objects.create(owner=request.user,
+    fleet = Fleet.objects.create(owner=request.user,
                          command_order=order,
                          x=x,
                          y=y,
@@ -920,6 +952,12 @@ def fleetsend(request):
 
     main_fleet.save()
     # If instant travel then immediately do the cmdFleetAction stuff
+
+    if order == 10 and fleet_time == 0: #explore
+        fleets_tmp = []
+        fleets_tmp.append(fleet)
+        explore_planets(fleets_tmp)
+
     if fleet_time == 0:
         # TODO
         # cmdFleetAction()
@@ -927,6 +965,7 @@ def fleetsend(request):
         return fleets(request)
 
     request.session['error'] = "The fleet will reach its destination in " + str(fleet_time) + " weeks"
+
     return fleets(request)
 
 
