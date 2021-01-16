@@ -225,12 +225,13 @@ onload="startTime()">
                 <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
                     <tbody><tr><td width="41" height="21" background="{% static 'i03.jpg' %}"></td>
                     <td background="{% static 'files_008' %}">
-                    <table style="white-space: nowrap; overflow: auto; " width="100%" cellspacing="0" cellpadding="0" border="0"><tbody><tr><td width="30%" align="center"><font size="1"><b>Networth : <span id="headernetworth">{{status.networth}} </span>
-                        </b></font></td><td width="40%" align="center">
+                    <table style="white-space: nowrap; overflow: auto; " width="100%" cellspacing="0" cellpadding="0" border="0"><tbody><tr><td width="25%" align="center"><font size="1"><b>Networth : <span id="headernetworth">{{status.networth}} </span>
+                        </b></font></td><td width="30%" align="center">
                         <font size="1"><b> Next tick: <span id="headerTime">
                         <!-- Tick timer done with javascript --><div style="display: inline" id="txt"></div>
-                        </span></b></font></td><td width="30%" align="center"><font size="1"><b>Population : <span id="headerpopulation">{{status.population}}</span></b>
-                        </font></td></tr></tbody>
+                        </span></b></font></td><td width="25%" align="center"><font size="1"><b>Population : <span id="headerpopulation">{{status.population}}</span></b>
+                        </font></td>
+                        <td align="center" width="20%"><span style="font-size: xx-small;"><strong>Fleet readiness: <span id="headerFleetready">{{status.fleet_readiness}}</span>%</strong> </span></font></td></tr></tbody>
                     </table>
                     </td><td width="78" height="21" background="{% static 'files_005' %}"></td></tr></tbody>
                 </table>
@@ -245,8 +246,9 @@ onload="startTime()">
                     <table width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
 
                         <tr>
-                        <td width="50%" nowrap="nowrap" align="center"><font size="1"><b>Energy: <span id="headerenergy">{{status.energy}}</span><br>Mineral: <span id="headermineral">{{status.minerals}}</span></b></font></td>
-                        <td width="50%" nowrap="nowrap" align="center"><font size="1"><b>Crystal: <span id="headercrystal">{{status.crystals}}</span><br>Ectrolium: <span id="headerectrolium">{{status.ectrolium}}</span></b></font></td>
+                        <td width="40%" nowrap="nowrap" align="center"><font size="1"><b>Energy: <span id="headerenergy">{{status.energy}}</span><br>Mineral: <span id="headermineral">{{status.minerals}}</span></b></font></td>
+                        <td width="30%" nowrap="nowrap" align="center"><font size="1"><b>Crystal: <span id="headercrystal">{{status.crystals}}</span><br>Ectrolium: <span id="headerectrolium">{{status.ectrolium}}</span></b></font></td>
+                        <td width="30%" nowrap="nowrap" align="center"><font size="1"><b>Psychics readiness: <span id="headerPsychicsready">{{status.psychic_readiness}}</span>%<br>Agents readiness: <span id="headerAgentsready">{{status.agent.readiness}}</span>%</b></font></td>
                         </tr>
                         </tbody>
                     </table>
@@ -256,7 +258,6 @@ onload="startTime()">
             </table>
             </td></tr></tbody>
         </table>
-
 
 
         <br>
