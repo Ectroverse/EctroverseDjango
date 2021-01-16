@@ -219,17 +219,18 @@ onload="startTime()">
 	<div class="content col-lg-10 col-md-10 col-sm-10 col-xs-12">
         <!-- Topbar content -->
         <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
-            <tbody><tr><td style="min-width: 35px;" width="35" height="63" background="{% static 'files_018.png' %}"></td><td>
+            <tbody><tr><td style="min-width: 35px;" width="35" height="63" background="{% static 'files_018.png' %}" background-repeat: no-repeat;></td><td>
             <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
                 <tbody><tr><td height="21" align="center">
                 <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
                     <tbody><tr><td width="41" height="21" background="{% static 'i03.jpg' %}"></td>
                     <td background="{% static 'files_008' %}">
-                    <table style="white-space: nowrap; overflow: auto; " width="100%" cellspacing="0" cellpadding="0" border="0"><tbody><tr><td width="30%" align="center"><font size="1"><b>Networth : <span id="headernetworth">{{status.networth}} </span>
-                        </b></font></td><td width="40%" align="center">
+                    <table style="white-space: nowrap; overflow: auto; " width="100%" cellspacing="0" cellpadding="0" border="0"><tbody><tr><td width="25%" align="center"><font size="1"><b>Networth : <span id="headernetworth">{{status.networth}} </span>
+                        </b></font></td><td width="30%" align="center">
                         <font size="1"><b> Next tick: <span id="headerTime">
                         <!-- Tick timer done with javascript --><div style="display: inline" id="txt"></div>
-                        </span></b></font></td><td width="30%" align="center"><font size="1"><b>Population : <span id="headerpopulation">{{status.population}}</span></b>
+                         </span></b></font></td><td width="25%" align="center"><font size="1"><b>Population : <span id="headerpopulation">{{status.population}}</span>0</b>
+                        </font></td><td width="20%" align="center"><font size="1"><b>Fleet readiness: <span id="headerfleetready">{{status.fleet_readiness}}</span>%</b>
                         </font></td></tr></tbody>
                     </table>
                     </td><td width="78" height="21" background="{% static 'files_005' %}"></td></tr></tbody>
@@ -241,16 +242,24 @@ onload="startTime()">
                     <td onclick="document.location='hq?2fix'" id="headerbuild" style="background-image:url('/static/i10.jpg');" border="0" class="href" width="40" height="42"></td>
                     <td onclick="document.location='hq?2fix'" id="headeraid" style="background-image:url('/static/i11.jpg');" border="0" class="href" width="39" height="42"></td>
                     <td onclick="document.location='hq?2fix'" id="headerfleet" style="background-image:url('/static/i12.jpg');" border="0" class="href" width="39" height="42"></td>
-                    <td width="18" height="42" background="{% static 'files_016' %}"></td><td background="{% static 'files_015' %}" align="left">
+                    <td width="18" height="42" background="{% static 'files_016' %}"></td><td background="{% static 'files_015' %}" align="left ">
                     <table width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
 
                         <tr>
-                        <td width="50%" nowrap="nowrap" align="center"><font size="1"><b>Energy: <span id="headerenergy">{{status.energy}}</span><br>Mineral: <span id="headermineral">{{status.minerals}}</span></b></font></td>
-                        <td width="50%" nowrap="nowrap" align="center"><font size="1"><b>Crystal: <span id="headercrystal">{{status.crystals}}</span><br>Ectrolium: <span id="headerectrolium">{{status.ectrolium}}</span></b></font></td>
+                        <td width="40%" nowrap="nowrap" align="center"><font size="1"><b>Energy: <span id="headerenergy">{{status.energy}}</span><br>Mineral: <span id="headermineral">{{status.minerals}}</span></b></font></td>
+                        <td width="30%" nowrap="nowrap" align="center"><font size="1"><b>Crystal: <span id="headercrystal">{{status.crystals}}</span><br>Ectrolium: <span id="headerectrolium">{{status.ectrolium}}</span></b></font></td>
+                        <td width="30%" nowrap="nowrap" align="center"><font size="1"><b>Psychics readiness: <span id="headerPsychicsready">{{status.psychic_readiness}}</span>%<br>Agents readiness: <span id="headerAgentsready">{{status.agent_readiness}}</span>%</b></font>
+                        <td><img src="{% static 'files_023' %}" height="43" background-repeat: no-repeat;>
                         </tr>
                         </tbody>
                     </table>
-                    </td><td width="49" height="42" background="{% static 'files_023' %}"></td></tr></tbody>
+        </table>
+
+
+
+                        </tr>
+                        </tbody>
+                    </table>
                 </table>
                 </td></tr></tbody>
             </table>
