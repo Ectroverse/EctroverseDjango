@@ -24,7 +24,7 @@ Planet {{planet.x}},{{planet.y}}:{{planet.i}}
     {% elif planet.nuked %}
         This planet suffered a heavy nuclear blast, polution is too high to inhabit it!
     {% else %}
-        No one owns this planet, it is free to explore.
+        No one owns this planet, it is free to explore. The exploration cost will be: {{exploration_cost}}%.
         <br><br>
 
 		<form action="/fleets" id="explore_form" action="showMessage.jsp" method="post">

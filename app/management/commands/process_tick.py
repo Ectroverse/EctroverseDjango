@@ -95,7 +95,6 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             # better not error out or someone was set to an invalid race somehow
             race_info = race_info_list[status.get_race_display()]
 
-
             # merge fleets in the same system (chosen manually)
             fleets = Fleet.objects.filter(owner=status.user.id,command_order=3,ticks_remaining=0)
             merge_fleets(fleets)
@@ -491,13 +490,12 @@ class Command(BaseCommand): # must be called command, use file name to name the 
 
             status.research_percent_military = min(race_info.get("research_max_military", 200),status.research_percent_military)
             status.research_percent_construction = min(race_info.get("research_max_construction", 200),status.research_percent_construction)
-            status.research_percent_tech = min(race_info.get("research_percent_tech", 200),status.research_percent_tech)
-            status.research_percent_energy = min(race_info.get("research_percent_energy", 200),status.research_percent_energy)
-            status.research_percent_population = min(race_info.get("research_percent_population", 200),status.research_percent_population )
-            status.research_percent_culture = min(race_info.get("research_percent_culture", 200),status.research_percent_culture)
-            status.research_percent_operations = min(race_info.get("research_percent_operations", 200),status.research_percent_operations )
-            status.research_percent_portals = min(race_info.get("research_percent_portals", 200),status.research_percent_portals)
-
+            status.research_percent_tech = min(race_info.get("research_max_tech", 200),status.research_percent_tech)
+            status.research_percent_energy = min(race_info.get("research_max_energy", 200),status.research_percent_energy)
+            status.research_percent_population = min(race_info.get("research_max_population", 200),status.research_percent_population )
+            status.research_percent_culture = min(race_info.get("research_max_culture", 200),status.research_percent_culture)
+            status.research_percent_operations = min(race_info.get("research_max_operations", 200),status.research_percent_operations )
+            status.research_percent_portals = min(race_info.get("research_max_portals", 200),status.research_percent_portals)
 
 
             #####################

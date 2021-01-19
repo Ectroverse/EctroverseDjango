@@ -91,6 +91,7 @@ def join_main_fleet(main_fleet, fleets):
         fl.delete()
     main_fleet.save()
 
+
 def split_fleets(fleets, split_pct):
     for fl in fleets:
         fl2 = {}
@@ -112,7 +113,9 @@ def split_fleets(fleets, split_pct):
                                  current_position_y=fl.current_position_y,
                                  **fl2)
 
+
 def explore_planets(fleets):
+    status = UserStatus.objects.get(user=fl.owner)
     for fl in fleets:
         try:
             planet = Planet.objects.get(x=fl.x, y=fl.y, i=fl.i)
@@ -123,3 +126,10 @@ def explore_planets(fleets):
                 planet.owner = fl.owner
                 fl.delete()
                 planet.save()
+                status.save()
+
+
+def calc_exploration_cost(status):
+    expo_ship_nr = Fleet.objects.filter(owner = status.user, main_fleet = False, exploration = 1).count()
+    pl_number = Planet.objects.filter(owner = status.user).count()
+    return (pl_number + expo_ship_nr + 40) >> 2

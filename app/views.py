@@ -236,10 +236,13 @@ def planet(request, planet_id):
     else:
         planet_owner_status = None
 
+    exploration_cost = calc_exploration_cost(status)
+
     context = {"status": status,
                "planet": planet,
                "planet_owner_status": planet_owner_status,
-               "page_title": "Planet " + str(planet.x) + ',' + str(planet.y) + ':' + str(planet.i)}
+               "page_title": "Planet " + str(planet.x) + ',' + str(planet.y) + ':' + str(planet.i),
+               "exploration_cost": exploration_cost}
     return render(request, "planet.html", context)
 
 
@@ -752,6 +755,7 @@ def fleets(request):
     other_fleets = Fleet.objects.filter(owner=status.user.id, main_fleet=False)
     display_fleet_exploration = Fleet.objects.filter(owner=status.user.id, main_fleet=False, exploration=1)
 
+
     # show errors from fleetsend such as not having enough transports for droids, etc
     error = None
     if 'error' in request.session:
@@ -765,6 +769,10 @@ def fleets(request):
             planet_to_template = Planet.objects.get(id=pl_id)
         except Planet.DoesNotExist:
             planet_to_template = None
+
+    exploration_cost = None
+    if planet_to_template:
+        exploration_cost = calc_exploration_cost(status)
 
     # If user changed order after attack or percentages
     if request.method == 'POST' and 'attack' in request.POST:
@@ -811,7 +819,8 @@ def fleets(request):
                "display_fleet_exploration": display_fleet_exploration,
                "explo_ships": explo_ships,
                "error":error,
-               "planet_to_template":planet_to_template}
+               "planet_to_template": planet_to_template,
+               "exploration_cost": exploration_cost}
     return render(request, "fleets.html", context)
 
 @login_required
@@ -962,10 +971,15 @@ def fleetsend(request):
     main_fleet.save()
     # If instant travel then immediately do the cmdFleetAction stuff
 
-    if order == 10 and fleet_time == 0: #explore
-        fleets_tmp = []
-        fleets_tmp.append(fleet)
-        explore_planets(fleets_tmp)
+    if order == 10:
+        fr_cost = calc_exploration_cost(status)
+        status.fleet_readiness -= fr_cost
+        status.save()
+        # instant explore
+        if fleet_time == 0:
+            fleets_tmp = []
+            fleets_tmp.append(fleet)
+            explore_planets(fleets_tmp)
 
     if fleet_time == 0:
         # TODO

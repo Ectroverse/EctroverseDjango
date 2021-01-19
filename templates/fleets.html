@@ -8,6 +8,17 @@
 {{error}}
 {% endif %}
 
+{% if planet_to_template %}
+	<script>
+		$(document).ready(function () {
+			// Handler for .ready() called.
+			$('html, body').animate({
+				scrollTop: $('#exploration_send').offset().top
+			}, 'slow');
+		});
+	</script>
+{% endif %}
+
 
 <div style="width:100%; float:left; ">
 	<div class ="left_box" >
@@ -238,9 +249,12 @@
 	
 
 	
-	<div class="center_box">
+	<div class="center_box" id="exploration_send" >
 		<div class="center_box_inside">
 			<b class="spaceUnder">Dispatch a new exploration ship</b><br>
+			{% if exploration_cost %}
+			It will cost {{exploration_cost}}% to explore the planet.<br>
+			{% endif %}
 			{{explo_ships}} ships availible<br>
 			<form action="fleetsend" method="POST">
 			{% csrf_token %}

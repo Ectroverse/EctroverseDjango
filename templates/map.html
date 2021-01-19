@@ -12,7 +12,7 @@
   const circle_radius = 0.1;
 
   const zoom = d3.zoom()
-      .scaleExtent([0.5, 50]) // max zoom out, max zoom in
+      .scaleExtent([1, 100]) // max zoom out, max zoom in
       .on("zoom", zoomed);
 
   const svg = d3.select("#mapdiv")
