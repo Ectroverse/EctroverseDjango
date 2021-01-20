@@ -185,6 +185,11 @@ class UserStatus(models.Model):
     fleet_readiness = models.IntegerField(default=100)
     psychic_readiness = models.IntegerField(default=100)
     agent_readiness = models.IntegerField(default=100)
+    
+    fleet_readiness_max = models.IntegerField(default=100)
+    psychic_readiness_max  = models.IntegerField(default=100)
+    agent_readiness_max  = models.IntegerField(default=100)
+
 
     # Research (names might seem verbose but it makes various spots in the code way less confusing to read)
     research_percent_military = models.IntegerField(default=0) # stored as integer, in percentage points
