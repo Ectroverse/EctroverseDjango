@@ -125,6 +125,7 @@ def choose_empire_race(request):
             empire1.save()
             status.race = request.POST['chose_race']
             status.empire = empire1
+            status.networth = 1
             status.save()
             for p in Planet.objects.filter(x=empire1.x, y=empire1.y):
                 if p.owner is None:
