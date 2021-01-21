@@ -57,12 +57,15 @@ Put your name after an item if you want to reserve it for yourself, not all item
 
 that's it!  without docker this would be a dozen steps
 
-## To rebuild the containers, like if a config setting changed
-
+## To rebuild the containers, like if a config setting changed (in project/requirements)
+First
+`docker-compose down`
+then
 `docker-compose up -d --no-deps --build`
 
 To rebuild only the python container:
 `docker-compose up -d --no-deps --build python`
+
 
 ## Check it's running
 
