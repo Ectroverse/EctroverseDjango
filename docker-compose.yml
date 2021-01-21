@@ -11,6 +11,7 @@ services:
         - ./static:/static
       depends_on:
         - python
+      restart: always
 
   db:
       image: postgres:12.0-alpine
@@ -24,6 +25,7 @@ services:
         POSTGRES_DB: djangodatabase
         POSTGRES_USER: dbadmin
         POSTGRES_PASSWORD: ${DBPASS} # defined in .env
+        restart: always
 
   python:
       build: ./project
@@ -35,6 +37,7 @@ services:
         - "8001" # this is used for the uwsgi to nginx interface, not the actual website
       depends_on:
         - db
+      restart: always
 
 # To persist the data beyond the life of the container we configured a volume. This config will bind postgres_data to the "/var/lib/postgresql/data/" directory in the container.
 volumes:
