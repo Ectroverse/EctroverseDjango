@@ -66,6 +66,12 @@ then
 To rebuild only the python container:
 `docker-compose up -d --no-deps --build python`
 
+## To extract the db (for backing up for example)
+to extract:
+`python manage.py dumpdata > db.json`
+
+to load extracted:
+`python manage.py loaddata db.json`
 
 ## Check it's running
 
