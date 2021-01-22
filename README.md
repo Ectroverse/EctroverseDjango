@@ -68,6 +68,7 @@ To rebuild only the python container:
 
 ## To extract the db (for backing up for example)
 If you are loading an old db on a new server, don't go through steps 3-7 
+Go to python container first: `docker exec -it ectroversedjango_python_1 /bin/bash`
 
 to extract:
 `python manage.py dumpdata --natural-foreign \
@@ -76,6 +77,9 @@ to extract:
 
 to load extracted:
 `python manage.py loaddata db.json`
+
+If you want to delete the DB:
+`python manage.py flush`
 
 ## Check it's running
 
