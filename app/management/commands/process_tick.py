@@ -87,9 +87,9 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             self.stdout.write("User: " + status.user_name)
             self.stdout.write("id: " + str(status.user.id))
 		
-	    status.fleet_readiness = min(fleet_readiness +2, status.fleet_readiness_max)
-	    status.psychic_readiness  = min(fleet_readiness +2, status.psychic_readiness_max)
-	    status.agent_readiness = min(fleet_readiness +2, status.agent_readiness_max)
+            status.fleet_readiness = min(fleet_readiness +2, status.fleet_readiness_max)
+            status.psychic_readiness  = min(fleet_readiness +2, status.psychic_readiness_max)
+            status.agent_readiness = min(fleet_readiness +2, status.agent_readiness_max)
             num_users_registered += 1
 
             # Pull out race info for this user
