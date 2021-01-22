@@ -40,7 +40,7 @@ Put your name after an item if you want to reserve it for yourself, not all item
 0. Copy .env.template to .env (`cp .env.template .env`) and change the secret key if you care about security
 1. `docker-compose up -d`
 2. `docker exec -it ectroversedjango_python_1 /bin/bash`
-3. `python manage.py makemigrations app`
+3. `python manage.py makemigrations app` (if you are loading an older db, check below in readme, don't do later steps)
 4. `python manage.py migrate`
 5. `python manage.py createsuperuser` create a user named admin, with whatever pass you want, you can skip email
 6. `python manage.py collectstatic --noinput`
@@ -67,8 +67,12 @@ To rebuild only the python container:
 `docker-compose up -d --no-deps --build python`
 
 ## To extract the db (for backing up for example)
+If you are loading an old db on a new server, don't go through steps 3-7 
+
 to extract:
-`python manage.py dumpdata > db.json`
+`python manage.py dumpdata --natural-foreign \
+   --exclude auth.permission --exclude contenttypes \
+   --indent 4 > db.json`
 
 to load extracted:
 `python manage.py loaddata db.json`
