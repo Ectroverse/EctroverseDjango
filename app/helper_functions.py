@@ -115,8 +115,8 @@ def split_fleets(fleets, split_pct):
 
 
 def explore_planets(fleets):
-    status = UserStatus.objects.get(user=fl.owner)
     for fl in fleets:
+        status = UserStatus.objects.get(user=fl.owner)
         try:
             planet = Planet.objects.get(x=fl.x, y=fl.y, i=fl.i)
         except Planet.DoesNotExist:
