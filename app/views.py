@@ -96,10 +96,17 @@ def headquarters(request):
     tick_time = RoundStatus.objects.get().tick_number
     week = tick_time % 52
     year = tick_time // 52
+    fresh_news = News.objects.filter(user1 = request.user, is_read = False)
+    old_news = News.objects.filter(user1 = request.user, is_read = True)
+    for n in fresh_news:
+        n.is_read = True
+    News.objects.bulk_update(fresh_news, ['is_read'])
     context = {"status": status,
                "page_title": "Headquarters",
                "week": week,
-               "year": year}
+               "year": year,
+               "fresh_news": fresh_news,
+               "old_news": old_news}
     return render(request, "headquarters.html", context)
 
 @login_required

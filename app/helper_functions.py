@@ -127,6 +127,19 @@ def explore_planets(fleets):
                 fl.delete()
                 planet.save()
                 status.save()
+                News.objects.create(user1 = fl.owner,
+                                    empire1 = status.empire,
+                                    news_type = 'SE',
+                                    tick_number = RoundStatus.objects.get().tick_number,
+                                    planet = planet)
+            else:
+                fl.command_order = 2
+                fl.save()
+                News.objects.create(user1 = fl.owner,
+                                    empire1 = status.empire,
+                                    news_type = 'UE',
+                                    tick_number = RoundStatus.objects.get().tick_number,
+                                    planet = planet)
 
 
 def calc_exploration_cost(status):

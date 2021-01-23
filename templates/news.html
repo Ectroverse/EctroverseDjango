@@ -1,0 +1,20 @@
+{% load mathfilters %}
+
+{% block content %}
+<br>
+	{% for n in news %}	
+		{% if n.news_type == 'SE' %}
+			<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+			Your exploration ship reached the <a href="/planet{{n.planet.id}}">planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}</a> and established a colony.
+			<br><br>
+		{% endif %}
+		{% if n.news_type == 'UE' %}
+			<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+			Your exploration ship reached the <a href="/planet{{n.planet.id}}">planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}</a>,
+			but the planet was already habited. The ship is now awaiting your orders in this solar system.
+			<br><br>
+		{% endif %}
+	
+	{% endfor %}
+
+{% endblock %}

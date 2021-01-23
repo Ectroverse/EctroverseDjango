@@ -2,6 +2,16 @@
 
 {% block content %}
 
+<script>
+function showDiv() {
+
+   if (document.getElementById('old_news').style.display == "block")
+		document.getElementById('old_news').style.display = "none";
+	else
+		document.getElementById('old_news').style.display = "block";
+}
+</script>
+
 <table cellspacing="0" cellpadding="0" width="90%" border="0" align="center"><tr>
 <td width="7" background="files?type=image&amp;name=i38.jpg">&nbsp;</td>
 <td bgcolor="#0b1119" align="center"><br>
@@ -40,10 +50,24 @@
 
 <br>
 <br>
-
-<b>No new reports</b>
+{% if fresh_news %}
+	{% include "news.html" with news=fresh_news %}
+{% else %}
+<b>No fresh reports</b>
+{% endif %}
 <br>
-<a href="news?2fix&amp;request=ajax" rel="ajaxpanel" data-loadtype="ajax">See all reports</a>
+
+<input type="button" value="See all reports" onclick="showDiv()" />
+
+<div id="old_news" style="display: none;">
+{% if old_news %}
+	{% include "news.html" with news=old_news %}
+{% else %}
+<b>No old reports</b>
+{% endif %}
+<div>
+
+
 <br><br></td><td width="7" background="files?type=image&amp;name=i43.jpg">&nbsp;</td></tr>
 </table>
 

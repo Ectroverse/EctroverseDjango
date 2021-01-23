@@ -100,6 +100,46 @@ class Empire(models.Model):
     empire_image = models.ImageField(upload_to='empire_images/', blank=True)
 
 
+class News(models.Model): # a single type of building under construction
+    user1 = models.ForeignKey(User, related_name='user11', on_delete=models.SET_NULL, blank=True, null=True,
+                                default=None)
+    user2 = models.ForeignKey(User, related_name='user22', on_delete=models.SET_NULL, blank=True, null=True,
+                                default=None)
+    empire1 = models.ForeignKey(Empire, related_name='empire11', on_delete=models.SET_NULL, blank=True, null=True,
+                                default=None)
+    empire2 = models.ForeignKey(Empire, related_name='empire22', on_delete=models.SET_NULL, blank=True, null=True,
+                                default=None)
+    class NewsType(models.TextChoices):
+        SA = 'SA', _('Successfull Attack')
+        UA = 'UA', _('Unsuccessfull Attack')
+        SD = 'SD', _('Successfull Defence')
+        UD = 'UD', _('Unsuccessfull Defence')
+        SE = 'SE', _('Successfull Exploration')
+        UE = 'UE', _('Unsuccessfull Exploration')
+        SO = 'SO', _('Successfull Specop Attack')
+        UO = 'UO', _('Unsuccessfull Specop Attack')
+        DS = 'DS', _('Successfull Specop Defence')
+        DU = 'DU', _('Unsuccessfull Specop Defence')
+        SI = 'SI', _('Sent aid')
+        RA = 'RA', _('Requested aid')
+        M = 'M', _('Market operation')
+        N = 'N', _('None')
+        BB = 'BB', _('Buildings Built')
+        UB = 'UB', _('Units Built')
+        MR = 'MR', _('Message Reseived')
+        RC = 'RC', _('Relation Changed')
+        FM = 'FM', _('Fleet Merged')
+        FJ = 'FJ', _('Fleet Joined Main')
+        E = 'E', _('Something Extra')
+
+    news_type = models.CharField(max_length=2, choices=NewsType.choices, default=NewsType.N)
+    tick_number = models.IntegerField(default=0)
+    is_read = models.BooleanField(default=False)
+    planet = models.ForeignKey(Planet, on_delete=models.CASCADE)
+    fleet1 = models.TextField()
+    fleet2 = models.TextField()
+    extra_info = models.TextField()
+
 class UserStatus(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE) # when referenced object is deleted, also delete this
 

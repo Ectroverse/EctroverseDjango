@@ -7,3 +7,4 @@ python-dotenv==0.14.0
 psycopg2
 psycopg2-binary==2.8.6
 miniball==1.0.4
+django-mathfilters

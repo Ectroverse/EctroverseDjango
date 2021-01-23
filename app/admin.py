@@ -13,7 +13,7 @@ admin.site.register(RoundStatus)
 admin.site.register(Empire)
 admin.site.register(Relations)
 admin.site.register(Messages)
-#admin.site.register(NewsFeed)
+admin.site.register(News)
 
 class YourModelAdmin(admin.ModelAdmin):
     formfield_overrides = {
