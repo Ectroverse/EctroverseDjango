@@ -4,14 +4,14 @@ Put your name after an item if you want to reserve it for yourself, not all item
 
 #### v0.1 Remaining Items
 
-- fleets move/exploration/attack (Vladimir)
+- fleets move/exploration/attack (Vladimir) - done
 - battle sequence (Rexer already started it)
 - operations- just scouting for now
-- news
-- auto tick update via cronjob (Rexer)
+- news - in progress (Vladimir)
+- auto tick update via cronjob (Rexer) - done
 - 2 players registered into 1 empire? (Vladimir)
 - when a player is deleted from an empire decrease its number of players (Vladimir)
-- give portal on home planet, fix empire 0 (or 1 whatever) for admin
+- give portal on home planet, fix empire 0 (or 1 whatever) for admin - done
 
 #### v0.2 Remaining Items
 
