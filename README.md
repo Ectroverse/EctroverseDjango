@@ -76,10 +76,10 @@ to extract:
    --indent 4 > db.json`
 
 to load extracted:
+Delete the existing db first:
+``python manage.py flush`
+then:
 `python manage.py loaddata db.json`
-
-If you want to delete the DB:
-`python manage.py flush`
 
 ## Check it's running
 
