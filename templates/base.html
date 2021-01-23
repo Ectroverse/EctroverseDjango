@@ -35,23 +35,27 @@ body
  @media only screen and (max-width : 660px) {
 	.left_box, .right_box {
 		width: 100%;
-		}	
-	
+		}
+
 	.center_box_inside {
 		text-align: left;
 	}
-	
+
 	.show_only_on_wide_scrn{
 		display: none;
-	}	
+	}
  }
- 
+
  @media only screen and (min-width : 661px) {
 		.show_only_on_mobile{
 			display: none;
 		}
 	}
- }
+
+.headerplanets{
+  vertical-align: middle;
+}
+
 </style>
 
 <!-- Tick Timer Script -->
@@ -74,21 +78,19 @@ function fixTimeDigits(i) {
 }
 
 // Toggle check boxes, used on various pages
-	function toggleForm(form_name) { 
-			
+	function toggleForm(form_name) {
+
 		var selectElements = document.forms[form_name].elements;
 		for(var i = 0; i < selectElements.length; i++) {
 			if(selectElements[i].type == "checkbox") {
-				selectElements[i].checked = !selectElements[i].checked; 
-			}  
+				selectElements[i].checked = !selectElements[i].checked;
+			}
 		}
 	}
 
 function changeslider(newValue,field) {
 	window.document.getElementById(field).value=newValue;
 }
-
-
 </script>
 
 
@@ -99,7 +101,7 @@ function changeslider(newValue,field) {
    width:100%;
    margin:0 0 50px 0;
    max-width:100%;
-   overflow-x:hidden;" 
+   overflow-x:hidden;"
 onload="startTime()">
 
 {% if user.is_authenticated %}
@@ -123,14 +125,14 @@ onload="startTime()">
                 <br>
                 <a href="/planets">Planets</a><br>
                 <a href="/empire{{status.empire_id}}">Empire</a>
-                <br>&nbsp;&nbsp;- 
-                <a href="/famaid">Send aid</a><br>&nbsp;&nbsp;- 
-                <a href="/famgetaid">Receive aid</a><br>&nbsp;&nbsp;- 
-                <a href="/famnews" style="color:red;">News</a><br>&nbsp;&nbsp;- 
+                <br>&nbsp;&nbsp;-
+                <a href="/famaid">Send aid</a><br>&nbsp;&nbsp;-
+                <a href="/famgetaid">Receive aid</a><br>&nbsp;&nbsp;-
+                <a href="/famnews" style="color:red;">News</a><br>&nbsp;&nbsp;-
                 <a href="/relations">Relations</a><br>
                 <a href="/fleets">Fleets</a><br>
-                <a href="/map">Galaxy map</a><br>&nbsp;&nbsp;- 
-                <a href="/map">Full map</a><br>&nbsp;&nbsp;- 
+                <a href="/map">Galaxy map</a><br>&nbsp;&nbsp;-
+                <a href="/map">Full map</a><br>&nbsp;&nbsp;-
                 <a href="/observessurveys" style="color:red;">Scouting</a><br>
                 <a href="/research">Research</a><br>
                 <a href="/spec" style="color:red;">Operations</a><br></font>
@@ -151,9 +153,9 @@ onload="startTime()">
                 <br><br>
                 <!---<form action="search?2fix" method="POST"><input type="text" name="search" size="8"><br>
                 <input type="submit" size="2" value="OK"></form><br> -->
-                <a href="https://discord.gg/"  style="color:red;" target="_blank">Discord</a><br>
-                <a href="guide" style="color:red;">Guide</a><br>
-                <a href="facebook"  style="color:red;" target="_blank">Facebook</a><br></font></b>
+                <a href="https://discord.gg/8Pkpqtd?2fix" target="_blank">Discord</a><br>
+                <a href="/guide">Guide</a><br>
+                <a href="https://web.facebook.com/groups/803616616363658?2fix" target="_blank">Facebook</a><br></font></b>
                 </td>
                 </tr>
                 </tbody>
@@ -163,62 +165,9 @@ onload="startTime()">
             <tr><td height="75" style="background-repeat:no-repeat;" background="{% static 'files_014.jpg' %}">&nbsp;</td></tr>
             </tbody>
         </table>
-	</div>
-	
-	 <!-- mobile version of sidebar -->
-	<div class="row hidden-lg hidden-md hidden-sm">
-	
-	<div class="container">
+  </div>
 
-    
-	<div class="dropdown keep-open">
-      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      &nbsp;&nbsp;Menu
-      <span class="caret"></span></button>
-    
-            <ul class="dropdown-menu" role="menu"  style="background-color: black;">
-
-            <li><a href="/headquarters">Headquarters</a></li>
-            <li><a href="/council">Council</a></li>
-            <li><a href="/units">Units</a></li>
-            <li><a href="/planets">Planets</a></li>
-            <li><a href="/empire{{status.empire_id}}">Empire</a>
-                <ul>
-                <li><a href="/famaid">Send aid</a></li>
-                <li><a href="/famgetaid">Receive aid</a></li>
-                <li><a href="/famnews" style="color:red;">News</a></li>
-                <li><a href="/relations">Relations</a></li>
-                </ul>
-            </li>
-            <li><a href="/fleets">Fleets</a>
-            <li><a href="/map">Galaxy map</a>
-                <ul>
-                <li><a href="/map">Full map</a></li>
-                <li><a href="/observessurveys" style="color:red;">Scouting</a></li>
-                </ul>
-            <li><a href="/research">Research</a>
-            <li><a href="/spec" style="color:red;">Operations</a>
-			<li><a href="/messages">Messages</a></li>
-            <li><a href="/rankings">Faction rankings</a></li>
-            <li><a href="/empire_ranking">Empire rankings</a></li>
-            <li><a href="/account">Account</a></li>
-            <br>
-            <li><a href="/?next={{request.path}}">Logout</a></li>
-            <br>
-            <!--  <form action="search?2fix" method="POST"><input type="text" name="search" size="8"><br>
-            <input type="submit" size="2" value="OK"></form></li> -->
-            <li><a href="https://discord.gg/"  style="color:red;" target="_blank">Discord</a></li>
-            <li><a href="guide" style="color:red;">Guide</a></li>
-            <li><a href="facebook"  style="color:red;" target="_blank">Facebook</a></b></li>
-            </ul>
-
-         </div>
-	</div>
-	</div>
-
-
-	
-	<div class="content col-lg-10 col-md-10 col-sm-10 col-xs-12">
+  <div class="content col-lg-10 col-md-10 col-sm-10 col-xs-12">
         <!-- Topbar content -->
         <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
             <tbody><tr><td style="min-width: 35px;" width="35" height="63" background="{% static 'files_018.png' %}" background-repeat: no-repeat;></td><td>
@@ -228,61 +177,154 @@ onload="startTime()">
                     <tbody><tr><td width="41" height="21" background="{% static 'i03.jpg' %}"></td>
                     <td background="{% static 'files_008' %}">
                     <table style="white-space: nowrap; overflow: auto; " width="100%" cellspacing="0" cellpadding="0" border="0"><tbody><tr><td width="25%" align="center"><font size="1"><b>Networth : <span id="headernetworth">{{status.networth}} </span>
-                        </b></font></td><td width="30%" align="center">
+                    </b></font></td><td width="25%" align="center">
                         <font size="1"><b> Next tick: <span id="headerTime">
                         <!-- Tick timer done with javascript --><div style="display: inline" id="txt"></div>
-                         </span></b></font></td><td width="25%" align="center"><font size="1"><b>Population : <span id="headerpopulation">{{status.population}}</span>0</b>
-                        </font></td><td width="20%" align="center"><font size="1"><b>Fleet readiness: <span id="headerfleetready">{{status.fleet_readiness}}</span>%</b>
-                        </font></td></tr></tbody>
+                        </td>
+                          <td width="25%" align="center"><font size="1"><b>Population : <span id="headerpopulation">{{status.population}}</span>0</b>
+                        </font></td><td width="25%" align="center"><div class="row col-lg-2 col-md-2 col-sm-2 hidden-xs"><font size="1"><b>Fleet readiness: <span id="headerfleetready">{{status.fleet_readiness}}</span>%</b></div>
+                        <div class="content hidden-lg hidden-md hidden-sm">
+                          <div class="headerplanets">
+                          <font size="1.5"><b>Planets: <span id="headerplanets">{{status.num_planets}}</span></b></font>
+                        </div>
+                      </div></font></td></tr></tbody>
                     </table>
                     </td><td width="78" height="21" background="{% static 'files_005' %}"></td></tr></tbody>
                 </table>
                 </td></tr><tr><td width="100%" align="center">
                 <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
                     <tbody><tr>
-                    <td onclick="document.location='hq?2fix'" id="headermail" style="background-image:url('/static/i09.jpg');" border="0" class="href" width="41" height="42"></td>
-                    <td onclick="document.location='hq?2fix'" id="headerbuild" style="background-image:url('/static/i10.jpg');" border="0" class="href" width="40" height="42"></td>
-                    <td onclick="document.location='hq?2fix'" id="headeraid" style="background-image:url('/static/i11.jpg');" border="0" class="href" width="39" height="42"></td>
-                    <td onclick="document.location='hq?2fix'" id="headerfleet" style="background-image:url('/static/i12.jpg');" border="0" class="href" width="39" height="42"></td>
+                    <td onclick="document.location='headquarters'" id="headermail" style="background-image:url('/static/i09.jpg');" border="0" class="href" width="41" height="42"></td>
+                    <td onclick="document.location='headquarters'" id="headerbuild" style="background-image:url('/static/i10.jpg');" border="0" class="href" width="40" height="42"></td>
+                    <td onclick="document.location='headquarters'" id="headeraid" style="background-image:url('/static/i11.jpg');" border="0" class="href" width="39" height="42"></td>
+                    <td onclick="document.location='headquarters'" id="headerfleet" style="background-image:url('/static/i12.jpg');" border="0" class="href" width="39" height="42"></td>
                     <td width="18" height="42" background="{% static 'files_016' %}"></td><td background="{% static 'files_015' %}" align="left ">
                     <table width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
-
                         <tr>
-                        <td width="40%" nowrap="nowrap" align="center"><font size="1"><b>Energy: <span id="headerenergy">{{status.energy}}</span><br>Mineral: <span id="headermineral">{{status.minerals}}</span></b></font></td>
-                        <td width="30%" nowrap="nowrap" align="center"><font size="1"><b>Crystal: <span id="headercrystal">{{status.crystals}}</span><br>Ectrolium: <span id="headerectrolium">{{status.ectrolium}}</span></b></font></td>
-                        <td width="30%" nowrap="nowrap" align="center"><font size="1"><b>Psychics readiness: <span id="headerPsychicsready">{{status.psychic_readiness}}</span>%<br>Agents readiness: <span id="headerAgentsready">{{status.agent_readiness}}</span>%</b></font>
-                        <td><img src="{% static 'files_023' %}" height="43" background-repeat: no-repeat;>
+                        <td width="33%" nowrap="nowrap" align="center">
+                          <div class="row col-lg-2 col-md-2 col-sm-2 hidden-xs">
+                            <textalign="center"><font size="1"><b>Energy: <span id="headerenergy">{{status.energy}}</span>
+                              <br>Mineral: <span id="headermineral">{{status.minerals}}</span></b></textalign>
+                            </div>
+                              <div class="row hidden-lg hidden-md hidden-sm">
+                              <div class="container">
+                              <div class="dropdown keep-open">
+                                  <button type="button" class="btn btn-primary dropdown-toggle" style="background-image:url('../static/dropbutton.png')" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  Menu
+                                  <span class="caret"></span></button>
+
+                                        <ul class="dropdown-menu" role="menu"  style="background-image: url(../static/drop.png);">
+
+                                        <li><a href="/headquarters">Headquarters</a></li>
+                                        <li><a href="/council">Council</a></li>
+                                        <li><a href="/units">Units</a></li>
+                                        <li><a href="/planets">Planets</a></li>
+                                        <li><a href="/empire{{status.empire_id}}">Empire</a>
+                                            <ul>
+                                            <li><a href="/famaid">Send aid</a></li>
+                                            <li><a href="/famgetaid">Receive aid</a></li>
+                                            <li><a href="/famnews" style="color:red;">News</a></li>
+                                            <li><a href="/relations">Relations</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="/fleets">Fleets</a>
+                                        <li><a href="/map">Galaxy map</a>
+                                            <ul>
+                                            <li><a href="/map">Full map</a></li>
+                                            <li><a href="/observessurveys" style="color:red;">Scouting</a></li>
+                                            </ul>
+                                        <li><a href="/research">Research</a>
+                                        <li><a href="/spec" style="color:red;">Operations</a>
+                                  <li><a href="/messages">Messages</a></li>
+                                        <li><a href="/rankings">Faction rankings</a></li>
+                                        <li><a href="/empire_ranking">Empire rankings</a></li>
+                                        <li><a href="/account">Account</a></li>
+                                        <br>
+                                        <li><a href="/?next={{request.path}}">Logout</a></li>
+                                        <br>
+                                        <!--  <form action="search?2fix" method="POST"><input type="text" name="search" size="8"><br>
+                                        <input type="submit" size="2" value="OK"></form></li> -->
+                                        <li><a href="https://discord.gg/8Pkpqtd?2fix" target="_blank">Discord</a></li>
+                                        <li><a href="/guide">Guide</a></li>
+                                        <li><a href="https://web.facebook.com/groups/803616616363658?2fix" target="_blank">Facebook</a></b></li>
+                                        </ul>
+
+                                     </div>
+                                   </div></div></font></td>
+                        <td width="34%" nowrap="nowrap" align="left">
+                          <div class="row col-lg-2 col-md-2 col-sm-2 hidden-xs">
+                          <font size="1"><b>Crystal: <span id="headercrystal">{{status.crystals}}</span><br>Ectrolium: <span id="headerectrolium">{{status.ectrolium}}</span></b>
+                          </div>
+                          <div class="row hidden-lg hidden-md hidden-sm">
+                          <div class="container">
+
+
+                            <div class="dropdown keep-open">
+                                <button type="button" class="btn btn-primary dropdown-toggle" style="background-image:url('../static/dropbutton.png')" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Resources
+                                <span class="caret"></span></button>
+
+                                        <ul class="dropdown-menu" role="menu"  style="background-image: url(../static/drop.png);"><font color="white">
+
+                                        <li><b><img src="../static/pr0.gif" alt="Energy">: <span id="headerenergy">{{status.energy}}</span></b></li>
+                                        <li><b><img src="../static/pr1.gif" alt="Mineral">: <span id="headermineral">{{status.minerals}}</span></b></li>
+                                        <li><b><img src="../static/pr2.gif" alt="Crystal">: <span id="headercrystal">{{status.crystals}}</span></b></li>
+                                        <li><b><img src="../static/pr3.gif" alt="Ectrolium">: <span id="headerectrolium">{{status.ectrolium}}</span></b></li>
+                                      </font></ul>
+
+                            </div>
+                            </div>
+                          </div></font></td>
+                        <td width="33%" nowrap="nowrap" align="left">
+                          <div class="row col-lg-2 col-md-2 col-sm-2 hidden-xs">
+                          <font size="1"><b>Psychics readiness: <span id="headerPsychicsready">{{status.psychic_readiness}}</span>%
+                            <br>Agents readiness: <span id="headerAgentsready">{{status.agent_readiness}}</span>%</b></div>
+                          <div class="row hidden-lg hidden-md hidden-sm">
+                          <div class="container">
+
+
+                            <div class="dropdown keep-open">
+                                <button type="button" class="btn btn-primary dropdown-toggle" style="background-image:url('../static/dropbutton.png')" style="border:none;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Readiness
+                                <span class="caret"></span></button>
+
+                                        <ul class="dropdown-menu" role="menu"  style="background-image: url(../static/drop.png);"><font color="white">
+
+                                        <li><b>FR: <span id="headerfleetready">{{status.fleet_readiness}}</span>%</b></li>
+                                        <li><b>AR: <span id="headerAgentsready">{{status.agent_readiness}}</span>%</b></li>
+                                        <li><b>PR: <span id="headerPsychicsready">{{status.psychic_readiness}}</span>%</b></li>
+                                      </font></ul>
+
+                            </div>
+                          </div></div></font>
+                        <td align="right"><img src="{% static 'files_023' %}" height="42" background-repeat: no-repeat;>
                         </tr>
                         </tbody>
                     </table>
         </table>
+      </tr>
+      </tbody>
+  </table>
+  </table>
+  </td></tr></tbody>
+  </table>
+  </td></tr></tbody>
+  </table>
+
+  <br>
 
 
 
-                        </tr>
-                        </tbody>
-                    </table>
-                </table>
-                </td></tr></tbody>
-            </table>
-            </td></tr></tbody>
-        </table>
+<!-- Main area content -->
+{% include "box_top.html" with heading=page_title minwidth="360px" textalign="center"  %}
+    {% block content %}
+    {% endblock %}
+{% include "box_bottom.html" %}
 
-
-
-        <br>
-
-
-
-        <!-- Main area content -->
-		{% include "box_top.html" with heading=page_title minwidth="360px" textalign="center"  %}
-            {% block content %}
-            {% endblock %}
-		{% include "box_bottom.html" %}
-
-	</div>
-
+  </div>
+  </div>
 </div>
+
 
 
 
@@ -292,7 +334,7 @@ onload="startTime()">
 YOU SHOULD NEVER BE ABLE TO GET TO THIS PAGE!! THE VIEW REQUIRES AUTHENTICATION!
 
 
-{% endif %} 
+{% endif %}
 
 
 </body>
