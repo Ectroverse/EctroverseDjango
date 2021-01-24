@@ -126,6 +126,7 @@ class News(models.Model): # a single type of building under construction
         N = 'N', _('None')
         BB = 'BB', _('Buildings Built')
         UB = 'UB', _('Units Built')
+        MS = 'MS', _('Message Sent')
         MR = 'MR', _('Message Reseived')
         RC = 'RC', _('Relation Changed')
         FM = 'FM', _('Fleet Merged')
@@ -134,11 +135,14 @@ class News(models.Model): # a single type of building under construction
 
     news_type = models.CharField(max_length=2, choices=NewsType.choices, default=NewsType.N)
     tick_number = models.IntegerField(default=0)
+    date_and_time = models.DateTimeField(blank=True, null=True, default=None)
     is_read = models.BooleanField(default=False)
-    planet = models.ForeignKey(Planet, on_delete=models.CASCADE)
-    fleet1 = models.TextField()
-    fleet2 = models.TextField()
-    extra_info = models.TextField()
+    is_personal_news = models.BooleanField(default=False)
+    is_empire_news = models.BooleanField(default=False)
+    planet = models.ForeignKey(Planet, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    fleet1 = models.TextField(blank=True, null=True, default=None)
+    fleet2 = models.TextField(blank=True, null=True, default=None)
+    extra_info = models.TextField(blank=True, null=True, default=None)
 
 class UserStatus(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE) # when referenced object is deleted, also delete this
@@ -149,6 +153,12 @@ class UserStatus(models.Model):
     empire = models.ForeignKey(Empire, on_delete=models.SET_NULL, blank=True, null=True, default=None)
     home_planet = models.ForeignKey(Planet, on_delete=models.SET_NULL, blank=True,
                                     null=True)  # only time we delete planets will be mid-round
+
+    #flags section 0 - no flag, 1 - green flag, 2-yellow flag, 3- red flag
+    mail_flag = models.IntegerField(default=0)
+    construction_flag = models.IntegerField(default=0)
+    economy_flag = models.IntegerField(default=0)
+    military_flag = models.IntegerField(default=0)
 
     # empire politics section
     class EmpireRoles(models.TextChoices):

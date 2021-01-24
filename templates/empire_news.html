@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load mathfilters %}
+
+{% block content %}
+
+<style>
+.news_parent_container{
+	width:100%;
+	float:left;
+	margin: 5px auto;
+}
+
+.left_news{
+	width: 10%;
+	min-width: 55px;
+	float:left;
+}
+
+.right_news{
+	width: 90%;
+	float:left;
+	text-align: left;
+}
+
+@media all and (max-width: 660px) {
+	.left_news{
+		width: 100%;
+		margin: 0 auto;
+	}
+	right_news{
+		width: 100%;
+		text-align: center !important;
+	}
+}
+
+@media all and (min-width: 661px) {
+
+	.left_news{
+		width: 10%;
+		margin: 0 auto;
+	}
+	
+	right_news{
+		width: 90%;
+		text-align: left !important;
+	}
+}
+
+</style>
+
+<br>
+
+	{% for n in news %}	
+		{% if n.news_type == 'SE' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/fn0.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				An exploration ship of {{n.user1.userstatus.user_name}} reached the <a href="/planet{{n.planet.id}}">
+				planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}</a> and established a colony.</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'UE' %}
+			<div class="news_parent_container">
+
+				<div class="left_news"><img src="{% static '/news/fn1.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				An exploration ship of {{n.user1.userstatus.user_name}} reached the <a href="/planet{{n.planet.id}}">
+				planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}</a> but the planet was already habited.</div>
+			</div>
+		{% endif %}
+	
+	{% endfor %}
+
+{% endblock %}

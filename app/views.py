@@ -96,8 +96,8 @@ def headquarters(request):
     tick_time = RoundStatus.objects.get().tick_number
     week = tick_time % 52
     year = tick_time // 52
-    fresh_news = News.objects.filter(user1 = request.user, is_read = False)
-    old_news = News.objects.filter(user1 = request.user, is_read = True)
+    fresh_news = News.objects.filter(user1 = request.user, is_read = False, is_personal_news = True).order_by('-date_and_time')
+    old_news = News.objects.filter(user1 = request.user, is_read = True, is_personal_news = True).order_by('-date_and_time')
     for n in fresh_news:
         n.is_read = True
     News.objects.bulk_update(fresh_news, ['is_read'])
@@ -108,6 +108,16 @@ def headquarters(request):
                "fresh_news": fresh_news,
                "old_news": old_news}
     return render(request, "headquarters.html", context)
+
+@login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
+def famnews(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    empire_news = News.objects.filter(empire1 = status.empire, is_empire_news = True).order_by('-date_and_time')
+    context = {"status": status,
+               "page_title": "Empire News",
+               "news": empire_news}
+    return render(request, "empire_news.html", context)
 
 @login_required
 @user_passes_test(reverse_race_check, login_url="/headquarters")
@@ -1465,6 +1475,22 @@ def compose_message(request, user_id):
                                         message = msg,
                                         date_and_time = datetime.now())
                 msg_on_top = 'Message sent!'
+                News.objects.create(user1 = request.user,
+                                    user2 = User.objects.get(id=request.POST['recipient']),
+                                    news_type = 'MS',
+                                    date_and_time=datetime.now(),
+                                    is_personal_news=True,
+                                    is_empire_news=False,
+                                    tick_number = RoundStatus.objects.get().tick_number
+                                    )
+                News.objects.create(user1 = User.objects.get(id=request.POST['recipient']),
+                                    user2 = request.user,
+                                    news_type = 'MR',
+                                    date_and_time=datetime.now(),
+                                    is_personal_news=True,
+                                    is_empire_news=False,
+                                    tick_number = RoundStatus.objects.get().tick_number
+                                    )
             else:
                 msg_on_top = 'You cannot send an empty message!'
 

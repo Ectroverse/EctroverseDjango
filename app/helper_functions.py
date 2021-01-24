@@ -126,18 +126,27 @@ def explore_planets(fleets):
                 planet.owner = fl.owner
                 fl.delete()
                 planet.save()
+                status.military_flag = 1;
                 status.save()
                 News.objects.create(user1 = fl.owner,
                                     empire1 = status.empire,
                                     news_type = 'SE',
+                                    date_and_time=datetime.now(),
+                                    is_personal_news=True,
+                                    is_empire_news=True,
                                     tick_number = RoundStatus.objects.get().tick_number,
                                     planet = planet)
             else:
                 fl.command_order = 2
                 fl.save()
+                status.military_flag = 2;
+                status.save()
                 News.objects.create(user1 = fl.owner,
                                     empire1 = status.empire,
                                     news_type = 'UE',
+                                    date_and_time=datetime.now(),
+                                    is_personal_news = True,
+                                    is_empire_news = True,
                                     tick_number = RoundStatus.objects.get().tick_number,
                                     planet = planet)
 

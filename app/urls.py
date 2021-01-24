@@ -47,6 +47,7 @@ urlpatterns = [
     path('fleets_orders', views.fleets_orders, name='fleets_orders'),
     path('fleets_orders_process', views.fleets_orders_process, name='fleets_orders_process'),
     path('fleets_disband', views.fleets_disband, name='fleets_disband'),
+	path('famnews', views.famnews, name='famnews'),
 ]
 
 if settings.DEBUG:
