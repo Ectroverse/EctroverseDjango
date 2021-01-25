@@ -19,15 +19,19 @@
 <br>
 
 <tr>
+<td ></td>
 <td ><b>Unit</b></td>
 <td ><b>Cost</b></td>
 <td ><b>Owned</b></td>
 <td ><b>Build</b></td>
 </tr>
 
+
+
 {% for unit in unit_dict %}
     {% if unit.cost == None %}
         <tr>
+		<td><img src="{% static '/units/'|add:unit.label|add:'.png' %}" width="70" height="70"></td>
         <td style="padding:10px" valign="top"><font color="#FFFFFF">{{unit.label}}</font></td>
         <td style="padding:10px" valign="top" nowrap><font color="#FF0000">Unavailable<br>Tech too low</font></td>
         <td style="padding:10px" valign="top" align="center">{{unit.owned}}</td>
@@ -35,6 +39,7 @@
         </tr>
 	{% else %}
         <tr>
+		<td><img src="{% static '/units/'|add:unit.label|add:'.png' %}" width="70" height="70"></td>
         <td style="padding:10px" valign="top"><font color="#FFFFFF">{{unit.label}}</font></td>
         <td style="padding:10px" valign="top" nowrap>
         {% for resource in unit.cost %}

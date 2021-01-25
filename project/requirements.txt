@@ -1,3 +1,4 @@
+pip
 Django==3.1
 uwsgi==2.0.19
 numpy==1.19.1
@@ -6,5 +7,5 @@ django-tables2==2.3.1
 python-dotenv==0.14.0
 psycopg2
 psycopg2-binary==2.8.6
-miniball==1.0.4
+miniball
 django-mathfilters
