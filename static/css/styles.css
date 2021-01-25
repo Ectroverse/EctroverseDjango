@@ -64,6 +64,11 @@ strikeout {
 	margin-right: auto;
 }
 
+.center_table {
+  margin-left: auto; 
+  margin-right: auto;
+}
+
 .styled-table {	
   td {
     padding-right: 10px;
@@ -503,14 +508,33 @@ label {
   padding: 3px;
 }
 
-footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 49px;
-  background-image: url("/static/ectro_12small.jpg"); 
-  display: block;
+
+.footer {
+   height: 49px;
+   position: fixed;
+   left: 0;
+   bottom: 0;
+   width: 100%;
+   color: white;
+   background-image: url("/static/ectro_12small.jpg"); 
 }
+
+.content-wrap {
+    /* Footer height */
+ display: flex;
+}
+
+.parent_container{
+	width: 100%;
+	height: 100%;
+	position: relative;
+	overflow:hidden;
+}
+
+.right_side{
+	width:100%;
+}
+
 
 img#footer_img_left{
 	box-sizing:  content-box ;

@@ -34,19 +34,6 @@ body
     background-image:url("/static/background.gif");
 }
 
-.parent_container{
-	width:100%;
-	position: relative;
-}
-
-.left_menu_large_scrn{
-	position: absolute;
-}
-
-.right_side{
-	position: absolute;
-	right: 0px;
-}
 
 
 @media all and (max-width: 660px) {
@@ -127,8 +114,8 @@ function changeslider(newValue,field) {
 
 </head>
 
-<body style="margin:auto;
-   display: inline-block;
+
+<body style="
    width:100%;
    margin:0 0 50px 0;
    max-width:100%;
@@ -138,8 +125,10 @@ onload="startTime()">
 {% if user.is_authenticated %}
 
 
+
 <div class="parent_container">
-	<div class="left_menu_large_scrn"> <!-- Hide on mobile -->
+<div class="content-wrap">
+		<div class="left_menu_large_scrn"> <!-- Hide on mobile -->
         <!-- Sidebar content -->
         <table style="text-align:left;line-height:120%;" cellspacing="0" cellpadding="0">
             <tbody>
@@ -199,35 +188,23 @@ onload="startTime()">
 
   <div class="right_side">
        {% include "header.html" %}
-
-
-
-<!-- Main area content -->
-{% include "box_top.html" with heading=page_title minwidth="360px" textalign="center"  %}
-    {% block content %}
-    {% endblock %}
-{% include "box_bottom.html" %}
-
+	<!-- Main area content -->
+	{% include "box_top.html" with heading=page_title minwidth="360px" textalign="center"  %}
+		{% block content %}
+		{% endblock %}
+	{% include "box_bottom.html" %}
   </div>
 </div>
-</div>
 
-
-
-
+{% include "footer.html" %}
 
 {% else %}
 
 YOU SHOULD NEVER BE ABLE TO GET TO THIS PAGE!! THE VIEW REQUIRES AUTHENTICATION!
 
-
 {% endif %}
 
+</div>
 
 </body>
-
-<footer>
-{% include "footer.html" %}
-</footer>
-
 </html>

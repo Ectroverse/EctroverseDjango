@@ -4,7 +4,7 @@ import numpy as np
 import miniball
 from collections import defaultdict
 from .map_settings import *
-
+from datetime import datetime
 
 def give_first_planet(user, status, planet):
     planet.solar_collectors = staring_solars
@@ -63,8 +63,6 @@ def generate_fleet_order(fleet, target_x, target_y, speed, order_type, *args):
     print(fleet.current_position_x,fleet.current_position_y)
     min_dist = np.sqrt((fleet.current_position_x - float(target_x)) ** 2 +
                        (fleet.current_position_y - float(target_y)) ** 2)
-    prit("------------------------------------------------------")
-    print("min_dist",min_dist,speed)
     fleet.ticks_remaining = int(np.ceil((min_dist / speed) - 0.001))  # due to rounding and
     # floating points the fleet travel time becomes more than it should, hence the subtraction
     fleet.command_order = order_type

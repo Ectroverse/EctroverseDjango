@@ -22,6 +22,14 @@
 			You received a message from {{n.user2.userstatus.user_name}}.
 			<br><br>
 		{% endif %}
+		{% if n.news_type == 'RA' %}
+			{{n.user1}} has requested an aid shipment of {{n.extra_info}} from you.
+			<br><br>
+		{% endif %}
+		{% if n.news_type == 'SI' %}
+			{{n.user1}} has sent you an aid shipment of {{n.extra_info}}.
+			<br><br>
+		{% endif %}
 	
 	{% endfor %}
 

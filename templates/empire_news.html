@@ -55,7 +55,7 @@
 	{% for n in news %}	
 		{% if n.news_type == 'SE' %}
 			<div class="news_parent_container">
-				<div class="left_news"><img src="{% static '/news/fn0.gif' %}"></div>
+				<div class="left_news"><img src="{% static '/news/successfull_exploration.gif' %}"></div>
 				<div class="right_news">
 				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
 				An exploration ship of {{n.user1.userstatus.user_name}} reached the <a href="/planet{{n.planet.id}}">
@@ -64,14 +64,136 @@
 		{% endif %}
 		{% if n.news_type == 'UE' %}
 			<div class="news_parent_container">
-
-				<div class="left_news"><img src="{% static '/news/fn1.gif' %}"></div>
+				<div class="left_news"><img src="{% static '/news/uncessessfull_exploration.png' %}"></div>
 				<div class="right_news">
 				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
 				An exploration ship of {{n.user1.userstatus.user_name}} reached the <a href="/planet{{n.planet.id}}">
 				planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}</a> but the planet was already habited.</div>
 			</div>
 		{% endif %}
+		{% if n.news_type == 'RWD' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/war_declared.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{% if current_empire == n.empire1 %}
+					Your empire has declared war on empire {{n.empire2.number}}!
+				{% else %}
+					Empire {{n.empire1.number}} declared war on your empire!
+				{% endif %}
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'RNP' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/nap_offered.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{% if current_empire == n.empire1 %}
+					Your empire has offered a {{n.extra_info}} non-aggression pact to empire {{n.empire2.number}}!
+				{% else %}
+					Empire {{n.empire1.number}} has offered a {{n.extra_info}} non-aggression pact!
+				{% endif %}
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'RAP' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/ally_offered.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{% if current_empire == n.empire1 %}
+					Your empire has offered an alliance to empire {{n.empire2.number}}!
+				{% else %}
+					Empire {{n.empire1.number}} has offered an alliance!
+				{% endif %}
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'RWE' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/war_undeclared.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{% if current_empire == n.empire1 %}
+					Your war with {{n.empire2.number}} has ended!
+				{% else %}
+					Your war with {{n.empire1.number}} has ended!
+				{% endif %}
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'RAE' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/ally_cancelled.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{% if current_empire == n.empire1 %}
+					Your empire cancelled an alliance with empire {{n.empire2.number}}!
+				{% else %}
+					Empire {{n.empire1.number}} cancelled an alliance with your empire!
+				{% endif %}
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'RNE' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/nap_cancelled.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{% if current_empire == n.empire1 %}
+					Your empire cancelled a non-aggression pact with empire{{n.empire2.number}}!
+				{% else %}
+					Empire {{n.empire1.number}} cancelled a non-aggression pact with your empire!
+				{% endif %}
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'RAD' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/ally_made.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{% if current_empire == n.empire1 %}
+					Your empire has made an alliance with empire {{n.empire2.number}}!
+				{% else %}
+					Your empire has made an alliance with empire {{n.empire1.number}}!
+				{% endif %}
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'RND' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/nap_made.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{% if current_empire == n.empire1 %}
+					Your empire has made a {{n.extra_info}} non-aggression pact with empire {{n.empire2.number}}!
+				{% else %}
+					Your empire has made a {{n.extra_info}} non-aggression pact with empire {{n.empire1.number}}!
+				{% endif %}
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'SI' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/aid_sent.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{{n.user1}} has sent an aid shipment of {{n.extra_info}} to {{n.user2}}.
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'RA' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/aid_received.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{{n.user1}} has requested an aid shipment of {{n.extra_info}} from {{n.user2}}.
+				</div>
+			</div>
+		{% endif %}
+
 	
 	{% endfor %}
 

@@ -23,8 +23,9 @@ The overbuilding penalty for this planet is <font color="#FF0000"><b>+{{planet.o
 
 <form action="" method="POST">
 {% csrf_token %}
-<table cellspacing="6">
+<table cellspacing="6" align="center">
 <tr>
+	<td><b></b></td>
     <td><b>Building</b></td>
     <td><b>Cost</b></td>
     <td><b>&nbsp;&nbsp;Owned&nbsp;&nbsp;</b></td>
@@ -32,6 +33,7 @@ The overbuilding penalty for this planet is <font color="#FF0000"><b>+{{planet.o
 </tr>
 {% for cost in costs %}
 <tr style="line-height: 1;">
+	<td><img src="{% static '/buildings/'|add:cost.name|add:'.png' %}" width="70" height="70" title ="{{cost.name}}"></td>
     <td valign="top"><font color="#FFFFFF">{{cost.name}}</font><br></td>
     {% if cost.cost == None %}
         <td valign="top" nowrap><font color="#FF0000">Unavailable<br>Tech too low</font></td>

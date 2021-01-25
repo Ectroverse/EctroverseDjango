@@ -28,6 +28,7 @@ import time
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from datetime import datetime
+from datetime import timedelta
 
 # Remember that Django uses the word View to mean the Controller in MVC.  Django's "Views" are the HTML templates. Models are models.
 
@@ -113,9 +114,12 @@ def headquarters(request):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def famnews(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    empire_news = News.objects.filter(empire1 = status.empire, is_empire_news = True).order_by('-date_and_time')
+    empire_news = News.objects.filter(Q(empire1 = status.empire) | Q(empire2 = status.empire), is_empire_news = True).order_by('-date_and_time')
+
+    current_empire = status.empire
     context = {"status": status,
                "page_title": "Empire News",
+               "current_empire": current_empire,
                "news": empire_news}
     return render(request, "empire_news.html", context)
 
@@ -1102,8 +1106,7 @@ def results(request):
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
-def set_relation(request,relation, current_empire, target_empire_nr, *rel_time_passed):
-    target_empire = Empire.objects.get(number=target_empire_nr)
+def set_relation(request,relation, current_empire, target_empire, *rel_time_passed):
 
     if current_empire.id == target_empire.id:
         return
@@ -1142,6 +1145,14 @@ def set_relation(request,relation, current_empire, target_empire_nr, *rel_time_p
                                      relation_length=rel_time,
                                      relation_creation_tick=RoundStatus.objects.get().tick_number,
                                      relation_remaining_time=rel_time)
+            News.objects.create(empire1=current_empire,
+                                empire2=target_empire,
+                                news_type='RAD',
+                                date_and_time=datetime.now()+timedelta(seconds=1),
+                                is_personal_news=False,
+                                is_empire_news=True,
+                                tick_number=RoundStatus.objects.get().tick_number
+                                )
             rel.relation_type = 'A'
             rel.save()
         else:
@@ -1168,6 +1179,14 @@ def set_relation(request,relation, current_empire, target_empire_nr, *rel_time_p
                                      relation_length=rel_time,
                                      relation_creation_tick=RoundStatus.objects.get().tick_number,
                                      relation_remaining_time=rel_time)
+            News.objects.create(empire1=current_empire,
+                                empire2=target_empire,
+                                news_type='RND',
+                                date_and_time=datetime.now()+timedelta(seconds=1),
+                                is_personal_news=False,
+                                is_empire_news=True,
+                                tick_number=RoundStatus.objects.get().tick_number
+                                )
             rel.relation_type = 'N'
             rel.save()
         else:
@@ -1239,18 +1258,75 @@ def pm_options(request):
         user_empire.relations_message = (request.POST['empire_relations_message'])
 
         if request.POST['empire_offer_alliance']:
-            set_relation(request,'ally', status.empire, int(request.POST['empire_offer_alliance']))
+            target_empire = Empire.objects.get(number=int(request.POST['empire_offer_alliance']))
+            set_relation(request,'ally', status.empire, target_empire)
+            News.objects.create(empire1=status.empire,
+                                empire2=target_empire,
+                                news_type='RAP',
+                                date_and_time=datetime.now(),
+                                is_personal_news=False,
+                                is_empire_news=True,
+                                tick_number=RoundStatus.objects.get().tick_number
+                                )
         elif request.POST['empire_offer_nap']:
-            set_relation(request,'nap', status.empire, int(request.POST['empire_offer_nap']), request.POST['empire_offer_nap_hours'])
+            target_empire = Empire.objects.get(number=int(request.POST['empire_offer_nap']))
+            set_relation(request,'nap', status.empire, target_empire, request.POST['empire_offer_nap_hours'])
+            if request.POST['empire_offer_nap_hours']:
+                info = request.POST['empire_offer_nap_hours'] +" hour"
+            else:
+                info = "permanent"
+            News.objects.create(empire1=status.empire,
+                                empire2=target_empire,
+                                news_type='RNP',
+                                date_and_time=datetime.now(),
+                                is_personal_news=False,
+                                is_empire_news=True,
+                                extra_info =info,
+                                tick_number=RoundStatus.objects.get().tick_number
+                                )
         elif request.POST['empire_cancel_relation']:
             relation = request.POST['empire_cancel_relation']
-            rel = Relations.objects.get(id=relation)
-            if (rel.relation_type=='A' or rel.relation_type=='W') and RoundStatus.objects.get().tick_number - rel.relation_creation_tick <= min_relation_time:
-                error = "You can't cancel the relation for " +str(min_relation_time) + " ticks after creating it!"
-            else:
-                cancel_relation(request, rel)
+            try:
+                rel = Relations.objects.get(id=relation)
+            except ObjectDoesNotExist:
+                rel = None
+            if rel:
+                if rel.empire1 == status.empire:
+                    target_empire = rel.empire2
+                else:
+                    target_empire = rel.empire1
+
+                if (rel.relation_type=='A' or rel.relation_type=='W') and RoundStatus.objects.get().tick_number - rel.relation_creation_tick <= min_relation_time:
+                    error = "You can't cancel the relation for " +str(min_relation_time) + " ticks after creating it!"
+                else:
+                    n_type = 'N'
+                    if rel.relation_type=='W':
+                        n_type = 'RWE'
+                    elif rel.relation_type=='A':
+                        n_type = 'RAE'
+                    elif rel.relation_type=='N':
+                        n_type = 'RNE'
+                    cancel_relation(request, rel)
+                    News.objects.create(empire1=status.empire,
+                                        empire2=target_empire,
+                                        news_type=n_type,
+                                        date_and_time=datetime.now(),
+                                        is_personal_news=False,
+                                        is_empire_news=True,
+                                        tick_number=RoundStatus.objects.get().tick_number
+                                        )
         elif request.POST['empire_declare_war']:
-            set_relation(request,'war', status.empire, int(request.POST['empire_declare_war']))
+            target_empire = Empire.objects.get(number=int(request.POST['empire_declare_war']))
+            set_relation(request,'war', status.empire, target_empire)
+            News.objects.create(empire1=status.empire,
+                                empire2=target_empire,
+                                news_type='RWD',
+                                date_and_time=datetime.now(),
+                                is_personal_news=False,
+                                is_empire_news=True,
+                                tick_number=RoundStatus.objects.get().tick_number
+                                )
+
         user_empire.save()
     context = {"status": status,
                "page_title": "Prime Minister options",
@@ -1264,8 +1340,8 @@ def pm_options(request):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def relations(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    relations_from_empire = Relations.objects.filter(empire1=status.empire)
-    relations_to_empire = Relations.objects.filter(empire2=status.empire)
+    relations_from_empire = Relations.objects.filter(empire1=status.empire).order_by('-relation_creation_tick')
+    relations_to_empire = Relations.objects.filter(empire2=status.empire).order_by('-relation_creation_tick')
     tick_time = RoundStatus.objects.get().tick_number
     context = {"status": status,
                "page_title": "Relations",
@@ -1324,8 +1400,10 @@ def famaid(request):
     player_list = UserStatus.objects.filter(empire=status.empire)
     num_players = len(player_list)
     message = ''
+    news_message = ''
     if request.method == 'POST':
         status2 = get_object_or_404(UserStatus, user=request.POST['player'])
+        total = 0
         if request.POST['energy']:
             e = int(request.POST['energy'])
             if e > status.energy:
@@ -1334,6 +1412,8 @@ def famaid(request):
                 status.energy -= e
                 status2.energy += e
                 message += str(e) + " Energy was transferred!<br>"
+                news_message += str(e) + " energy "
+                total+= e
         if request.POST['minerals']:
             m = int(request.POST['minerals'])
             if m > status.minerals:
@@ -1342,6 +1422,8 @@ def famaid(request):
                 status.minerals -= m
                 status2.minerals += m
                 message += str(m) + " Minerals was transferred!<br>"
+                news_message += str(m) + " minerals "
+                total += m
         if request.POST['crystals']:
             c = int(request.POST['crystals'])
             if c > status.crystals:
@@ -1350,6 +1432,8 @@ def famaid(request):
                 status.crystals -= c
                 status2.crystals += c
                 message += str(c) + " Crystals was transferred!<br>"
+                news_message += str(c) + " crystals "
+                total += c
         if request.POST['ectrolium']:
             e = int(request.POST['ectrolium'])
             if e > status.ectrolium:
@@ -1358,6 +1442,19 @@ def famaid(request):
                 status.ectrolium -= e
                 status2.ectrolium += e
                 message += str(e) + " Ectrolium was transferred!<br>"
+                news_message += str(e) + " ectrolium "
+                total += e
+        if total > 0:
+            News.objects.create(user1=request.user,
+                            user2=status2.user,
+                            empire1=status.empire,
+                            news_type='SI',
+                            date_and_time=datetime.now(),
+                            is_personal_news=True,
+                            is_empire_news=True,
+                            extra_info=news_message,
+                            tick_number=RoundStatus.objects.get().tick_number
+                            )
         status.save()
         status2.save()
     context = {"status": status,
@@ -1375,10 +1472,12 @@ def famgetaid(request):
     player_list = UserStatus.objects.filter(empire=status.empire)
     num_players = len(player_list)
     message = ''
+    news_message = ''
     if 'receive_aid' in request.POST:
         status2 = get_object_or_404(UserStatus, user=request.POST['player'])
         if status2.request_aid == 'A' or (status2.request_aid == 'PM' and status.empire_role == 'PM') or \
             (status2.request_aid == 'VM' and (status.empire_role == 'PM' or status.empire_role == 'VM')):
+            total = 0
             if request.POST['energy']:
                 e = int(request.POST['energy'])
                 if e > status2.energy:
@@ -1387,6 +1486,8 @@ def famgetaid(request):
                     status.energy += e
                     status2.energy -= e
                     message += str(e) + " Energy was transferred!<br>"
+                    news_message += str(e) + " energy "
+                    total += e
             if request.POST['minerals']:
                 m = int(request.POST['minerals'])
                 if m > status2.minerals:
@@ -1395,6 +1496,8 @@ def famgetaid(request):
                     status.minerals += m
                     status2.minerals -= m
                     message += str(m) + " Minerals was transferred!<br>"
+                    news_message += str(m) + " minerals "
+                    total += m
             if request.POST['crystals']:
                 c = int(request.POST['crystals'])
                 if c > status2.crystals:
@@ -1403,6 +1506,8 @@ def famgetaid(request):
                     status.crystals += c
                     status2.crystals -= c
                     message += str(c) + " Crystals was transferred!<br>"
+                    news_message += str(c) + " crystals "
+                    total += m
             if request.POST['ectrolium']:
                 e = int(request.POST['ectrolium'])
                 if e > status2.ectrolium:
@@ -1411,6 +1516,19 @@ def famgetaid(request):
                     status.ectrolium += e
                     status2.ectrolium -= e
                     message += str(e) + " Ectrolium was transferred!<br>"
+                    news_message += str(e) + " ectrolium "
+                    total += e
+            if total > 0:
+                News.objects.create(user1=request.user,
+                                user2=status2.user,
+                                empire1=status.empire,
+                                news_type='RA',
+                                date_and_time=datetime.now(),
+                                is_personal_news=True,
+                                is_empire_news=True,
+                                extra_info = news_message,
+                                tick_number=RoundStatus.objects.get().tick_number
+                                )
             status.save()
             status2.save()
         else:

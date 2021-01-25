@@ -1,7 +1,7 @@
 map_size = 100
 num_homes = 20
 distance = int(map_size*0.4)
-players_per_empire = 1 # max is 8
+players_per_empire = 2 # max is 8
 staring_solars = 100
 starting_meral_planets = 50
 starting_ectrolium_refs = 25
