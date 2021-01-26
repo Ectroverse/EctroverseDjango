@@ -1,0 +1,200 @@
+<!doctype html>
+{% load static %}
+
+<head>
+
+<style>
+.menu_container {
+	width:100%;
+	height: 63px;
+	position: relative;
+	min-width: 360px;
+}
+
+.menu_container_left{
+	position: absolute;
+	width: 35px;
+	height: 63px;
+	left: 0px;
+	top: 0px;
+    content:url({% static 'files_018.jpg' %});
+}
+
+.menu_container_header_left{
+	position: absolute;
+	width: 41px;
+	height: 21px;
+	left: 35px;
+	top: 0px;
+    content:url({% static 'i03.jpg' %});
+}
+
+.menu_container_header_mid{
+	position: absolute;
+	height: 21px;
+	left: 76px;
+	right: 78px;
+	top: 0px;
+    background-image:url({% static 'i05.jpg' %});
+	
+}
+
+.menu_container_header_right{
+	position: absolute;
+	width: 78px;
+	height: 21px;
+	right: 0;
+	top: 0px;
+    content:url({% static 'i07.jpg' %});
+}
+
+.menu_container_btn1{
+	position: absolute;
+	width: 41px;
+	height: 42px;
+	left: 35px;
+	top: 21px;
+    content:url({% static 'i09.jpg' %});
+}
+
+.menu_container_btn2{
+	position: absolute;
+	width: 41px;
+	height: 42px;
+	left: 76px;
+	top: 21px;
+    content:url({% static 'i10.jpg' %});
+}
+
+.menu_container_btn3{
+	position: absolute;
+	width: 41px;
+	height: 42px;
+	left: 117px;
+	top: 21px;
+    content:url({% static 'i11.jpg' %});
+}
+
+.menu_container_btn4{
+	position: absolute;
+	width: 41px;
+	height: 42px;
+	left: 158px;
+	top: 21px;
+    content:url({% static 'i12.jpg' %});
+}
+
+.menu_container_footer_left{
+	position: absolute;
+	width: 18px;
+	height: 42px;
+	left: 199px;
+	top: 21px;
+    content:url({% static 'i13.jpg' %});
+}
+
+.menu_container_footer_mid{
+	position: absolute;
+	height: 42px;
+	left: 217px;
+	right: 49px;
+	top: 21px;
+    background-image:url({% static 'i15.jpg' %});	
+}
+
+.menu_container_footer_right{
+	position: absolute;
+	width: 49px;
+	height: 42px;
+	right: 0px;
+	top: 21px;
+    content:url({% static 'i17.jpg' %});
+}
+
+.menu_left_align{
+	position: relative;
+	width: 33%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 3px;
+	overflow: hidden;
+}
+
+.menu_mid_align{
+	position: relative;
+	width: 33%;
+	display: inline;
+	height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 3px;
+	overflow: hidden;
+}
+
+.menu_right_align{
+	position: relative;
+	width: 33%;
+	display: inline;
+	height: 35px;
+	float: left;
+	color:white;
+	text-align: center;
+	top: 3px;
+	overflow: hidden;
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+    
+	<div class="menu_container">
+		<div class="menu_container_left"></div>
+		<div class="menu_container_header_left"></div>
+		<div class="menu_container_header_mid">
+			<div class = "menu_left_align">
+				Networth : {{status.networth}}
+			</div>
+			<div class = "menu_mid_align">
+				Ticks : <span id="headerTime">
+			</div>
+			<div class = "menu_right_align">
+				Population : {{status.population}}
+			</div>
+		</div>
+		<div class="menu_container_header_right"></div>
+		<a href="/headquarters"><div class="menu_container_btn1"></div></a>
+		<a href="/headquarters"><div class="menu_container_btn2"></div></a>
+		<a href="/headquarters"><div class="menu_container_btn3"></div></a>
+		<a href="/headquarters"><div class="menu_container_btn4"></div></a>	
+		<div class="menu_container_footer_left"></div>		
+		<div class="menu_container_footer_mid">
+			<div class = "menu_left_align">
+				Energy : {{status.energy}}<br>
+				Minerals : {{status.minerals}}
+			</div>
+			<div class = "menu_mid_align">
+				Crystals : {{status.crystals}}<br>
+				Ectrolium : {{status.ectrolium}}
+			</div>
+			<div class = "menu_right_align">
+				FR: {{status.fleet_readiness}}
+				AR: {{status.agent_readiness}}
+				PR: {{status.psychic_readiness}}
+			</div>
+		
+		</div>
+		<div class="menu_container_footer_right"></div>			
+	
+
+	</div>
+
+
+</body>
