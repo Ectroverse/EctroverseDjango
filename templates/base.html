@@ -37,6 +37,8 @@ body
 
 
 @media all and (max-width: 660px) {
+	.content-desktop {display: none;}
+	.content-mobile-menu, .content-mobile {display: block;}
 	.left_menu_large_scrn {display:none;}
 	.right_side{
 	width: 100%;
@@ -67,6 +69,17 @@ body
 	.show_only_on_mobile{
 		display: none;
 	}
+}
+
+@media all and (min-width: 661px) and (max-width: 837px) {
+	.content-mobile {display: block;}
+	.content-desktop, .content-mobile-menu {display: none;}
+}
+
+@media all and (min-width: 838px){
+	.content-desktop {display: block;}
+	.content-mobile, .content-mobile-menu {display: none;}
+
 }
 
 
