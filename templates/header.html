@@ -8,12 +8,9 @@
 
 	    if (document.getElementById('mobilemenu').style.display == "block"){
 			document.getElementById('mobilemenu').style.display = "none";
-			document.getElementById('hide_pop').style.display = "inline";
 			}
 		else{
 			document.getElementById('mobilemenu').style.display = "block";
-			document.getElementById('hide_pop').style.display = "none";
-			
 			}
 	}
 	</script>
@@ -32,6 +29,7 @@
 @media all and (min-width: 661px) and (max-width: 837px) {
 	.content-mobile {display: block;}
 	.content-desktop, .content-mobile-menu {display: none;}
+	.hide_pop {display: inline;}
 }
 
 @media all and (min-width: 838px){
@@ -404,7 +402,7 @@
 			</div>
 			<div class="mob_menu_mid_align">Next tick : </div>
 			<div class="mob_menu_right_align">Networth : {{status.networth}}</div>
-			<div id="hide_pop" class="mob_menu_left_align">Population: {{status.population}}</div>
+			<div class="hide_pop "><div class="mob_menu_right_align">Population: {{status.population}}</div></div>
 	</div>
 	
 	<div class="menu_container content-desktop">
