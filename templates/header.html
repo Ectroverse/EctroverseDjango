@@ -1,41 +1,50 @@
-<!doctype html>
+<!DOCTYPE html>
 {% load static %}
 
 <head>
 
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width">
-
 	<script>
 	function showMenu() {
 
-	   if (document.getElementById('mobilemenu').style.display == "block")
+	    if (document.getElementById('mobilemenu').style.display == "block"){
 			document.getElementById('mobilemenu').style.display = "none";
-		else
+			document.getElementById('hide_pop').style.display = "inline";
+			}
+		else{
 			document.getElementById('mobilemenu').style.display = "block";
+			document.getElementById('hide_pop').style.display = "none";
+			
+			}
 	}
 	</script>
 
-
-
 <style>
+<!-- width>= 836px - normal desctop mode
+	width < 836px and width > 660 still show side menu, but change the appearence of header, dont top show meny yet
+	width <= 660 full mobile version
+-->
 
-#content-desktop {display: block;}
-#content-mobile {display: none;}
 
-@media screen and (max-width: 660px) {
+@media all and (max-width: 660px){
+<!-- defined in base, need to clean this all up, but carefully, this shit breaks easily and mayconflict with @media on base page" -->
+}
 
-#content-desktop {display: none;}
-#content-mobile {display: block;}
+@media all and (min-width: 661px) and (max-width: 837px) {
+	.content-mobile {display: block;}
+	.content-desktop, .content-mobile-menu {display: none;}
+}
+
+@media all and (min-width: 838px){
+	.content-desktop {display: block;}
+	.content-mobile, .content-mobile-menu {display: none;}
 
 }
-/*desktop container*/
+
 .menu_container {
 	width:100%;
 	height: 63px;
 	position: relative;
 	min-width: 360px;
-	top: 21px;
 }
 
 .menu_container_left{
@@ -47,7 +56,6 @@
     content:url({% static 'files_018.jpg' %});
 }
 
-
 .menu_container_header_left{
 	position: absolute;
 	width: 41px;
@@ -57,7 +65,6 @@
     content:url({% static 'i03.jpg' %});
 }
 
-
 .menu_container_header_mid{
 	position: absolute;
 	height: 21px;
@@ -65,7 +72,7 @@
 	right: 78px;
 	top: 0px;
     background-image:url({% static 'i05.jpg' %});
-
+	
 }
 
 .menu_container_header_right{
@@ -128,7 +135,7 @@
 	left: 217px;
 	right: 49px;
 	top: 21px;
-    background-image:url({% static 'i15.jpg' %});
+    background-image:url({% static 'i15.jpg' %});	
 }
 
 .menu_container_footer_right{
@@ -140,53 +147,7 @@
     content:url({% static 'i17.jpg' %});
 }
 
-.menu_lefttop_align{
-	position: relative;
-	width: 33%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 3px;
-	font-size: 1;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space:nowrap;
-	display: block;
-	line-height: 1em;
-	max-height: 1em;
-}
-.menu_lefttopmob_align{
-	position: relative;
-	width: 33%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: right;
-	top: 3px;
-	font-size: 2vw;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space:nowrap;
-	display: block;
-	line-height: 1em;
-	max-height: 1em;
-}
 .menu_left_align{
-	position: relative;
-	width: 33%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 3px;
-	font-size: 1;
-}
-
-.menu_midtop_align{
 	position: relative;
 	width: 33%;
 	display: inline;
@@ -195,13 +156,7 @@
 	color:white;
 	text-align: center;
 	top: 3px;
-	font-size: 1
 	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space:nowrap;
-	display: block;
-	line-height: 1em;
-	max-height: 1em;
 }
 
 .menu_mid_align{
@@ -213,8 +168,7 @@
 	color:white;
 	text-align: center;
 	top: 3px;
-	font-size: 1;
-
+	overflow: hidden;
 }
 
 .menu_right_align{
@@ -226,52 +180,87 @@
 	color:white;
 	text-align: center;
 	top: 3px;
-	font-size: 1;
 	overflow: hidden;
-	text-overflow: ellipsis;
-	word-wrap: break-word;
-	display: block;
-	line-height: 1em;
-	max-height: 3em;
 }
 
-.menu_righttop_align{
+.menu_containermob {
+	width:100%;
+	height: 21px;
+	min-width: 360px;
+	background-image:url({% static 'i05.jpg' %});
+	position: relative;
+}
+
+.mob_menu_left_align{
 	position: relative;
 	width: 33%;
 	display: inline;
-	height: 35px;
+	height: 21;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 3px;
+	overflow: hidden;
+}
+
+.mob_menu_mid_align{
+	position: relative;
+	width: 33%;
+	display: inline;
+	height: 21;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 3px;
+	overflow: hidden;
+}
+
+.mob_menu_right_align{
+	position: relative;
+	width: 33%;
+	display: inline;
+	height: 21;
 	float: left;
 	color:white;
 	text-align: center;
 	top: 3px;
-	font-size: 1;
+	overflow: hidden;
 }
 
-/*mobile container*/
-.menu_containermob {
-	width:100%;
-	height: 21px;
-	position: absolute;
-	min-width: 360px;
+.menu_left_mobile{
+	position: relative;
+	width: 33%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 4px;
+	/*font-size: max(2vw, 5px);*/
 }
 
-.menu_container_mobile_menu{
-	position: absolute;
-	height: 21px;
-	left: 0px;
-	right: 0px;
-	top: 0px;
-    background-image:url({% static 'i05.jpg' %});
-
+.menu_cn1_mobile{
+	position: relative;
+	width: 33%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 4px;
+	/*font-size: max(2vw, 6px);*/
 }
 
-.menu_container_leftmob{
-	position: absolute;
-	width: 35px;
-	height: 21px;
-	left: 0px;
-	top: 0px;
-    content:url({% static 'files_0182.png' %});
+.menu_right_mobile{
+	position: relative;
+	width: 34%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 4px;
+	/*font-size: max(2vw, 6px);*/
 }
 
 .menu_container_footer_leftmob{
@@ -300,6 +289,55 @@
 	top: 21px;
     content:url({% static 'i17.jpg' %});
 }
+
+.menu_leftmob1_align{
+	position: relative;
+	width: 25%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 10px;
+	/*font-size: max(2vw, 6px);*/
+}
+
+.menu_leftmob2_align{
+	position: relative;
+	width: 25%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 10px;
+	/*font-size: max(2vw, 6px);*/
+}
+
+.menu_rightmob1_align{
+	position: relative;
+	width: 25%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: left;
+	top: 10px;
+	/*font-size: max(2vw, 6px);*/
+}
+
+.menu_rightmob2_align{
+	position: relative;
+	width: 25%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: left;
+	top: 10px;
+	/*font-size: max(2vw, 6px);*/
+}
+
 .menu_container_btnmob{
 	position: absolute;
 	width: 41px;
@@ -307,118 +345,6 @@
 	left: 35px;
 	top: 21px;
     content:url({% static 'mobnoti1.png' %});
-}
-
-.menu_righttopmob_align{
-	position: relative;
-	width: 33%;
-	display: inline;
-	height: 35px;
-	float: left;
-	color:white;
-	text-align: left;
-	top: 3px;
-	font-size: 2vw;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space:nowrap;
-	display: block;
-	line-height: 1em;
-	max-height: 1em;
-}
-
-.menu_left_mobile{
-	position: relative;
-	width: 33%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	font-size: 2vw;
-}
-.menu_cn1_mobile{
-	position: relative;
-	width: 33%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 3px;
-	font-size: 2vw;
-}
-
-.menu_right_mobile{
-	position: relative;
-	width: 34%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 3px;
-	font-size: 2vw;
-}
-
-.menu_leftmob_align{
-	position: relative;
-	width: 50%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 3px;
-	font-size: 2vw;
-}
-
-.menu_rightmob_align{
-	position: relative;
-	width: 50%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: left;
-	top: 3px;
-	font-size: 2vw;
-}
-
-.menu_lefttopmob_align{
-	position: relative;
-	width: 33%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 3px;
-	font-size: 2vw;
-}
-
-.menu_centertopmob_align{
-	position: relative;
-	width: 33%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 3px;
-	font-size: 2vw;
-}
-
-.menu_righttopmob_align{
-	position: relative;
-	width: 33%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: left;
-	top: 3px;
-	font-size: 2vw;
 }
 
 .mobdrop ul{
@@ -436,99 +362,92 @@
 	overflow: visible;
 }
 
-
 </style>
+
 </head>
 
 
 <body>
 
+	<div class="menu_containermob content-mobile">
+			<div class="mob_menu_left_align">
+				<div class="content-mobile-menu"><input type="button" value="Menu" onclick="showMenu()" ></div>
+				<div id="mobilemenu" class="mobdrop mobilemenu" style="display: none;">
+					<ul>
+					<li><a href="/headquarters">Headquarters</a></li>
+					<li><a href="/council">Council</a></li>
+					<li><a href="/units">Units</a></li>
+					<li><a href="/planets">Planets</a></li>
+					<li><a href="/empire{{status.empire_id}}">Empire</a>
+					<li><a href="/famaid">-Send aid</a></li>
+					<li><a href="/famgetaid">-Receive aid</a></li>
+					<li><a href="/famnews" style="color:red;">-News</a></li>
+					<li><a href="/relations">-Relations</a></li>
+					<li><a href="/fleets">Fleets</a>
+					<li><a href="/map">Galaxy map</a>
+					<li><a href="/map">-Full map</a></li>
+					<li><a href="/observessurveys" style="color:red;">-Scouting</a></li>
+					<li><a href="/research">Research</a>
+					<li><a href="/spec" style="color:red;">Operations</a></li>
+						<br>
+					<li><a href="/messages">Messages</a></li>
+					<li><a href="/rankings">Faction rankings</a></li>
+					<li><a href="/empire_ranking">Empire rankings</a></li>
+					<li><a href="/account">Account</a></li>
+					<li><a href="/?next={{request.path}}">Logout</a></li><br>
+					<li><a href="https://discord.gg/8Pkpqtd?2fix" target="_blank">Discord</a></li>
+					<li><a href="/guide">Guide</a></li>
+					<li><a href="https://web.facebook.com/groups/803616616363658?2fix" target="_blank">Facebook</a></b></li>
+					</ul>
+				</div>
 
-		<!-- Mobile Extra Top Bar -->
-		<div class="menu_containermob">
-			<div class="menu_container_mobile_menu">
-				<div class="menu_left_mobile">
-				<input type="button" value="Menu" onclick="showMenu()" background-image="../static/i15.jpg"/>
-					<div id="mobilemenu" class="mobdrop" style="display: none;">
-								<ul>
-									<li><a href="/headquarters">Headquarters</a></li>
-									<li><a href="/council">Council</a></li>
-									<li><a href="/units">Units</a></li>
-									<li><a href="/planets">Planets</a></li>
-									<li><a href="/empire{{status.empire_id}}">Empire</a>
-									<li><a href="/famaid">-Send aid</a></li>
-									<li><a href="/famgetaid">-Receive aid</a></li>
-									<li><a href="/famnews" style="color:red;">-News</a></li>
-									<li><a href="/relations">-Relations</a></li>
-									<li><a href="/fleets">Fleets</a>
-									<li><a href="/map">Galaxy map</a>
-									<li><a href="/map">-Full map</a></li>
-									<li><a href="/observessurveys" style="color:red;">-Scouting</a></li>
-									<li><a href="/research">Research</a>
-									<li><a href="/spec" style="color:red;">Operations</a></li>
-										<br>
-									<li><a href="/messages">Messages</a></li>
-									<li><a href="/rankings">Faction rankings</a></li>
-									<li><a href="/empire_ranking">Empire rankings</a></li>
-									<li><a href="/account">Account</a></li>
-									<li><a href="/?next={{request.path}}">Logout</a></li>
-									<!--  <form action="search?2fix" method="POST"><input type="text" name="search" size="8"><br>
-									<input type="submit" size="2" value="OK"></form></li> --><br>
-									<li><a href="https://discord.gg/8Pkpqtd?2fix" target="_blank">Discord</a></li>
-									<li><a href="/guide">Guide</a></li>
-									<li><a href="https://web.facebook.com/groups/803616616363658?2fix" target="_blank">Facebook</a></b></li>
-									</ul>
-								</div>
-					<div class="menu_cn1_mobile">	Next tick : </div>
-					<div class="menu_right_mobile">Networth : {{status.networth}}</div>
-					</div>
-
-	<!--Desktop Top Nav-->
-	<div id="content-desktop">
-	<div class="menu_container">
+			</div>
+			<div class="mob_menu_mid_align">Next tick : </div>
+			<div class="mob_menu_right_align">Networth : {{status.networth}}</div>
+			<div id="hide_pop" class="mob_menu_left_align">Population: {{status.population}}</div>
+	</div>
+	
+	<div class="menu_container content-desktop">
 		<div class="menu_container_left"></div>
 		<div class="menu_container_header_left"></div>
 		<div class="menu_container_header_mid">
-			<div class = "menu_lefttop_align">
+			<div class = "menu_left_align">
 				Networth : {{status.networth}}
 			</div>
-			<div class = "menu_midtop_align">
-				Next tick : <span id="headerTime">
-			 <!-- Tick timer done with javascript --><div style="display: inline" id="txt"></div>
+			<div class = "menu_mid_align">
+				Ticks : <span id="headerTime">
 			</div>
-			<div class = "menu_righttop_align">
-				Population : {{status.population}}0
+			<div class = "menu_right_align">
+				Population : {{status.population}}
 			</div>
 		</div>
 		<div class="menu_container_header_right"></div>
-				<a href="/headquarters"><div class="menu_container_btn1"></div></a>
-				<a href="/headquarters"><div class="menu_container_btn2"></div></a>
-				<a href="/headquarters"><div class="menu_container_btn3"></div></a>
-				<a href="/headquarters"><div class="menu_container_btn4"></div></a>
-		<div class="menu_container_footer_left"></div>
+		<a href="/headquarters"><div class="menu_container_btn1"></div></a>
+		<a href="/headquarters"><div class="menu_container_btn2"></div></a>
+		<a href="/headquarters"><div class="menu_container_btn3"></div></a>
+		<a href="/headquarters"><div class="menu_container_btn4"></div></a>	
+		<div class="menu_container_footer_left"></div>		
 		<div class="menu_container_footer_mid">
 			<div class = "menu_left_align">
-				<img src="../static/pr0.gif" alt="Energy"> Energy : {{status.energy}}<br>
-				<img src="../static/pr1.gif" alt="Energy"> Mineral : {{status.minerals}}
+				Energy : {{status.energy}}<br>
+				Minerals : {{status.minerals}}
 			</div>
 			<div class = "menu_mid_align">
-				<img src="../static/pr2.gif" alt="Energy"> Crystal : {{status.crystals}}<br>
-				<img src="../static/pr3.gif" alt="Energy"> Ectrolium : {{status.ectrolium}}
+				Crystals : {{status.crystals}}<br>
+				Ectrolium : {{status.ectrolium}}
 			</div>
 			<div class = "menu_right_align">
-				FR: {{status.fleet_readiness}}%<br>
-				AR: {{status.agent_readiness}}%<br>
-				PR: {{status.psychic_readiness}}%
+				FR: {{status.fleet_readiness}}
+				AR: {{status.agent_readiness}}
+				PR: {{status.psychic_readiness}}
 			</div>
+		
 		</div>
-		<div class="menu_container_footer_right"></div>
-</div>
-</div>
-
-
-<!--Mobile Top Nav-->
-<div id="content-mobile">
-<div class="menu_container">
+		<div class="menu_container_footer_right"></div>			
+	</div>
+	
+	<!--Mobile Top Nav-->
+<div class="menu_container content-mobile">
 	<div class="menu_container_left"></div>
 	<div class="menu_container_header_left"></div>
 	<div class="menu_container_header_mid">
@@ -541,20 +460,21 @@
 	<a href="/headquarters"><div class="menu_container_btnmob"></div></a>
 	<div class="menu_container_footer_leftmob"></div>
 	<div class="menu_container_footer_midmob">
-		<div class = "menu_leftmob_align">
-			<img src="../static/pr0.gif" alt="Energy"> : {{status.energy}}<br>
+		<div class = "menu_leftmob1_align">
+			<img src="../static/pr0.gif" alt="Energy"> : {{status.energy}}
+		</div>
+		<div class = "menu_leftmob2_align">
 			<img src="../static/pr1.gif" alt="Mineral"> : {{status.minerals}}
 		</div>
-		<div class = "menu_rightmob_align">
-			<img src="../static/pr2.gif" alt="Crystal"> : {{status.crystals}}<br>
+		<div class = "menu_rightmob1_align">
+			<img src="../static/pr2.gif" alt="Crystal"> : {{status.crystals}}
+		</div>
+		<div class = "menu_rightmob2_align">
 			<img src="../static/pr3.gif" alt="Ectrolium"> : {{status.ectrolium}}
 		</div>
 	</div>
 	<div class="menu_container_footer_rightmob"></div>
 </div>
 
-	</div>
-	<br>
-	<br>
 
 </body>
