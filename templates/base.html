@@ -100,7 +100,7 @@ function startTime() {
   m_left = 0;
   s_left = 59 - (s % 60);
   s_left = fixTimeDigits(s_left);
-  document.getElementById('txt').innerHTML =
+  document.getElementById('headerTime').innerHTML =
   m_left + ":" + s_left;
   var t = setTimeout(startTime, 60);
 }
