@@ -104,3 +104,9 @@ Database log:
 ## Console into the python container (which runs the Django app) to poke around or debug something
 
 `docker exec -it ectroversedjango_python_1 /bin/bash`
+
+## Console into the potgres container psql
+`docker exec -it ectroversedjango_db_1 bash`
+`psql -U dbadmin djangodatabase`
+
+the user name and db name are set in the db: -> environment: in the docker-compose.yml
