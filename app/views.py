@@ -21,6 +21,7 @@ from django.db.models import Q
 from django.contrib.auth.decorators import user_passes_test
 from app.map_settings import *
 from app.helper_functions import *
+from app.specops import *
 
 import json
 import numpy as np
@@ -1391,6 +1392,25 @@ def research(request):
                "page_title": "Research",
                "message": message}
     return render(request, "research.html", context)
+
+@login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
+def specops(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    race_ops = race_info_list[status.get_race_display()]["op_list"]
+    race_spells = race_info_list[status.get_race_display()]["spell_list"]
+    race_inca = race_info_list[status.get_race_display()]["incantation_list"]
+    ops = list(set(race_ops) & set(all_operations))
+    spells = list(set(race_spells) & set(all_spells))
+    inca = list(set(race_inca) & set(all_incantations))
+    print(ops, spells, inca)
+    context = {"status": status,
+               "page_title": "Special Operations",
+               "operations": ops,
+                "spells": spells,
+                "incantations": inca
+               }
+    return render(request, "specops.html", context)
 
 
 @login_required

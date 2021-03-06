@@ -6,7 +6,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', views.index, name='index'), # root page
+    path('', views.index, name='index'),  # root page
     path('headquarters', views.headquarters, name='headquarters'),
     path('council', views.council, name='council'),
     path('map', views.map, name='map'),
@@ -40,16 +40,18 @@ urlpatterns = [
     path('delete_all_messages_outbox', views.bulk_del_message_out, name='delete_all_messages_outbox'),
     path('guide', views.guide, name='guide'),
     path('faq', views.faq, name='faq'),
-    path("registration/register", views.register, name="register" ),
+    path("registration/register", views.register, name="register"),
     path('logout', views.custom_logout, name='logout'),
     path('login', views.custom_login, name='login'),
     path('choose_empire_race', views.choose_empire_race, name='choose_empire_race'),
     path('fleets_orders', views.fleets_orders, name='fleets_orders'),
     path('fleets_orders_process', views.fleets_orders_process, name='fleets_orders_process'),
     path('fleets_disband', views.fleets_disband, name='fleets_disband'),
-	path('famnews', views.famnews, name='famnews'),
+    path('fleets_disband', views.fleets_disband, name='fleets_disband'),
+    path('famnews', views.famnews, name='famnews'),
+    path('specops', views.specops, name='specops'),
 ]
 
 if settings.DEBUG:
-        urlpatterns += static(settings.MEDIA_URL,
-                              document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
