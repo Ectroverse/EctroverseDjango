@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+{% if message != '' %}
+{{message}}
+<br>
+{% endif %}
+
+<div style="width:100%;">
+<h3>Operations</h3>
+	<div style="width: 50%; margin:0 auto; float:left">
+		<form>
+			{% for o in operations %}
+			<input type="radio" id="{{ o }}" name="operation" value="{{ o }}">
+			<label for="{{ o }}">{{ o }}</label>
+			{% endfor %}
+		</form> 
+	</div>
+	<div style="width: 50%; margin:0 auto; float:right">
+		planet coords
+		<br>
+	</div>
+</div>
+<br><br>
+
+<div style="width:100%;  float:left">
+<h3>Spells</h3>
+	<div style="width: 50%; margin:0 auto; float:left">
+		<form>
+			{% for s in spells %}
+			<input type="radio" id="{{ s }}" name="spell" value="{{ s }}">
+			<label for="{{ s }}">{{ s }}</label>
+			{% endfor %}
+		</form> 
+	</div>
+	<div style="width: 50%; margin:0 auto; float:right">
+		planet coords
+		<br>
+	</div>
+</div>
+<br><br>
+
+<div style="width:100%; float:left ">
+<h3>Incantations</h3>
+	<div style="width: 50%; margin:0 auto; float:left">
+		<form>
+			{% for i in incantations %}
+			<input type="radio" id="{{ i }}" name="spell" value="{{ i }}">
+			<label for="{{ i }}">{{ i }}</label>
+			{% endfor %}
+		</form> 
+	</div>
+	<div style="width: 50%; margin:0 auto; float:right">
+		planet coords
+	</div>
+</div>
+<br><br>
+
+
+{% endblock %}
