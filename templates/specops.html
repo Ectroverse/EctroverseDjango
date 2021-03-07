@@ -9,51 +9,116 @@
 <br>
 {% endif %}
 
-<div style="width:100%;">
-<h3>Operations</h3>
-	<div style="width: 50%; margin:0 auto; float:left">
+<style>
+.border_agent { 
+position:relative;
+display:inline-block;
+box-sizing: border-box;
+border: 25px solid transparent;
+border-image-slice:100% 100% 100% 100%;
+border-image: url("../static/units/agent_ops2.png") 500 ;
+width:100%;
+margin-bottom: 25px;
+}
+
+.border_psyhic { 
+position:relative;
+display:inline-block;
+box-sizing: border-box;
+border: 25px solid transparent;
+border-image-slice:100% 100% 100% 100%;
+border-image: url("../static/units/psy_ops.png") 500 ;
+width:100%;
+margin-bottom: 25px;
+}
+
+.border_ghost { 
+position:relative;
+display:inline-block;
+box-sizing: border-box;
+border: 25px solid transparent;
+border-image-slice:100% 100% 100% 100%;
+border-image: url("../static/units/gs_ops.png") 500 ;
+width:100%;
+}
+
+.ops_box{
+box-sizing: border-box;
+width: 50%; 
+margin:0 auto;
+float:left; 
+text-align:left;
+padding-left: 15%;
+}
+
+.ops_box2{
+box-sizing: border-box;
+width: 50%; 
+margin:0 auto;
+float:right; 
+text-align:right;
+padding-right: 15%;
+}
+
+.centered2 {
+    position:relative;
+    top:-20px;
+}
+
+.remove-all-styles {
+    all: revert;
+  }
+
+}
+</style>
+
+
+<div  class ="border_agent"  >
+<div class="centered2"><h3>Operations</h3></div>
+	<div class="ops_box">
 		<form>
 			{% for o in operations %}
 			<input type="radio" id="{{ o }}" name="operation" value="{{ o }}">
-			<label for="{{ o }}">{{ o }}</label>
+			<label class="remove-all-styles" for="{{ o }}">{{ o }}</label>
 			{% endfor %}
+			<br>
 		</form> 
 	</div>
-	<div style="width: 50%; margin:0 auto; float:right">
+	<div class="ops_box2">
 		planet coords
-		<br>
 	</div>
 </div>
 <br><br>
 
-<div style="width:100%;  float:left">
-<h3>Spells</h3>
-	<div style="width: 50%; margin:0 auto; float:left">
+<div class="border_psyhic" >
+<div class="centered2"><h3>Spells</h3></div>
+	<div class="ops_box">
 		<form>
 			{% for s in spells %}
 			<input type="radio" id="{{ s }}" name="spell" value="{{ s }}">
-			<label for="{{ s }}">{{ s }}</label>
+			<label class="remove-all-styles" for="{{ s }}">{{ s }}</label>
+			<br>
 			{% endfor %}
 		</form> 
 	</div>
-	<div style="width: 50%; margin:0 auto; float:right">
+	<div class="ops_box2">
 		planet coords
-		<br>
 	</div>
 </div>
 <br><br>
 
-<div style="width:100%; float:left ">
-<h3>Incantations</h3>
-	<div style="width: 50%; margin:0 auto; float:left">
+<div class="border_ghost" >
+<div class="centered2"><h3>Incantations</h3></div>
+	<div class="ops_box">
 		<form>
 			{% for i in incantations %}
 			<input type="radio" id="{{ i }}" name="spell" value="{{ i }}">
-			<label for="{{ i }}">{{ i }}</label>
+			<label class="remove-all-styles" for="{{ i }}">{{ i }}</label>
+			<br>
 			{% endfor %}
 		</form> 
 	</div>
-	<div style="width: 50%; margin:0 auto; float:right">
+	<div class="ops_box2">
 		planet coords
 	</div>
 </div>
