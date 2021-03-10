@@ -110,7 +110,7 @@ public class Main
 			"WHERE id = ?" ; //53 wow what a long string :P
 		 PreparedStatement userStatusUpdateStatement = con.prepareStatement(userStatusUpdateQuery); //mass update, much faster
 
-		 ArrayList<HashMap<Integer, Integer>> users = new ArrayList<>();
+		 ArrayList<HashMap<String, Integer>> users = new ArrayList<>();
 		 //loop over users
 		while(resultSet.next()){
 			int userID = resultSet.getInt("user_id");
@@ -125,7 +125,7 @@ public class Main
 				System.out.println("empire was null");
 		   		continue;
 			}
-			HashMap<String,String> row = new HashMap<String, String>(columns.size());
+			HashMap<String,Integer> row = new HashMap<>(columns.size());
 			for(String col : columns) {
 			    row.put(col, resultSet.getInt(col));
 			}
