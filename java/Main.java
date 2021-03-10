@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.*;
 
 public class Main
 {
@@ -39,7 +40,7 @@ public class Main
 		System.out.println(Arrays.toString(inserted));*/
 		ResultSet resultSet = statement.executeQuery("SELECT * FROM app_userstatus");
 	   	ResultSetMetaData rsmd = resultSet.getMetaData();
-	   	List<String> columns = new ArrayList<String>(rsmd.getColumnCount());
+	   	ArrayList<String> columns = new ArrayList<>(rsmd.getColumnCount());
 	  	for(int i = 0; i < rsmd.getColumnCount(); i++){
 			columns.add(rsmd.getColumnName(i));
 		    }
