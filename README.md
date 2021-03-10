@@ -112,8 +112,8 @@ Database log:
 the user name and db name are set in the db: -> environment: in the docker-compose.yml
 
 to run the java tick process:
-`docker exec -it ectroversedjango_python_1 /bin/bash`
-`cd /java`
-`javac Main.java` - if wasnt allready compiled into bytecode
-`java -cp postgresql-42.2.19.jar:. Main > log.txt`
+1. `docker exec -it ectroversedjango_python_1 /bin/bash`
+2. `cd /java`
+3. `javac Main.java` - if wasnt allready compiled into bytecode
+4. `java -cp postgresql-42.2.19.jar:. Main > log.txt`
 
