@@ -115,5 +115,5 @@ to run the java tick process:
 1. `docker exec -it ectroversedjango_python_1 /bin/bash`
 2. `cd /java`
 3. `javac Main.java` - if wasnt allready compiled into bytecode
-4. `java -cp postgresql-42.2.19.jar:. Main > log.txt`
+4. `java -cp postgresql-42.2.19.jar:. Main >> log.txt`
 
