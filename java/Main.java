@@ -170,7 +170,7 @@ public class Main
 				//# Update Population
 			        /*planet.max_population = (planet.size * population_size_factor)
 				planet.max_population += (planet.cities * building_production_cities)
-				planet.max_population *= (1.00 + 0.01 * status.research_percent_population)
+				planet.max_population *= (1.00 + 0.01 * status.research_percent_population)*/
 		
 			}
 		}
