@@ -118,7 +118,7 @@ public class Main
 		 ArrayList<HashMap<String, Long>> usersLong = new ArrayList<>();
 		 //loop over users
 		while(resultSet.next()){
-			int userID = resultSet.getInt("user_id");
+			
 			if(resultSet.getInt("networth") == 0){
 				System.out.println("networth was null");
 				continue;
@@ -146,7 +146,11 @@ public class Main
 		 
 		 
 		
-		 /*for(Integer user: users){	   
+		 for(int i = 0; i < usersInt.length(); i++){
+			HashMap<String,Integer> rowInt = usersInt.get(i);
+			HashMap<String,Long> rowLong  = usersLong.get(i);
+				
+			int userID = rowInt.get("user_id");
 			ResultSet planets = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE id = " + userID);
 			
 			
@@ -169,7 +173,7 @@ public class Main
 				planet.max_population *= (1.00 + 0.01 * status.research_percent_population)
 		
 			}
-		}*/
+		}
 		 
 
 		 
