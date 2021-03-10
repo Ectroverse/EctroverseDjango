@@ -41,7 +41,7 @@ public class Main
 		ResultSet resultSet = statement.executeQuery("SELECT * FROM app_userstatus");
 	   	ResultSetMetaData rsmd = resultSet.getMetaData();
 	   	ArrayList<String> columns = new ArrayList<>(rsmd.getColumnCount());
-	  	for(int i = 0; i < rsmd.getColumnCount(); i++){
+	  	for(int i = 1; i <= rsmd.getColumnCount(); i++){
 			columns.add(rsmd.getColumnName(i));
 		    }
 		 System.out.println(columns);
