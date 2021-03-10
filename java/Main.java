@@ -113,15 +113,15 @@ public class Main
 		 List<HashMap<Integer, Integer>> users = new ArrayList<>();
 		 //loop over users
 		while(resultSet.next()){
-			int userID = users.getInt("user_id");
-			if(users.getInt("networth") == 0){
+			int userID = resultSet.getInt("user_id");
+			if(resultSet.getInt("networth") == 0){
 				System.out.println("networth was null");
 				continue;
 			}
 			
 			//check if the players empire is null
-			users.getInt("empire_id");
-		 	if (users.wasNull()){
+			resultSet.getInt("empire_id");
+		 	if (resultSet.wasNull()){
 				System.out.println("empire was null");
 		   		continue;
 			}
@@ -131,12 +131,11 @@ public class Main
 			}
 			System.out.println(row);
 			users.add(row);
-			
 		}
 		 
 		 
 		
-		 for(Integer user: users){	   
+		 /*for(Integer user: users){	   
 			ResultSet planets = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE id = " + userID);
 			
 			
@@ -159,7 +158,7 @@ public class Main
 				planet.max_population *= (1.00 + 0.01 * status.research_percent_population)*/
 		
 			}
-		}
+		}*/
 		 
 
 		 
