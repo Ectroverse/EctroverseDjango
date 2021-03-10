@@ -131,7 +131,7 @@ public class Main
 		   		continue;
 			}
 			HashMap<String,Integer> rowInt = new HashMap<>(columns.size());
-			HashMap<String,Integer> rowLong = new HashMap<>(columns.size());
+			HashMap<String,Long> rowLong = new HashMap<>(columns.size());
 			for(String[] col : columns) {
 				if(col[1].equals("java.lang.Integer"))
 			    		rowInt.put(col[0], resultSet.getInt(col[0]));
