@@ -8,7 +8,6 @@ public class Main
     public static void main(String[] args) {
 	//some constants temporarily written here, fetch them from app/constants.py later
 	int population_size_factor  = 20;
-	int building_production_cities = 10000;
 	int energy_decay_factor = 0.005;
 	int crystal_decay_factor = 0.02;
 	int upkeep_solar_collectors = 0.0;
@@ -119,7 +118,7 @@ public class Main
 		wookiees.put("mineral_production",   1.25);
 		wookiees.put("crystal_production",   1.25);
 		wookiees.put("ectrolium_production",   1.0);
-	race_info_list.put("wookiees",wookiees);  
+	race_info_list.put("Wookiees",wookiees);  
 
 		
 	long startTime = System.nanoTime();
@@ -350,9 +349,9 @@ public class Main
 			//loop over planets of each user
 			while(planets.next()){
 				num_planets++;
-				int max_population = (resultSet.getInt(size) * population_size_factor)
-				max_population += (resultSet.getInt(cities) * building_production_cities)
-				max_population *= (1.00 + 0.01 * status.research_percent_population)
+				int max_population = (resultSet.getInt(size) * population_size_factor);
+				max_population += (resultSet.getInt(cities) * building_production_cities);
+				max_population *= (1.00 + 0.01 * rowInt.get("research_percent_population"));
 				//Update Population
 				
 		
