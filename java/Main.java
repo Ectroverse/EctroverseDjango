@@ -130,8 +130,9 @@ public class Main
 		   		continue;
 			}
 			HashMap<String,Integer> row = new HashMap<>(columns.size());
-			for(String col : columns) {
-			    row.put(col, resultSet.getInt(col));
+			for(String[] col : columns) {
+				if(col[1].equals("Integer"))
+			    		row.put(col[0], resultSet.getInt(col));
 			}
 			System.out.println(row);
 			users.add(row);
