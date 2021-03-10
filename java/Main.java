@@ -132,7 +132,7 @@ public class Main
 			HashMap<String,Integer> row = new HashMap<>(columns.size());
 			for(String[] col : columns) {
 				if(col[1].equals("Integer"))
-			    		row.put(col[0], resultSet.getInt(col));
+			    		row.put(col[0], resultSet.getInt(col[0]));
 			}
 			System.out.println(row);
 			users.add(row);
