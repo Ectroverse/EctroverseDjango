@@ -37,35 +37,59 @@ public class Main
 		executeBatchTime = System.nanoTime();
 		int[] inserted = preparedStatement.executeBatch();
 		System.out.println(Arrays.toString(inserted));*/
-		
-		 String compiledQuery2 = "UPDATE \"PLANET\" SET max_population = ? "+
-				 + " current_population = ?" +
-				 + " protection = ?" +
-		 		+ "WHERE id = ?" ;
-		 PreparedStatement preparedStatement = con.prepareStatement(compiledQuery2);
+		ResultSet users = statement.executeQuery("SELECT * FROM app_userstatus");
 		 
-		ResultSet planets = statement.executeQuery("SELECT * FROM \"PLANET\"");
-		long t0 = System.nanoTime();
-		while(planets.next()){
-			int id = planets.getInt("id");
-			int max_population = planets.getInt("max_population");
-			int size = planets.getInt("size");
-			int total = size * 4 ;
+		 
+		 String compiledQuery2 = "UPDATE \"PLANET\" SET max_population = ? "+
+		 + " current_population = ?" +
+		 + " protection = ?" +
+		+ "WHERE id = ?" ;
+		 PreparedStatement preparedStatement = con.prepareStatement(compiledQuery2); //mass update, much faster
+		 
+		 //loop over users
+		while(users.next()){
+			int userID = users.getInt("id")
+			if(planets.getInt("networth") == 0){
+				System.out.println("networth was null");
+				continue;
+			}
+			
+			//check if the players empire is null
+			users.getInt("empire");
+		 	if (wasNull()){
+				System.out.println("empire was null");
+		   		continue;
+			}
+			   
+			   
+			ResultSet planets = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE id = userID");
 			
 			
-			
-			preparedStatement.setInt(4, id);
-			preparedStatement.setInt(3, 2435345);
-			preparedStatement.setInt(2, 345);
-			preparedStatement.setInt(1, total+2);
-			preparedStatement.addBatch();
-					
-			//# Update Population
-	        /*        planet.max_population = (planet.size * population_size_factor)
-	                planet.max_population += (planet.cities * building_production_cities)
-	                planet.max_population *= (1.00 + 0.01 * status.research_percent_population)*/
-			
+			//loop over planets of each user
+			while(planets.next()){
+				int id = planets.getInt("id");
+				int max_population = planets.getInt("max_population");
+				int size = planets.getInt("size");
+				int total = size * 4 ;
+
+				preparedStatement.setInt(4, id);
+				preparedStatement.setInt(3, 2435345);
+				preparedStatement.setInt(2, 345);
+				preparedStatement.setInt(1, total+2);
+				preparedStatement.addBatch();
+
+				//# Update Population
+			/*        planet.max_population = (planet.size * population_size_factor)
+				planet.max_population += (planet.cities * building_production_cities)
+				planet.max_population *= (1.00 + 0.01 * status.research_percent_population)*/
+			}
 		}
+		 
+
+		 
+		
+		long t0 = System.nanoTime();
+		
 		long t1 = System.nanoTime();
 		preparedStatement.executeBatch();
 		long t2= System.nanoTime();
