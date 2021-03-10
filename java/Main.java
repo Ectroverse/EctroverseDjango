@@ -114,7 +114,8 @@ public class Main
 			"WHERE id = ?" ; //53 wow what a long string :P
 		 PreparedStatement userStatusUpdateStatement = con.prepareStatement(userStatusUpdateQuery); //mass update, much faster
 
-		 ArrayList<HashMap<String, Integer>> users = new ArrayList<>();
+		 ArrayList<HashMap<String, Integer>> usersInt = new ArrayList<>();
+		 ArrayList<HashMap<String, Long>> usersLong = new ArrayList<>();
 		 //loop over users
 		while(resultSet.next()){
 			int userID = resultSet.getInt("user_id");
@@ -129,13 +130,18 @@ public class Main
 				System.out.println("empire was null");
 		   		continue;
 			}
-			HashMap<String,Integer> row = new HashMap<>(columns.size());
+			HashMap<String,Integer> rowInt = new HashMap<>(columns.size());
+			HashMap<String,Integer> rowLong = new HashMap<>(columns.size());
 			for(String[] col : columns) {
-				if(col[1].equals("Integer"))
-			    		row.put(col[0], resultSet.getInt(col[0]));
+				if(col[1].equals("java.lang.Integer"))
+			    		rowInt.put(col[0], resultSet.getInt(col[0]));
+				else if(col[1].equals("java.lang.Long"))
+			    		rowLong.put(col[0], resultSet.getLong(col[0]));
 			}
-			System.out.println(row);
-			users.add(row);
+			System.out.println(rowInt);
+			System.out.println(rowLong);
+			usersInt.add(rowInt);
+			usersLong.add(rowLong);
 		}
 		 
 		 
