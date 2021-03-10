@@ -150,4 +150,4 @@ dmypy.json
 
 # java log
 /java/log.txt
-
+/java/Main.class
