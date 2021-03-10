@@ -126,7 +126,7 @@ public class Main
 		wookiees.put("ectrolium_production",   1.0);
 	race_info_list.put("WK",wookiees);
 
-		
+
 	long startTime = System.nanoTime();
 	long connectionTime = 0;
 	long statTime = 0;
@@ -136,21 +136,21 @@ public class Main
 	 	//long startTime = System.nanoTime();
 		Connection con = DriverManager.getConnection("jdbc:postgresql://ectroversedjango_db_1:5432/djangodatabase", "dbadmin", "pass");
 		connectionTime = System.nanoTime();
-		
+
 		Statement statement = con.createStatement();
  		/*statTime = System.nanoTime();
 		ResultSet resultSet = statement.executeQuery("SELECT * FROM app_userstatus");
 		resultTime = System.nanoTime();*/
-		
+
 		//System.out.println(resultSet);
 		 /*String compiledQuery = "INSERT INTO app_userstatus(id, fleet_readiness)" +
                 " VALUES" + "(?, ?)";
         	PreparedStatement preparedStatement = connection.prepareStatement(compiledQuery);
-		 
+
 		while(resultSet.next()){
 			int id = resultSet.getInt("id")
 			int fleet_readiness = resultSet.getInt("fleet_readiness")
-				
+
 			System.out.println(id);
 			preparedStatement.setInt(1, id);
 			preparedStatement.setInt(2, fleet_readiness+2);
@@ -170,14 +170,14 @@ public class Main
 			columns.add(arr);
 		    }
 		 //System.out.println(columns);
-		 
+
 		 String planetStatusUpdateQuery = "UPDATE \"PLANET\"  SET" +
 		  " max_population = ? "+
 		  " current_population = ?" +
 		  " protection = ?" +
 		 "WHERE id = ?" ;
 		  PreparedStatement planetsUpdateStatement = con.prepareStatement(planetStatusUpdateQuery); //mass update, much faster
-		 
+
 		 String userStatusUpdateQuery = "UPDATE app_userstatus SET "+
 			" fleet_readiness  = ?" +  //1
 			" psychic_readiness  = ?" + //2
@@ -231,7 +231,7 @@ public class Main
 			" crystals                = ?" + //50
 			" ectrolium               = ?" + //51
 			" networth                = ?" + //52
-			 
+
 			"WHERE id = ?" ; //53 wow what a long string :P
 		 PreparedStatement userStatusUpdateStatement = con.prepareStatement(userStatusUpdateQuery); //mass update, much faster
 
@@ -246,7 +246,7 @@ public class Main
 				System.out.println("networth was null");
 				continue;
 			}
-			
+
 			//check if the players empire is null
 			resultSet.getInt("empire_id");
 		 	if (resultSet.wasNull()){
@@ -272,7 +272,7 @@ public class Main
 		}
 
 			 System.out.println(usersRace);
-		
+
 		 for(int i = 0; i < usersInt.size(); i++){
 			HashMap<String,Integer> rowInt = usersInt.get(i);
 			HashMap<String,Long> rowLong  = usersLong.get(i);
@@ -282,12 +282,12 @@ public class Main
 			 System.out.println(race_info);
 
 			int fr = Math.min(rowInt.get("fleet_readiness")+2, rowInt.get("fleet_readiness_max"));
-			userStatusUpdateStatement.setInt(1, fr); 
+			userStatusUpdateStatement.setInt(1, fr);
 			int pr = Math.min(rowInt.get("psychic_readiness")+2, rowInt.get("psychic_readiness_max"));
-			userStatusUpdateStatement.setInt(2, pr); 
+			userStatusUpdateStatement.setInt(2, pr);
 			int ar = Math.min(rowInt.get("agent_readiness")+2, rowInt.get("agent_readiness_max"));
 			userStatusUpdateStatement.setInt(3, ar);
-			 
+
 			 /*for job in Construction.objects.filter(user=status.user.id):
                 job.ticks_remaining -= 1
                 if job.ticks_remaining <= 0:
@@ -320,7 +320,7 @@ public class Main
                     job.delete()
                 else:
                     job.save()*/
-			 
+
 		/*
 		   # Repeat for units
             main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True) # should only ever be 1
@@ -333,11 +333,11 @@ public class Main
                     job.delete()
                 else:
                     job.save()*/
-			 
-			 
-			 
+
+
+
 			resultSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE id = " + userID);
-			 
+
 			long population = 0;
 			int num_planets = 0;
 			long cmdTickProduction_solar = 0;
@@ -358,8 +358,8 @@ public class Main
 			int total_defense_sats = 0;
 			int total_shield_networks = 0;
 			int total_portals = 0;
-			
-			
+
+
 			//loop over planets of each user
 			while(resultSet.next()){
 				num_planets++;
