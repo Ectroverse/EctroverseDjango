@@ -155,7 +155,7 @@ public class Main
 				//# Update Population
 			        /*planet.max_population = (planet.size * population_size_factor)
 				planet.max_population += (planet.cities * building_production_cities)
-				planet.max_population *= (1.00 + 0.01 * status.research_percent_population)*/
+				planet.max_population *= (1.00 + 0.01 * status.research_percent_population)
 		
 			}
 		}*/
@@ -163,13 +163,13 @@ public class Main
 
 		 
 		
-		long t0 = System.nanoTime();
+		/*long t0 = System.nanoTime();
 		
 		long t1 = System.nanoTime();
 		preparedStatement.executeBatch();
 		long t2= System.nanoTime();
 		System.out.println("planets execution 1: " + (double)(t1 - t0)/1_000_000_000.0);
-		System.out.println("planets execution 2: " + (double)(t2 - t1)/1_000_000_000.0);
+		System.out.println("planets execution 2: " + (double)(t2 - t1)/1_000_000_000.0);*/
 	}
 	catch (Exception e) {
             System.out.println("exception " +  e.getMessage());
