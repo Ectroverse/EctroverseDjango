@@ -146,7 +146,7 @@ public class Main
 		 
 		 
 		
-		 for(int i = 0; i < usersInt.length(); i++){
+		 for(int i = 0; i < usersInt.size(); i++){
 			HashMap<String,Integer> rowInt = usersInt.get(i);
 			HashMap<String,Long> rowLong  = usersLong.get(i);
 				
