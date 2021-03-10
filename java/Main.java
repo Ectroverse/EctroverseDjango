@@ -110,7 +110,7 @@ public class Main
 			"WHERE id = ?" ; //53 wow what a long string :P
 		 PreparedStatement userStatusUpdateStatement = con.prepareStatement(userStatusUpdateQuery); //mass update, much faster
 
-		 List<HashMap<Integer, Integer>> users = new ArrayList<>();
+		 ArrayList<HashMap<Integer, Integer>> users = new ArrayList<>();
 		 //loop over users
 		while(resultSet.next()){
 			int userID = resultSet.getInt("user_id");
@@ -127,7 +127,7 @@ public class Main
 			}
 			HashMap<String,String> row = new HashMap<String, String>(columns.size());
 			for(String col : columns) {
-			    row.put(col, rs.getInt(col));
+			    row.put(col, resultSet.getInt(col));
 			}
 			System.out.println(row);
 			users.add(row);
