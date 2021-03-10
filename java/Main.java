@@ -41,28 +41,28 @@ public class Main
 		 
 		 
 		 String compiledQuery2 = "UPDATE \"PLANET\" SET max_population = ? "+
-		 + " current_population = ?" +
-		 + " protection = ?" +
-		+ "WHERE id = ?" ;
+		  " current_population = ?" +
+		  " protection = ?" +
+		 "WHERE id = ?" ;
 		 PreparedStatement preparedStatement = con.prepareStatement(compiledQuery2); //mass update, much faster
 		 
 		 //loop over users
 		while(users.next()){
-			int userID = users.getInt("id")
-			if(planets.getInt("networth") == 0){
+			int userID = users.getInt("user_id");
+			if(users.getInt("networth") == 0){
 				System.out.println("networth was null");
 				continue;
 			}
 			
 			//check if the players empire is null
-			users.getInt("empire");
-		 	if (wasNull()){
+			users.getInt("empire_id");
+		 	if (users.wasNull()){
 				System.out.println("empire was null");
 		   		continue;
 			}
 			   
 			   
-			ResultSet planets = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE id = userID");
+		/*	ResultSet planets = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE id = " + userID);
 			
 			
 			//loop over planets of each user
@@ -79,10 +79,11 @@ public class Main
 				preparedStatement.addBatch();
 
 				//# Update Population
-			/*        planet.max_population = (planet.size * population_size_factor)
+			        planet.max_population = (planet.size * population_size_factor)
 				planet.max_population += (planet.cities * building_production_cities)
-				planet.max_population *= (1.00 + 0.01 * status.research_percent_population)*/
-			}
+				planet.max_population *= (1.00 + 0.01 * status.research_percent_population)
+		
+			}*/
 		}
 		 
 

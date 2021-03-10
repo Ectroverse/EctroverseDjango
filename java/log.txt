@@ -1,0 +1,5 @@
+empire was null
+planets execution 1: 2.67E-7
+planets execution 2: 4.9368E-5
+connection time 0.399487648
+0.441494704
