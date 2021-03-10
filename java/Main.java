@@ -40,9 +40,13 @@ public class Main
 		System.out.println(Arrays.toString(inserted));*/
 		ResultSet resultSet = statement.executeQuery("SELECT * FROM app_userstatus");
 	   	ResultSetMetaData rsmd = resultSet.getMetaData();
-	   	ArrayList<String> columns = new ArrayList<>(rsmd.getColumnCount());
+	   	ArrayList<String []> columns = new ArrayList<>(rsmd.getColumnCount());
 	  	for(int i = 1; i <= rsmd.getColumnCount(); i++){
-			columns.add(rsmd.getColumnName(i));
+			String [] arr = new String[2];
+			arr[0] = rsmd.getColumnName(i);
+			arr[1] = rsmd.getColumnClassName(i);
+			System.out.println(Arrays.toString(arr));
+			columns.add(arr);
 		    }
 		 System.out.println(columns);
 		 
