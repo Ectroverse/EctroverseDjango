@@ -410,17 +410,48 @@ public class Main
 				current_population = Math.min(current_population, max_population);
 				planetsUpdateStatement.setInt(1, current_population);
 				
+				//add planets population to total population
 				population += current_population;
 				
 				//update portal coverage
 				if(resultSet.getBoolean("portal") == true)
 					planetsUpdateStatement.setInt(3, 100);
-				else
-					planetsUpdateStatement.setInt(3, (int)(100.0 * battlePortalCalc(resultSet.getInt("x"), resultSet.getInt("y"), 
-													portals, rowInt.get(research_percent_population)) ));
-
+				else{
+					if(portals.size() == 0)
+						planetsUpdateStatement.setInt(3, 0);
+					else
+						planetsUpdateStatement.setInt(3, (int)(100.0 * battlePortalCalc(resultSet.getInt("x"), resultSet.getInt("y"), 
+													portals, rowInt.get(research_percent_portals)) ));
+				}
 				
-		
+				// Add buildings to running total for player
+				total_solar_collectors += resultSet.getInt("solar_collectors");
+				total_fission_reactors += resultSet.getInt("fission_reactors");
+				total_mineral_plants += resultSet.getInt("mineral_plants");
+				total_crystal_labs += resultSet.getInt("crystal_labs");
+				total_refinement_stations += resultSet.getInt("refinement_stations");
+				total_cities += resultSet.getInt("cities");
+				total_research_centers += resultSet.getInt("research_centers");
+				total_defense_sats += resultSet.getInt("defense_sats");
+				total_shield_networks += resultSet.getInt("shield_networks");
+				total_portals += resultSet.getInt("portal");
+				
+				int total_buildings = resultSet.getInt("solar_collectors") + 
+					resultSet.getInt("fission_reactors") + resultSet.getInt("mineral_plants")+
+					resultSet.getInt("crystal_labs") + resultSet.getInt("refinement_stations")+
+					resultSet.getInt("cities") + resultSet.getInt("research_centers") +
+					resultSet.getInt("defense_sats") + resultSet.getInt("shield_networks") +
+					resultSet.getInt("portal");
+				
+				planetsUpdateStatement.setInt(16, total_buildings);
+				
+				cmdTickProduction_solar += (building_production_solar * resultSet.getInt("solar_collectors")) * (1 + resultSet.getInt("bonus_solar")/100.0);
+				cmdTickProduction_fission += (building_production_fission  * resultSet.getInt("fission_reactors")) * (1 + resultSet.getInt("bonus_fission")/100.0);
+				cmdTickProduction_mineral += 0;
+				cmdTickProduction_crystal += 0;
+				cmdTickProduction_ectrolium += 0;
+				cmdTickProduction_cities += 0;
+				cmdTickProduction_research += 0;
 			}
 		}
 		 
@@ -446,9 +477,13 @@ public class Main
     	System.out.println((double)(endTime-startTime)/1_000_000_000.0);
     }
 	
-	private double battlePortalCalc(int x, int y, LinkedList<Planet> portals, int popRc){
-		
-		
+	private double battlePortalCalc(int x, int y, LinkedList<Planet> portals, int portalResearch){
+		double cover = 0
+		for (Planet portal : portals){
+		    double d = Math.sqrt(Math.pow((x-portal.x),2) + Math.pow((y-portal.y),2));
+		    cover = Math.max(0, 1.0 - Math.sqrt(d/(7.0*(1.0 + 0.01*portalResearch))));
+		}
+		return cover;
 	}
 	
 }
