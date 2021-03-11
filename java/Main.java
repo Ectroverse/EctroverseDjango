@@ -3,6 +3,18 @@ import java.util.*;
 
 public class Main
 {
+	
+	class Planet{
+		int posX;
+		int posY;
+		int posZ;
+		
+		public Planet(int x, int y, int z){
+			this.posX = x;
+			this.posY = y;
+			this.posZ = z;
+		}
+	}
 
 
     public static void main(String[] args) {
@@ -172,10 +184,25 @@ public class Main
 		 //System.out.println(columns);
 
 		 String planetStatusUpdateQuery = "UPDATE \"PLANET\"  SET" +
-		  " max_population = ? "+
-		  " current_population = ?" +
-		  " protection = ?" +
-		 "WHERE id = ?" ;
+			" current_population = ? "+ //1
+			" max_population = ?" + //2
+			" protection = ?" + //3
+			" overbuilt = ?" + //4
+			" overbuilt_percent = ?" + //5
+			" solar_collectors = ?" + //6
+			" fission_reactors = ?" + //7
+			" mineral_plants = ?" + //8
+			" crystal_labs = ?" + //9
+			" cities = ?" + //10
+			" research_centers = ?" + //11
+			" defense_sats = ?" + //12
+			" shield_networks = ?" + //13
+			" portal = ?" + //14
+			" portal_under_construction = ?" + //15
+			" total_buildings = ?" + //16
+			" buildings_under_construction = ?" + //17
+			 
+		 	"WHERE id = ?" ; //18
 		  PreparedStatement planetsUpdateStatement = con.prepareStatement(planetStatusUpdateQuery); //mass update, much faster
 
 		 String userStatusUpdateQuery = "UPDATE app_userstatus SET "+
@@ -271,7 +298,7 @@ public class Main
 			usersLong.add(rowLong);
 		}
 
-			 System.out.println(usersRace);
+			 //System.out.println(usersRace);
 
 		 for(int i = 0; i < usersInt.size(); i++){
 			HashMap<String,Integer> rowInt = usersInt.get(i);
@@ -279,7 +306,7 @@ public class Main
 			int userID = rowInt.get("user_id");
 			HashMap<String, Double> race_info = race_info_list.get(usersRace.get(userID));
 
-			 System.out.println(race_info);
+			 //System.out.println(race_info);
 
 			int fr = Math.min(rowInt.get("fleet_readiness")+2, rowInt.get("fleet_readiness_max"));
 			userStatusUpdateStatement.setInt(1, fr);
@@ -333,9 +360,15 @@ public class Main
                     job.delete()
                 else:
                     job.save()*/
-
-
-
+			
+			portalstSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE portal = TRUE AND id = " + userID );
+			 //this may be quite slow with a lot of portals and planets, could optimize this later
+			LinkedList<Planet> portals = new LinkedList<>();
+			while(resultSet.next()){
+				Planet planet = new Planet(resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("i"));
+				portals.add(planet);
+			}
+			
 			resultSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE id = " + userID);
 
 			long population = 0;
@@ -368,10 +401,23 @@ public class Main
 				int max_population = (resultSet.getInt("size") * population_size_factor);
 				max_population += (resultSet.getInt("cities") * building_production_cities);
 				max_population *= (1.00 + 0.01 * rowInt.get("research_percent_population"));
-
+				planetsUpdateStatement.setInt(2, max_population);
+				
 				//planet.current_population += int(np.ceil(planet.current_population * race_info["pop_growth"] * (1.00 + 0.01 * status.research_percent_population) * 0.75**nInfection))
 				//planet.current_population = min(planet.max_population, planet.current_population)
-
+				
+				int current_population  = Math.ceil(resultSet.getInt("current_population") * race_info.get("pop_growth")*(1.00 + 0.01 * rowInt.get(research_percent_population)));
+				current_population = Math.min(current_population, max_population);
+				planetsUpdateStatement.setInt(1, current_population);
+				
+				population += current_population;
+				
+				//update portal coverage
+				if(resultSet.getBoolean("portal") == true)
+					planetsUpdateStatement.setInt(3, 100);
+				else
+					planetsUpdateStatement.setInt(3, (int)(100.0 * battlePortalCalc(resultSet.getInt("x"), resultSet.getInt("y"), 
+													portals, rowInt.get(research_percent_population)) ));
 
 				
 		
@@ -399,4 +445,10 @@ public class Main
     	
     	System.out.println((double)(endTime-startTime)/1_000_000_000.0);
     }
+	
+	private double battlePortalCalc(int x, int y, LinkedList<Planet> portals, int popRc){
+		
+		
+	}
+	
 }
