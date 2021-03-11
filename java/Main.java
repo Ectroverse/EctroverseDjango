@@ -170,11 +170,9 @@ public class Main
 		 /*String compiledQuery = "INSERT INTO app_userstatus(id, fleet_readiness)" +
                 " VALUES" + "(?, ?)";
         	PreparedStatement preparedStatement = connection.prepareStatement(compiledQuery);
-
 		while(resultSet.next()){
 			int id = resultSet.getInt("id")
 			int fleet_readiness = resultSet.getInt("fleet_readiness")
-
 			System.out.println(id);
 			preparedStatement.setInt(1, id);
 			preparedStatement.setInt(2, fleet_readiness+2);
@@ -200,12 +198,15 @@ public class Main
 			 
 		 	"WHERE id = ?" ; //12
 		 PreparedStatement jobsUpdateStatement = con.prepareStatement(planetjobsUpdateQuery); //mass update, much faster
+		//building jobs update
+		//select all jobs with 1 tick remaining time
+		//Select aggregated by planet
+		//Delete those jobs
+		
 		 
 		//update units jobs
 		 
 		//update fleets
-		 
-		
 		 
 		 
 		ResultSet resultSet = statement.executeQuery("SELECT * FROM app_userstatus");
@@ -219,7 +220,8 @@ public class Main
 			arr[1] = rsmd.getColumnClassName(i);
 			//System.out.println(Arrays.toString(arr));
 			columns.add(arr);
-		    }
+		 }
+		 
 		 //System.out.println(columns);
 		 ArrayList<HashMap<String, Integer>> usersInt = new ArrayList<>();
 		 ArrayList<HashMap<String, Long>> usersLong = new ArrayList<>();
@@ -359,6 +361,8 @@ public class Main
 			portalstSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE portal = TRUE AND id = " + userID );
 			 //this may be quite slow with a lot of portals and planets, could optimize this later
 			LinkedList<Planet> portals = new LinkedList<>();
+			
+			
 			while(resultSet.next()){
 				Planet planet = new Planet(resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("i"));
 				portals.add(planet);
