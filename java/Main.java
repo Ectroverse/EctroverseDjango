@@ -137,6 +137,18 @@ public class Main
 		wookiees.put("crystal_production",   1.25);
 		wookiees.put("ectrolium_production",   1.0);
 	race_info_list.put("WK",wookiees);
+	    
+	HashMap<String, String> buildingsNames = new HashMap<>();
+	buildingsNames.put( "SC", "solar_collectors");
+	buildingsNames.put( "FR", "fission_reactors");
+	buildingsNames.put( "MP", "mineral_plants");
+	buildingsNames.put( "CL", "crystal_labs");
+	buildingsNames.put( "RS", "refinement_stations");
+	buildingsNames.put( "CT", "cities");
+	buildingsNames.put( "RC", "research_centers");
+	buildingsNames.put( "DS", "defense_sats");
+	buildingsNames.put( "SN", "shield_networks");
+	buildingsNames.put( "PL", "portal");
 
 
 	long startTime = System.nanoTime();
@@ -171,9 +183,36 @@ public class Main
 		executeBatchTime = System.nanoTime();
 		int[] inserted = preparedStatement.executeBatch();
 		System.out.println(Arrays.toString(inserted));*/
+		 
+		//update construction jobs
+		 String planetjobsUpdateQuery = "UPDATE \"PLANET\"  SET" +
+			" solar_collectors = ?" + //1
+			" fission_reactors = ?" + //2
+			" mineral_plants = ?" + //3
+			" crystal_labs = ?" + //4
+			" cities = ?" + //5
+			" research_centers = ?" + //6
+			" defense_sats = ?" + //7
+			" shield_networks = ?" + //8
+			" portal = ?" + //9
+			" portal_under_construction = ?" + //10
+			" buildings_under_construction = ?" + //11
+			 
+		 	"WHERE id = ?" ; //12
+		 PreparedStatement jobsUpdateStatement = con.prepareStatement(planetjobsUpdateQuery); //mass update, much faster
+		 
+		//update units jobs
+		 
+		//update fleets
+		 
+		
+		 
+		 
 		ResultSet resultSet = statement.executeQuery("SELECT * FROM app_userstatus");
 	   	ResultSetMetaData rsmd = resultSet.getMetaData();
 	   	ArrayList<String []> columns = new ArrayList<>(rsmd.getColumnCount());
+		 
+		 //put user table into list with hash maps, as we cannot use nested resultSet
 	  	for(int i = 1; i <= rsmd.getColumnCount(); i++){
 			String [] arr = new String[2];
 			arr[0] = rsmd.getColumnName(i);
@@ -182,6 +221,9 @@ public class Main
 			columns.add(arr);
 		    }
 		 //System.out.println(columns);
+		 ArrayList<HashMap<String, Integer>> usersInt = new ArrayList<>();
+		 ArrayList<HashMap<String, Long>> usersLong = new ArrayList<>();
+		 HashMap<Integer, String> usersRace = new HashMap<>();
 
 		 String planetStatusUpdateQuery = "UPDATE \"PLANET\"  SET" +
 			" current_population = ? "+ //1
@@ -262,9 +304,7 @@ public class Main
 			"WHERE id = ?" ; //53 wow what a long string :P
 		 PreparedStatement userStatusUpdateStatement = con.prepareStatement(userStatusUpdateQuery); //mass update, much faster
 
-		 ArrayList<HashMap<String, Integer>> usersInt = new ArrayList<>();
-		 ArrayList<HashMap<String, Long>> usersLong = new ArrayList<>();
-		 HashMap<Integer, String> usersRace = new HashMap<>();
+
 
 		 //loop over users
 		while(resultSet.next()){
@@ -315,51 +355,6 @@ public class Main
 			int ar = Math.min(rowInt.get("agent_readiness")+2, rowInt.get("agent_readiness_max"));
 			userStatusUpdateStatement.setInt(3, ar);
 
-			 /*for job in Construction.objects.filter(user=status.user.id):
-                job.ticks_remaining -= 1
-                if job.ticks_remaining <= 0:
-                    if job.building_type == 'SC':
-                        job.planet.solar_collectors += job.n
-                    if job.building_type == 'FR':
-                        job.planet.fission_reactors += job.n
-                    if job.building_type == 'MP':
-                        job.planet.mineral_plants += job.n
-                    if job.building_type == 'CL':
-                        job.planet.crystal_labs += job.n
-                    if job.building_type == 'RS':
-                        job.planet.refinement_stations += job.n
-                    if job.building_type == 'CT':
-                        job.planet.cities += job.n
-                    if job.building_type == 'RC':
-                        job.planet.research_centers += job.n
-                    if job.building_type == 'DS':
-                        job.planet.defense_sats += job.n
-                    if job.building_type == 'SN':
-                        job.planet.shield_networks += job.n
-                    if job.building_type == 'PL':
-                        job.planet.portal = True
-                        job.planet.portal_under_construction = False
-                    job.planet.buildings_under_construction -= job.n
-                    job.planet.save()
-
-                    # TODO ADD IT TO THE NEWS!
-
-                    job.delete()
-                else:
-                    job.save()*/
-
-		/*
-		   # Repeat for units
-            main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True) # should only ever be 1
-            for job in UnitConstruction.objects.filter(user=status.user.id):
-                job.ticks_remaining -= 1
-                if job.ticks_remaining <= 0:
-                    setattr(main_fleet, job.unit_type, getattr(main_fleet, job.unit_type) + job.n)
-                    main_fleet.save()
-                    # TODO ADD IT TO THE NEWS!
-                    job.delete()
-                else:
-                    job.save()*/
 			
 			portalstSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE portal = TRUE AND id = " + userID );
 			 //this may be quite slow with a lot of portals and planets, could optimize this later
@@ -445,13 +440,20 @@ public class Main
 				
 				planetsUpdateStatement.setInt(16, total_buildings);
 				
+				//update player production
 				cmdTickProduction_solar += (building_production_solar * resultSet.getInt("solar_collectors")) * (1 + resultSet.getInt("bonus_solar")/100.0);
 				cmdTickProduction_fission += (building_production_fission  * resultSet.getInt("fission_reactors")) * (1 + resultSet.getInt("bonus_fission")/100.0);
-				cmdTickProduction_mineral += 0;
-				cmdTickProduction_crystal += 0;
-				cmdTickProduction_ectrolium += 0;
-				cmdTickProduction_cities += 0;
-				cmdTickProduction_research += 0;
+				cmdTickProduction_mineral += (building_production_mineral   * resultSet.getInt("mineral_plants")) * (1 + resultSet.getInt("bonus_mineral")/100.0);
+				cmdTickProduction_crystal += (building_production_crystal    * resultSet.getInt("crystal_labs")) * (1 + resultSet.getInt("bonus_crystal")/100.0);
+				cmdTickProduction_ectrolium += (building_production_ectrolium    * resultSet.getInt("refinement_stations")) * (1 + resultSet.getInt("bonus_ectrolium")/100.0);
+				cmdTickProduction_cities += building_production_cities * resultSet.getInt("cities");
+				cmdTickProduction_research += building_production_research * resultSet.getInt("research_centers");
+				
+				double overbuilt = calc_overbuild(resultSet.getInt("size"), total_buildings + resultSet.getInt("buildings_under_construction"));
+                		double overbuilt_percent = (overbuilt-1.0)*100; 
+				
+				planetsUpdateStatement.setDouble(4, overbuilt);
+				planetsUpdateStatement.setDouble(5, overbuilt_percent);
 			}
 		}
 		 
