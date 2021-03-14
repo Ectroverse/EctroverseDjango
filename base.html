@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+
+{% load mathfilters %}
+
+<head>
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="{% static 'icon.jpg' %}">
+
+{% block title %}<title>Ectroverse</title>{% endblock %}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<!-- Add additional CSS in static file -->
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+
+<!-- Bootstrap stuff -->
+<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"> -->
+<!--<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">-->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>-->
+
+<!-- Our CSS should come after everything else -->
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+<style type="text/css">
+body
+{
+    background-image:url("/static/background.gif");
+}
+
+
+
+@media all and (max-width: 660px) {
+	.hide_pop {display: none;}
+	.content-desktop {display: none;}
+	.content-mobile-menu, .content-mobile {display: block;}
+	.left_menu_large_scrn {display:none;}
+	.right_side{
+	width: 100%;
+	}
+
+	.left_box, .right_box {
+		width: 100%;
+		}
+
+	.center_box_inside {
+		text-align: left;
+	}
+
+	.show_only_on_wide_scrn{
+		display: none;
+	}
+
+}
+
+@media all and (min-width: 661px) {
+	.left_menu_large_scrn{
+	min-width: 175px;
+	}
+	.right_side{
+	left: 180px;
+	right: 0px;
+	}
+	.show_only_on_mobile{
+		display: none;
+	}
+}
+
+@media all and (min-width: 661px) and (max-width: 837px) {
+	.content-mobile {display: block;}
+	.content-desktop, .content-mobile-menu {display: none;}
+}
+
+@media all and (min-width: 838px){
+	.content-desktop {display: block;}
+	.content-mobile, .content-mobile-menu {display: none;}
+
+}
+
+
+.headerplanets{
+  vertical-align: middle;
+}
+
+.nav_top{
+ position: absolute;
+ width: 150px;
+ height: 40px;
+ left: 0px;
+ top: 0px;
+  content:url({% static 'files_004' %});
+}
+
+.nav_hq{
+  position: absolute;
+  width: 150px;
+  height: 20px;
+  left: 0px;
+  top: 40px;
+    background-image:url({% static 'files_010' %});
+}
+
+.nav_body{
+  position: relative;
+  width: 150px;
+  height: 430px;
+  left: 0px;
+  top: 60px;
+    background-image:url({% static 'files_013' %});
+}
+
+.nav_bottom{
+  position: relative;
+  width: 150px;
+  height: 20px;
+  left: 0px;
+    content:url({% static 'files_022' %});
+}
+
+.nav_footer{
+  position: relative;
+  width: 150px;
+  height: 75px;
+    content:url({% static 'files_014.jpg' %});
+}
+
+.nav_head{
+ position: relative;
+}
+
+.nav_navi{
+ position: relative;
+}
+
+</style>
+
+<!-- Tick Timer Script -->
+<script>
+function startTime() {
+  var today = new Date();
+  var m = today.getMinutes();
+  var s = today.getSeconds();
+  <!--m_left = 9 - (m % 10); -->
+  m_left = 0;
+  s_left = 59 - (s % 60);
+  s_left = fixTimeDigits(s_left);
+  document.getElementById('headerTime').innerHTML =
+  m_left + ":" + s_left;
+  var t = setTimeout(startTime, 60);
+}
+function fixTimeDigits(i) {
+  if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+  return i;
+}
+
+// Toggle check boxes, used on various pages
+	function toggleForm(form_name) {
+
+		var selectElements = document.forms[form_name].elements;
+		for(var i = 0; i < selectElements.length; i++) {
+			if(selectElements[i].type == "checkbox") {
+				selectElements[i].checked = !selectElements[i].checked;
+			}
+		}
+	}
+
+function changeslider(newValue,field) {
+	window.document.getElementById(field).value=newValue;
+}
+</script>
+
+
+</head>
+
+
+<body style="
+   width:100%;
+   margin:0 0 50px 0;
+   max-width:100%;
+   overflow-x:hidden;"
+onload="startTime()">
+
+{% if user.is_authenticated %}
+
+
+
+<div class="parent_container">
+<div class="content-wrap">
+		<div class="left_menu_large_scrn"> <!-- Hide on mobile -->
+        <!-- Sidebar content -->
+	<div class="nav_top"></div>
+        <div class="nav_hq">
+		<div class="nav_head">
+          	<b><font size="2" face="Tahoma">
+          	<a href="/headquarters">Headquarters</a></font></b>
+        	</div>
+	</div>
+        <div class="nav_body">
+		<div class="nav_navi">
+          	<b><font size="2" face="Tahoma">
+                        <a href="/council">Council</a><br>
+                        <a href="/units">Units</a><br>
+                        <a href="/planets">Planets</a><br>
+                        <a href="/empire12">Empire</a><br>
+                        -<a href="/famaid">Send aid</a><br>
+                        -<a href="/famgetaid">Receive aid</a><br>
+                        -<a href="/famnews">News</a><br>
+                        -<a href="/relations">Relations</a><br>
+                        <a href="/fleets">Fleets</a><br>
+                        <a href="/map">Galaxy map</a><br>
+                        -<a href="/map">Full map</a><br>
+                        -<a href="/observessurveys" style="color:red;">Scouting</a><br>
+                        <a href="/research">Research</a><br>
+                        <a href="/specops" style="color:red;">Operations</a><br></font>
+            		<img src="/static/files_017" height="15">
+            		<font size="2" face="Tahoma">
+        				<a href="/messages">Messages</a><br>
+                        <a href="/ranking">Faction Rank</a><br>
+                        <a href="/empire_ranking">Empire Rank</a><br>
+                        <a href="/account">Account</a>
+                        <br>
+                        <a href="/logout">Logout</a>
+                        <br><br>
+                        <!---<form action="search?2fix" method="POST"><input type="text" name="search" size="8"><br>
+                        <input type="submit" size="2" value="OK"></form><br> -->
+                        <a href="https://discord.gg/8Pkpqtd?2fix" target="_blank">Discord</a><br>
+                        <a href="/guide">Guide</a><br>
+                        <a href="https://web.facebook.com/groups/803616616363658?2fix" target="_blank">Facebook</a><br></font></b>
+        	</div>
+	</div>
+	<div class="nav_bottom"></div>
+	<div class="nav_footer"></div>
+
+
+  </div>
+
+  <div class="right_side">
+       {% include "header.html" %}
+	<!-- Main area content -->
+	{% include "box_top.html" with heading=page_title minwidth="360px" textalign="center"  %}
+		{% block content %}
+		{% endblock %}
+	{% include "box_bottom.html" %}
+  </div>
+</div>
+
+{% include "footer.html" %}
+
+{% else %}
+
+YOU SHOULD NEVER BE ABLE TO GET TO THIS PAGE!! THE VIEW REQUIRES AUTHENTICATION!
+
+{% endif %}
+
+</div>
+
+</body>
+</html>
