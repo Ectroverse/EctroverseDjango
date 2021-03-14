@@ -13,19 +13,19 @@
 			document.getElementById('mobilemenu').style.display = "block";
 			}
 	}
-	
+
 
 </script>
 
 <style>
-<!-- width>= 836px - normal desctop mode
+/* width>= 836px - normal desctop mode
 	width < 836px and width > 660 still show side menu, but change the appearence of header, dont top show meny yet
 	width <= 660 full mobile version
--->
+*/
 
 
 @media all and (max-width: 660px){
-<!-- defined in base, need to clean this all up, but carefully, this shit breaks easily and mayconflict with @media on base page" -->
+/*defined in base, need to clean this all up, but carefully, this shit breaks easily and mayconflict with @media on base page" */
 }
 
 @media all and (min-width: 661px) and (max-width: 837px) {
@@ -72,7 +72,7 @@
 	right: 78px;
 	top: 0px;
     background-image:url({% static 'i05.jpg' %});
-	
+
 }
 
 .menu_container_header_right{
@@ -135,7 +135,7 @@
 	left: 217px;
 	right: 49px;
 	top: 21px;
-    background-image:url({% static 'i15.jpg' %});	
+    background-image:url({% static 'i15.jpg' %});
 }
 
 .menu_container_footer_right{
@@ -391,8 +391,8 @@
 					<li><a href="/specops">Operations</a></li>
 						<br>
 					<li><a href="/messages">Messages</a></li>
-					<li><a href="/rankings">Faction rankings</a></li>
-					<li><a href="/empire_ranking">Empire rankings</a></li>
+					<li><a href="/ranking">Faction Rank</a></li>
+					<li><a href="/empire_ranking">Empire Rank</a></li>
 					<li><a href="/account">Account</a></li>
 					<li><a href="/?next={{request.path}}">Logout</a></li><br>
 					<li><a href="https://discord.gg/8Pkpqtd?2fix" target="_blank">Discord</a></li>
@@ -406,7 +406,7 @@
 			<div class="mob_menu_right_align">Networth : {{status.networth}}</div>
 			<div class="hide_pop "><div class="mob_menu_right_align">Population: {{status.population}}</div></div>
 	</div>
-	
+
 	<div class="menu_container content-desktop">
 		<div class="menu_container_left"></div>
 		<div class="menu_container_header_left"></div>
@@ -425,8 +425,8 @@
 		<a href="/headquarters"><div class="menu_container_btn1"></div></a>
 		<a href="/headquarters"><div class="menu_container_btn2"></div></a>
 		<a href="/headquarters"><div class="menu_container_btn3"></div></a>
-		<a href="/headquarters"><div class="menu_container_btn4"></div></a>	
-		<div class="menu_container_footer_left"></div>		
+		<a href="/headquarters"><div class="menu_container_btn4"></div></a>
+		<div class="menu_container_footer_left"></div>
 		<div class="menu_container_footer_mid">
 			<div class = "menu_left_align">
 				Energy : {{status.energy}}<br>
@@ -437,15 +437,15 @@
 				Ectrolium : {{status.ectrolium}}
 			</div>
 			<div class = "menu_right_align">
-				FR: {{status.fleet_readiness}}
-				AR: {{status.agent_readiness}}
-				PR: {{status.psychic_readiness}}
+				FR: {{status.fleet_readiness}}%
+				AR: {{status.agent_readiness}}%
+				PR: {{status.psychic_readiness}}%
 			</div>
-		
+
 		</div>
-		<div class="menu_container_footer_right"></div>			
+		<div class="menu_container_footer_right"></div>
 	</div>
-	
+
 	<!--Mobile Top Nav-->
 <div class="menu_container content-mobile">
 	<div class="menu_container_left"></div>
@@ -461,16 +461,16 @@
 	<div class="menu_container_footer_leftmob"></div>
 	<div class="menu_container_footer_midmob">
 		<div class = "menu_leftmob1_align">
-			<img src="../static/pr0.gif" alt="Energy"> : {{status.energy}}
+			<img src="../static/pr0.gif" alt="Energy"> {{status.energy}}
 		</div>
 		<div class = "menu_leftmob2_align">
-			<img src="../static/pr1.gif" alt="Mineral"> : {{status.minerals}}
+			<img src="../static/pr1.gif" alt="Mineral"> {{status.minerals}}
 		</div>
 		<div class = "menu_rightmob1_align">
-			<img src="../static/pr2.gif" alt="Crystal"> : {{status.crystals}}
+			<img src="../static/pr2.gif" alt="Crystal"> {{status.crystals}}
 		</div>
 		<div class = "menu_rightmob2_align">
-			<img src="../static/pr3.gif" alt="Ectrolium"> : {{status.ectrolium}}
+			<img src="../static/pr3.gif" alt="Ectrolium"> {{status.ectrolium}}
 		</div>
 	</div>
 	<div class="menu_container_footer_rightmob"></div>
