@@ -332,7 +332,8 @@ public class Main
 			usersInt.add(rowInt);
 			usersLong.add(rowLong);
 		}
-
+			
+		System.out.println("test1");
 		//loops over users to uodate their stats and planets --main loop!
 		 for(int j = 0; j < usersInt.size(); j++){
 			HashMap<String,Integer> rowInt = usersInt.get(j);
@@ -356,7 +357,7 @@ public class Main
 			ResultSet portalstSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE portal = TRUE AND id = " + userID );
 			 //this may be quite slow with a lot of portals and planets, could optimize this later
 			LinkedList<Planet> portals = new LinkedList<>();
-			
+			System.out.println("test2");
 			
 			while(portalstSet.next()){
 				Planet planet = new Main().new Planet(resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("i"));
@@ -432,7 +433,7 @@ public class Main
 				}
 				
 				
-			
+				System.out.println("test3");
 				
 				//update planets buildings
 				int solar_collectors = resultSet.getInt("solar_collectors") + buildgsBuiltFromJobs.getOrDefault("solar_collectors",0);
@@ -515,6 +516,7 @@ public class Main
 				
 				planetsUpdateStatement.addBatch();
 			}
+			System.out.println("test4");
 			//update planets
 			userStatusUpdateStatement.setInt(55, num_planets);
 			
