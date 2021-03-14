@@ -188,7 +188,7 @@ public class Main
 	
 	Connection con = null;
 	try{
-		con = DriverManager.getConnection("jdbc:postgresql://ectroversedjango_db_1:5432/djangodatabase", "dbadmin", "pass");
+		con = DriverManager.getConnection("jdbc:postgresql://ectroversedjango_db_1:5432/djangodatabase", "admin", "admin12345");
 		connectionTime = System.nanoTime();
 	}
 	catch (Exception e) {
