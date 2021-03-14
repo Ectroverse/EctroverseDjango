@@ -204,11 +204,12 @@ class UserStatus(models.Model):
     ectrolium = models.BigIntegerField(default=0, validators = [MinValueValidator(0)])
 
     # Current resource production/decay, calculated in process_tick
-    energy_production = models.IntegerField(default=0)
-    energy_decay = models.IntegerField(default=0)
-    energy_interest = models.IntegerField(default=0) # wookies only
-    energy_income = models.IntegerField(default=0)
+    energy_production = models.BigIntegerField(default=0)
+    energy_decay = models.BigIntegerField(default=0)
+    energy_interest = models.BigIntegerField(default=0) # wookies only
+    energy_income = models.BigIntegerField(default=0)
     mineral_production = models.IntegerField(default=0)
+    mineral_decay = models.IntegerField(default=0)
     mineral_interest = models.IntegerField(default=0) # wookies only
     mineral_income = models.IntegerField(default=0)
     crystal_production = models.IntegerField(default=0)
@@ -216,17 +217,18 @@ class UserStatus(models.Model):
     crystal_interest = models.IntegerField(default=0) # wookies only
     crystal_income = models.IntegerField(default=0)
     ectrolium_production = models.IntegerField(default=0)
+    ectrolium_decay = models.IntegerField(default=0)
     ectrolium_interest = models.IntegerField(default=0) # wookies only
     ectrolium_income = models.IntegerField(default=0)
 
     # Misc info that must be recalculated
     num_planets = models.IntegerField(default=1) # number of planets, will get calculated
-    population = models.IntegerField(default=0)
+    population = models.BigIntegerField(default=0)
     networth = models.BigIntegerField(default=1)
-    buildings_upkeep = models.IntegerField(default=0) # stored as a positive number
-    units_upkeep = models.IntegerField(default=0) # stored as a positive number
+    buildings_upkeep = models.BigIntegerField(default=0) # stored as a positive number
+    units_upkeep = models.BigIntegerField(default=0) # stored as a positive number
     portals_upkeep = models.IntegerField(default=0) # stored as a positive number
-    population_upkeep_reduction = models.IntegerField(default=0)
+    population_upkeep_reduction = models.BigIntegerField(default=0)
 
     total_solar_collectors = models.IntegerField(default=staring_solars) # all of these are across all planets (which is why its in status and not planet)
     total_fission_reactors = models.IntegerField(default=0)
@@ -348,19 +350,19 @@ class Fleet(models.Model):
     i = models.IntegerField(null=True, blank=True, default=None)
 
     # Number of each type of unit
-    bomber      = models.IntegerField(default=0, verbose_name="Bombers")
-    fighter     = models.IntegerField(default=0, verbose_name="Fighters")
-    transport   = models.IntegerField(default=0, verbose_name="Transports")
-    cruiser     = models.IntegerField(default=0, verbose_name="Cruisers")
-    carrier     = models.IntegerField(default=0, verbose_name="Carriers")
-    soldier     = models.IntegerField(default=0, verbose_name="Soldiers")
-    droid       = models.IntegerField(default=0, verbose_name="Droids")
-    goliath     = models.IntegerField(default=0, verbose_name="Goliaths")
-    phantom     = models.IntegerField(default=0, verbose_name="Phantoms")
-    wizard      = models.IntegerField(default=0, verbose_name="Psychics")
-    agent       = models.IntegerField(default=0, verbose_name="Agents")
-    ghost       = models.IntegerField(default=0, verbose_name="Ghost Ships")
-    exploration = models.IntegerField(default=0, verbose_name="Exploration Ships")
+    bomber      = models.BigIntegerField(default=0, verbose_name="Bombers")
+    fighter     = models.BigIntegerField(default=0, verbose_name="Fighters")
+    transport   = models.BigIntegerField(default=0, verbose_name="Transports")
+    cruiser     = models.BigIntegerField(default=0, verbose_name="Cruisers")
+    carrier     = models.BigIntegerField(default=0, verbose_name="Carriers")
+    soldier     = models.BigIntegerField(default=0, verbose_name="Soldiers")
+    droid       = models.BigIntegerField(default=0, verbose_name="Droids")
+    goliath     = models.BigIntegerField(default=0, verbose_name="Goliaths")
+    phantom     = models.BigIntegerField(default=0, verbose_name="Phantoms")
+    wizard      = models.BigIntegerField(default=0, verbose_name="Psychics")
+    agent       = models.BigIntegerField(default=0, verbose_name="Agents")
+    ghost       = models.BigIntegerField(default=0, verbose_name="Ghost Ships")
+    exploration = models.BigIntegerField(default=0, verbose_name="Exploration Ships")
 
 
 

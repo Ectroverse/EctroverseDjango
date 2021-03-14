@@ -4,64 +4,140 @@
 
 {% block content %}
 
-{% if msg %}
-    <br>
-    {{msg|safe}}
-    <br>
-{% endif %}
+<style>
+#content-desktop {display: block;}
+#content-mobile {display: none;}
 
+@media screen and (max-width: 660px) {
+
+#content-desktop {display: none;}
+#content-mobile {display: block;}
+
+}
+.clear { clear: both; height: 40px; }
+
+
+</style>
 <form action="/units" method="POST">
-{% csrf_token %}
-<table cellspacing="6" cellpadding="0" width="90%" border="0" align="center">
 
-<br>
-<a href="info?2fix&amp;type=units&amp;request=ajax" rel="ajaxpanel" data-loadtype="ajax">Build Units</a>
-<br>
+  <div id="content-mobile">
+  {% if msg %}
+      <br>
+      {{msg|safe}}
+      <br>
+  {% endif %}
+  {% csrf_token %}
+  <table cellspacing="6" cellpadding="0" width="90%" border="0" align="center">
+    <br>
+    <a href="info?2fix&amp;type=units&amp;request=ajax" rel="ajaxpanel" data-loadtype="ajax">Build Units</a>
+    <br>
+      <tr>
+        <td ><b>Unit</b></td>
+        <td ><b>Cost</b></td>
+        <td ><b>Owned</b></td>
+        <td ><b>Build</b></td>
+      </tr>
 
-<tr>
-<td ></td>
-<td ><b>Unit</b></td>
-<td ><b>Cost</b></td>
-<td ><b>Owned</b></td>
-<td ><b>Build</b></td>
-</tr>
+
+
+      {% for unit in unit_dict %}
+        {% if unit.cost == None %}
+            <tr>
+    		        <td style="padding:5px" valign="top"><font color="#FFFFFF">{{unit.label}}</font><br>
+                  <img src="{% static '/units/'|add:unit.label|add:'.png' %}" width="50" height="50" title ="{{unit.label}}" style="padding-top :5px;"></td>
+                  <td style="padding:5px" valign="top" nowrap><font color="#FF0000">Unavailable<br>Tech too low</font></td>
+                  <td style="padding:5px" valign="top" align="center">{{unit.owned}}</td>
+                  <td style="padding:10px" valign="top">&nbsp;</td>
+            </tr>
+    	   {% else %}
+            <tr>
+    		        <td style="padding:5px" valign="top"><font color="#FFFFFF">{{unit.label}}</font><br>
+		                <img src="{% static '/units/'|add:unit.label|add:'.png' %}" width="50" height="50" title ="{{unit.label}}" style="padding-top :5px;"></td>
+                    <td style="padding:5px" valign="top" nowrap>
+                      {% for resource in unit.cost %}
+                      {% if resource.value > 0 %}
+                      {{resource.value}} {{resource.name}} <br>
+                      {% endif %}
+                      {% endfor %}
+                      {% if unit.penalty > 0 %}
+                      <font color="#FF2020">Tech : +{{unit.penalty}}% costs</font><br>
+          {% endif %}
+                    </td>
+                    <td style="padding:5px" valign="top" align="center">{{unit.owned}}</td>
+                    <td style="padding:5px" valign="top" align="center"><input type="text" pattern="[0-9]+" maxlength="9" name="{{unit.i}}" size="8"></td>
+            </tr>
+          {% endif %}
+
+    {% endfor %}
+    </table>
+<button type="submit" formmethod="POST">Build</button>
+  </div>
+
+
+  <div id="content-desktop">
+  {% if msg %}
+      <br>
+      {{msg|safe}}
+      <br>
+  {% endif %}
+  <form action="/units" method="POST">
+  {% csrf_token %}
+  <table cellspacing="6" cellpadding="0" width="90%" border="0" align="center">
+
+  <br>
+  <a href="info?2fix&amp;type=units&amp;request=ajax" rel="ajaxpanel" data-loadtype="ajax">Build Units</a>
+  <br>
+
+  <tr>
+  <td ></td>
+  <td ><b>Unit</b></td>
+  <td ><b>Cost</b></td>
+  <td ><b>Owned</b></td>
+  <td ><b>Build</b></td>
+  </tr>
 
 
 
-{% for unit in unit_dict %}
-    {% if unit.cost == None %}
-        <tr>
-		<td><img src="{% static '/units/'|add:unit.label|add:'.png' %}" width="70" height="70" title ="{{unit.label}}"></td>
-        <td style="padding:10px" valign="top"><font color="#FFFFFF">{{unit.label}}</font></td>
-        <td style="padding:10px" valign="top" nowrap><font color="#FF0000">Unavailable<br>Tech too low</font></td>
-        <td style="padding:10px" valign="top" align="center">{{unit.owned}}</td>
-        <td style="padding:10px" valign="top">&nbsp;</td>
-        </tr>
-	{% else %}
-        <tr>
-		<td><img src="{% static '/units/'|add:unit.label|add:'.png' %}" width="70" height="70" title ="{{unit.label}}"></td>
-        <td style="padding:10px" valign="top"><font color="#FFFFFF">{{unit.label}}</font></td>
-        <td style="padding:10px" valign="top" nowrap>
-        {% for resource in unit.cost %}
-            {% if resource.value > 0 %}
-                {{resource.value}} {{resource.name}} <br>
-            {% endif %}
-        {% endfor %}
-        {% if unit.penalty > 0 %}
-            <font color="#FF2020">Tech : +{{unit.penalty}}% costs</font><br>
-        {% endif %}
-        </td>
-        <td style="padding:10px" valign="top" align="center">{{unit.owned}}</td>
-        <td style="padding:10px" valign="top" align="center"><input type="text" pattern="[0-9]+" maxlength="9" name="{{unit.i}}" size="12"></td>
-        </tr>
-    {% endif %}
+  {% for unit in unit_dict %}
+      {% if unit.cost == None %}
+          <tr>
+  		<td><img src="{% static '/units/'|add:unit.label|add:'.png' %}" width="70" height="70" title ="{{unit.label}}"></td>
+          <td style="padding:10px" valign="top"><font color="#FFFFFF">{{unit.label}}</font></td>
+          <td style="padding:10px" valign="top" nowrap><font color="#FF0000">Unavailable<br>Tech too low</font></td>
+          <td style="padding:10px" valign="top" align="center">{{unit.owned}}</td>
+          <td style="padding:10px" valign="top">&nbsp;</td>
+          </tr>
+  	{% else %}
+          <tr>
+  		<td><img src="{% static '/units/'|add:unit.label|add:'.png' %}" width="70" height="70" title ="{{unit.label}}"></td>
+          <td style="padding:10px" valign="top"><font color="#FFFFFF">{{unit.label}}</font></td>
+          <td style="padding:10px" valign="top" nowrap>
+          {% for resource in unit.cost %}
+              {% if resource.value > 0 %}
+                  {{resource.value}} {{resource.name}} <br>
+              {% endif %}
+          {% endfor %}
+          {% if unit.penalty > 0 %}
+              <font color="#FF2020">Tech : +{{unit.penalty}}% costs</font><br>
+          {% endif %}
+          </td>
+          <td style="padding:10px" valign="top" align="center">{{unit.owned}}</td>
+          <td style="padding:10px" valign="top" align="center"><input type="text" pattern="[0-9]+" maxlength="9" name="{{unit.i}}" size="12"></td>
+          </tr>
+      {% endif %}
 
-{% endfor %}
+  {% endfor %}
 
-</table>
-<input type="submit" value="Build" style="margin:0 auto">
+  </table>
+<button type="submit" formmethod="POST">Build</button>
+
+  </div>
+
 </form>
+
+<div class="clear"></div>
+
+
 
 
 {% endblock %}
-
