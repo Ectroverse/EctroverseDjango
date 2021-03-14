@@ -44,7 +44,7 @@ body
 	.right_side{
 	width: 100%;
 	}
-	
+
 	.left_box, .right_box {
 		width: 100%;
 		}
@@ -60,7 +60,7 @@ body
 }
 
 @media all and (min-width: 661px) {
-	.left_menu_large_scrn{ 
+	.left_menu_large_scrn{
 	min-width: 175px;
 	}
 	.right_side{
@@ -86,6 +86,57 @@ body
 
 .headerplanets{
   vertical-align: middle;
+}
+
+.nav_top{
+ position: absolute;
+ width: 150px;
+ height: 40px;
+ left: 0px;
+ top: 0px;
+  content:url({% static 'files_004' %});
+}
+
+.nav_hq{
+  position: absolute;
+  width: 150px;
+  height: 20px;
+  left: 0px;
+  top: 40px;
+    background-image:url({% static 'files_010' %});
+}
+
+.nav_body{
+  position: absolute;
+  width: 150px;
+  height: 370px;
+  left: 0px;
+  top: 60px;
+    background-image:url({% static 'files_013' %});
+}
+
+.nav_bottom{
+  position: absolute;
+  width: 150px;
+  height: 20px;
+  top:430px;
+    content:url({% static 'files_022' %});
+}
+
+.nav_footer{
+  position: absolute;
+  width: 150px;
+  height: 75px;
+  top:450px;
+    content:url({% static 'files_014.jpg' %});
+}
+
+.nav_head{
+ position: relative;
+}
+
+.nav_navi{
+ position: relative;
 }
 
 </style>
@@ -144,60 +195,50 @@ onload="startTime()">
 <div class="content-wrap">
 		<div class="left_menu_large_scrn"> <!-- Hide on mobile -->
         <!-- Sidebar content -->
-        <table style="text-align:left;line-height:120%;" cellspacing="0" cellpadding="0">
-            <tbody>
-            <tr><td height="40" style="background-repeat:no-repeat;" background="{% static 'files_004' %}">&nbsp;</td></tr>
-            <tr>
-            <td height="20" style="background-repeat:no-repeat;" background="{% static 'files_010' %}"><b>
-            <font size="2" face="Tahoma"><a href="/headquarters">Headquarters</a></font></b></td></tr>
-            <tr><td background="{% static 'files_013' %}">
-            <table style="text-align:left;" cellspacing="0" cellpadding="0">
-                <tbody><tr><td><b><font size="2" face="Tahoma">
-                <a href="/council">Council</a><br>
-                <a href="/units">Units</a>
-                <br>
-                <a href="/planets">Planets</a><br>
-                <a href="/empire{{status.empire_id}}">Empire</a>
-                <br>&nbsp;&nbsp;-
-                <a href="/famaid">Send aid</a><br>&nbsp;&nbsp;-
-                <a href="/famgetaid">Receive aid</a><br>&nbsp;&nbsp;-
-                <a href="/famnews">News</a><br>&nbsp;&nbsp;-
-                <a href="/relations">Relations</a><br>
-                <a href="/fleets">Fleets</a><br>
-                <a href="/map">Galaxy map</a><br>&nbsp;&nbsp;-
-                <a href="/map">Full map</a><br>&nbsp;&nbsp;-
-                <a href="/observessurveys" style="color:red;">Scouting</a><br>
-                <a href="/research">Research</a><br>
-                <a href="/specops">Operations</a><br></font>
-                </b></td></tr>
-                </tbody>
-            </table>
-            </td></tr>
-            <tr><td style="background-repeat:no-repeat;" background="{% static 'files_013' %}"><img src="{% static 'files_017' %}" height="15"></td></tr>
-            <tr><td background="{% static 'files_013' %}">
-            <table style="text-align:left;" cellspacing="0" cellpadding="0">
-                <tbody><tr><td><b><font size="2" face="Tahoma">
-				<a href="/messages">Messages</a><br>
-                <a href="/ranking">Faction Rank</a><br>
-                <a href="/empire_ranking">Empire Rank</a><br>
-                <a href="/account">Account</a>
-                <br>
-                <a href="/logout">Logout</a>
-                <br><br>
-                <!---<form action="search?2fix" method="POST"><input type="text" name="search" size="8"><br>
-                <input type="submit" size="2" value="OK"></form><br> -->
-                <a href="https://discord.gg/8Pkpqtd?2fix" target="_blank">Discord</a><br>
-                <a href="/guide">Guide</a><br>
-                <a href="https://web.facebook.com/groups/803616616363658?2fix" target="_blank">Facebook</a><br></font></b>
-                </td>
-                </tr>
-                </tbody>
-            </table>
-            </td></tr>
-            <tr><td height="20" style="background-repeat:no-repeat;" background="{% static 'files_022' %}">&nbsp;</td></tr>
-            <tr><td height="75" style="background-repeat:no-repeat;" background="{% static 'files_014.jpg' %}">&nbsp;</td></tr>
-            </tbody>
-        </table>
+	<div class="nav_top"></div>
+        <div class="nav_hq">
+		<div class="nav_head">
+          	<b><font size="2" face="Tahoma">
+          	<a href="/headquarters">Headquarters</a></font></b>
+        	</div>
+	</div>
+        <div class="nav_body">
+		<div class="nav_navi">
+          	<b><font size="2" face="Tahoma">
+                        <a href="/council">Council</a><br>
+                        <a href="/units">Units</a><br>
+                        <a href="/planets">Planets</a><br>
+                        <a href="/empire12">Empire</a><br>
+                        -<a href="/famaid">Send aid</a><br>
+                        -<a href="/famgetaid">Receive aid</a><br>
+                        -<a href="/famnews">News</a><br>
+                        -<a href="/relations">Relations</a><br>
+                        <a href="/fleets">Fleets</a><br>
+                        <a href="/map">Galaxy map</a><br>
+                        -<a href="/map">Full map</a><br>
+                        -<a href="/observessurveys" style="color:red;">Scouting</a><br>
+                        <a href="/research">Research</a><br>
+                        <a href="/specops" style="color:red;">Operations</a><br></font>
+            		<img src="/static/files_017" height="15">
+            		<font size="2" face="Tahoma">
+        				<a href="/messages">Messages</a><br>
+                        <a href="/ranking">Faction Rank</a><br>
+                        <a href="/empire_ranking">Empire Rank</a><br>
+                        <a href="/account">Account</a>
+                        <br>
+                        <a href="/logout">Logout</a>
+                        <br><br>
+                        <!---<form action="search?2fix" method="POST"><input type="text" name="search" size="8"><br>
+                        <input type="submit" size="2" value="OK"></form><br> -->
+                        <a href="https://discord.gg/8Pkpqtd?2fix" target="_blank">Discord</a><br>
+                        <a href="/guide">Guide</a><br>
+                        <a href="https://web.facebook.com/groups/803616616363658?2fix" target="_blank">Facebook</a><br></font></b>
+        	</div>
+	</div>
+	<div class="nav_bottom"></div>
+	<div class="nav_footer"></div>
+
+
   </div>
 
   <div class="right_side">
