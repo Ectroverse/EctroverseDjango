@@ -19,6 +19,7 @@ public class Main
 
     public static void main(String[] args) {
 	//some constants temporarily written here, fetch them from app/constants.py later
+    int total_units = 13;
 	int population_size_factor  = 20;
 	double energy_decay_factor = 0.005;
 	double crystal_decay_factor = 0.02;
@@ -76,6 +77,7 @@ public class Main
 		manticarias.put("mineral_production",   1.0);
 		manticarias.put("crystal_production",   1.0);
 		manticarias.put("ectrolium_production",   1.0);
+		manticarias.put("race_special_solar_15",   1.15);
 	race_info_list.put("MT",manticarias);
 	HashMap<String, Double> foohons = new HashMap<>();
 		foohons.put("pop_growth", 0.8*0.02);
@@ -136,6 +138,7 @@ public class Main
 		wookiees.put("mineral_production",   1.25);
 		wookiees.put("crystal_production",   1.25);
 		wookiees.put("ectrolium_production",   1.0);
+		wookiees.put("race_special_resource_interest",   1.005);
 	race_info_list.put("WK",wookiees);
 	    
 	HashMap<String, String> buildingsNames = new HashMap<>();
@@ -160,6 +163,11 @@ public class Main
 		{"research_points_operations", "research_bonus_operations", "alloc_research_operations", "research_max_operations", "research_percent_operations"},
 		{"research_points_portals", "research_bonus_portals", "alloc_research_portals", "research_max_portals", "research_percent_portals"},
 	};
+	
+	double [] units_upkeep_costs = {2.0, 1.6, 3.2, 12.0, 18.0, 0.4, 0.6, 2.8, 0.0, 0.8, 0.8, 2.4, 60.0};
+	
+	double [] units_nw = {4,3,5,12,14,1,1,4,7,2,2,6,30};
+
 	
 
 	long startTime = System.nanoTime();
@@ -277,13 +285,18 @@ public class Main
 			" mineral_interest              = ? ," + //43
 			" crystal_interest              = ? ," + //44
 			" ectrolium_interest              = ? ," + //45
-			" energy                  = ? ," + //46
-			" minerals                = ? ," + //47
-			" crystals                = ? ," + //48
-			" ectrolium               = ? ," + //49
-			" networth                = ? ," + //50
+			" energy_income              = ? ," + //46
+			" mineral_income              = ? ," + //47
+			" crystal_income              = ? ," + //48
+			" ectrolium_income              = ? ," + //49
+			" energy                  = ? ," + //50
+			" minerals                = ? ," + //51
+			" crystals                = ? ," + //52
+			" ectrolium               = ? ," + //53
+			" networth                = ? ," + //54
+			" num_planets = ? " + //55
 
-			"WHERE id = ?" ; //51 wow what a long string :P
+			"WHERE id = ?" ; //56 wow what a long string :P
 		 PreparedStatement userStatusUpdateStatement = con.prepareStatement(userStatusUpdateQuery); //mass update, much faster
 
 
@@ -320,12 +333,15 @@ public class Main
 			usersLong.add(rowLong);
 		}
 
-		//loops over users to uodate their stats and planets
-		 for(int i = 0; i < usersInt.size(); i++){
-			HashMap<String,Integer> rowInt = usersInt.get(i);
-			HashMap<String,Long> rowLong  = usersLong.get(i);
+		//loops over users to uodate their stats and planets --main loop!
+		 for(int j = 0; j < usersInt.size(); j++){
+			HashMap<String,Integer> rowInt = usersInt.get(j);
+			HashMap<String,Long> rowLong  = usersLong.get(j);
 			int userID = rowInt.get("user_id");
-			HashMap<String, Double> race_info = race_info_list.get(usersRace.get(userID));
+			userStatusUpdateStatement.setInt(56, userID);
+			String race = usersRace.get(userID);
+			HashMap<String, Double> race_info = race_info_list.get(race);
+			
 
 			 //System.out.println(race_info);
 
@@ -337,26 +353,27 @@ public class Main
 			userStatusUpdateStatement.setInt(3, ar);
 
 			
-			portalstSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE portal = TRUE AND id = " + userID );
+			ResultSet portalstSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE portal = TRUE AND id = " + userID );
 			 //this may be quite slow with a lot of portals and planets, could optimize this later
 			LinkedList<Planet> portals = new LinkedList<>();
 			
 			
-			while(resultSet.next()){
-				Planet planet = new Planet(resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("i"));
+			while(portalstSet.next()){
+				Planet planet = new Main().new Planet(resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("i"));
 				portals.add(planet);
 			}
 			
 			resultSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE id = " + userID);
 
 			long population = 0;
+			long networth = 0;
 			int num_planets = 0;
 			long cmdTickProduction_solar = 0;
 			long cmdTickProduction_fission = 0;
 			int cmdTickProduction_mineral = 0;
 			int cmdTickProduction_crystal = 0;
 			int cmdTickProduction_ectrolium = 0;
-			long cmdTickProduction_cities = 0;
+			//long cmdTickProduction_cities = 0;
 			int cmdTickProduction_research = 0;
 
 			int total_solar_collectors = 0;
@@ -368,8 +385,10 @@ public class Main
 			int total_research_centers = 0;
 			int total_defense_sats = 0;
 			int total_shield_networks = 0;
-			int total_portals = 0;
-
+			int total_portals = portals.size();
+			
+			
+			
 
 			//loop over planets of each user
 			while(resultSet.next()){
@@ -393,12 +412,13 @@ public class Main
 				//planet.current_population += int(np.ceil(planet.current_population * race_info["pop_growth"] * (1.00 + 0.01 * status.research_percent_population) * 0.75**nInfection))
 				//planet.current_population = min(planet.max_population, planet.current_population)
 				
-				int current_population  = Math.ceil(resultSet.getInt("current_population") * race_info.get("pop_growth")*(1.00 + 0.01 * rowInt.get(research_percent_population)));
+				int current_population  = (int) Math.ceil(resultSet.getInt("current_population") * race_info.get("pop_growth")*(1.00 + 0.01 * rowInt.get("research_percent_population")));
 				current_population = Math.min(current_population, max_population);
 				planetsUpdateStatement.setInt(1, current_population);
 				
 				//add planets population to total population
 				population += current_population;
+				
 				
 				//update portal coverage
 				if(resultSet.getBoolean("portal") == true)
@@ -408,21 +428,24 @@ public class Main
 						planetsUpdateStatement.setInt(3, 0);
 					else
 						planetsUpdateStatement.setInt(3, (int)(100.0 * battlePortalCalc(resultSet.getInt("x"), resultSet.getInt("y"), 
-													portals, rowInt.get(research_percent_portals)) ));
+													portals, rowInt.get("research_percent_portals")) ));
 				}
 				
-				//update planets buildings
-				int solar_collectors = resultSet.getInt("solar_collectors") + buildgsBuiltFromJobs.getOrDefault(solar_collectors,0);
-				int fission_reactors = resultSet.getInt("fission_reactors") + buildgsBuiltFromJobs.getOrDefault(fission_reactors,0);
-				int mineral_plants = resultSet.getInt("mineral_plants") + buildgsBuiltFromJobs.getOrDefault(mineral_plants,0);
-				int crystal_labs = resultSet.getInt("crystal_labs") + buildgsBuiltFromJobs.getOrDefault(crystal_labs,0);
-				int refinement_stations = resultSet.getInt("refinement_stations") + buildgsBuiltFromJobs.getOrDefault(refinement_stations,0);
-				int cities = resultSet.getInt("cities") + buildgsBuiltFromJobs.getOrDefault(cities,0);
-				int research_centers = resultSet.getInt("research_centers") + buildgsBuiltFromJobs.getOrDefault(research_centers,0);
-				int defense_sats = resultSet.getInt("defense_sats") + buildgsBuiltFromJobs.getOrDefault(defense_sats,0);
-				int shield_networks = resultSet.getInt("shield_networks") + buildgsBuiltFromJobs.getOrDefault(shield_networks,0);
 				
-				boolean portals = resultSet.getBoolean("portal") || (buildgsBuiltFromJobs.getOrDefault(portal,0) == 1 ? true : false);
+			
+				
+				//update planets buildings
+				int solar_collectors = resultSet.getInt("solar_collectors") + buildgsBuiltFromJobs.getOrDefault("solar_collectors",0);
+				int fission_reactors = resultSet.getInt("fission_reactors") + buildgsBuiltFromJobs.getOrDefault("fission_reactors",0);
+				int mineral_plants = resultSet.getInt("mineral_plants") + buildgsBuiltFromJobs.getOrDefault("mineral_plants",0);
+				int crystal_labs = resultSet.getInt("crystal_labs") + buildgsBuiltFromJobs.getOrDefault("crystal_labs",0);
+				int refinement_stations = resultSet.getInt("refinement_stations") + buildgsBuiltFromJobs.getOrDefault("refinement_stations",0);
+				int cities = resultSet.getInt("cities") + buildgsBuiltFromJobs.getOrDefault("cities",0);
+				int research_centers = resultSet.getInt("research_centers") + buildgsBuiltFromJobs.getOrDefault("research_centers",0);
+				int defense_sats = resultSet.getInt("defense_sats") + buildgsBuiltFromJobs.getOrDefault("defense_sats",0);
+				int shield_networks = resultSet.getInt("shield_networks") + buildgsBuiltFromJobs.getOrDefault("shield_networks",0);
+				
+				boolean portal = resultSet.getBoolean("portal") || (buildgsBuiltFromJobs.getOrDefault("portal",0) == 1 ? true : false);
 				
 				planetsUpdateStatement.setInt(6, solar_collectors );
 				planetsUpdateStatement.setInt(7, fission_reactors );
@@ -433,7 +456,7 @@ public class Main
 				planetsUpdateStatement.setInt(12, research_centers);
 				planetsUpdateStatement.setInt(13, defense_sats);
 				planetsUpdateStatement.setInt(14, shield_networks);	
-				planetsUpdateStatement.setBoolean(15, portals);	
+				planetsUpdateStatement.setBoolean(15, portal);	
 				
 				if (buildgsBuiltFromJobs.getOrDefault(portal,0) == 1 )
 					planetsUpdateStatement.setBoolean(16, false);	
@@ -450,14 +473,25 @@ public class Main
 				total_research_centers +=research_centers;
 				total_defense_sats += defense_sats;
 				total_shield_networks += shield_networks;
-				total_portals += portals;
+				total_portals += (portal == true? 1 : 0);
 				
 				int total_buildings = solar_collectors + 
 					fission_reactors + mineral_plants +
 					crystal_labs + refinement_stations +
 					cities + research_centers +
-					defense_sats + defense_sats +
-					portal;
+					defense_sats + shield_networks +
+					(portal == true? 1 : 0);
+				
+				networth += total_buildings * networth_per_building;
+				
+                networth += (resultSet.getInt("bonus_solar") * 1.25);
+                networth += (resultSet.getInt("bonus_mineral")  * 1.45);
+                networth += (resultSet.getInt("bonus_crystal") * 2.25);
+                networth += (resultSet.getInt("bonus_ectrolium") * 1.65);
+                networth += (resultSet.getInt("bonus_fission") * 5.0);
+
+                networth += (resultSet.getInt("size") * 1.75);
+				
 				
 				planetsUpdateStatement.setInt(17, total_buildings);
 				
@@ -466,11 +500,11 @@ public class Main
 				
 				//update player production
 				cmdTickProduction_solar += (building_production_solar * solar_collectors) * (1 + resultSet.getInt("bonus_solar")/100.0);
-				cmdTickProduction_fission += (building_production_fission  * fission_reactors)) * (1 + resultSet.getInt("bonus_fission")/100.0);
+				cmdTickProduction_fission += (building_production_fission  * fission_reactors) * (1 + resultSet.getInt("bonus_fission")/100.0);
 				cmdTickProduction_mineral += (building_production_mineral   * mineral_plants) * (1 + resultSet.getInt("bonus_mineral")/100.0);
 				cmdTickProduction_crystal += (building_production_crystal    * crystal_labs) * (1 + resultSet.getInt("bonus_crystal")/100.0);
 				cmdTickProduction_ectrolium += (building_production_ectrolium    * refinement_stations) * (1 + resultSet.getInt("bonus_ectrolium")/100.0);
-				cmdTickProduction_cities += building_production_cities * cities;
+				//cmdTickProduction_cities += building_production_cities * cities;
 				cmdTickProduction_research += building_production_research * research_centers;
 				
 				double overbuilt = calc_overbuild(resultSet.getInt("size"), total_buildings + resultSet.getInt("buildings_under_construction"));
@@ -481,35 +515,141 @@ public class Main
 				
 				planetsUpdateStatement.addBatch();
 			}
+			//update planets
+			userStatusUpdateStatement.setInt(55, num_planets);
+			
+			//update population
+			userStatusUpdateStatement.setLong(4, population);
 			
 			//update reseach
 			int artibonus = 0;
-			int racebonus = 0;
+			double racebonus = 0;
 			if (race.equals("FH"))
 				racebonus = 1.5;
-
+			
+			long totalRcPoints = 0;
 			for(int i = 0; i < researchNames.length; i++){
-				long rc = usersLong.get(researchNames[0]) + (long) 1.2 * race_info.get(researchNames[1])  * usersInt.get(researchNames[2]) * 
-				(100.0 *cmdTickProduction_research + usersLong.get("current_research_funding") + artibonus) / 10000.0 + 
-				1.2 * (racebonus * usersLong.get("population") / (600.0*100.0) );
-				rc = Math.max(0, rc[i] );
+				long rc = (long) (rowLong.get(researchNames[0]) +  1.2 * race_info.get(researchNames[1])  * rowInt.get(researchNames[2]) * 
+				(100.0 *cmdTickProduction_research + rowLong.get("current_research_funding") + artibonus) / 10000.0 + 
+				1.2 * (racebonus * rowLong.get("population") / (600.0*100.0) ));
+				rc = Math.max(0, rc);
+				totalRcPoints += rc;
 				userStatusUpdateStatement.setLong(17 + i, rc);
 				
-				"research_max_portals"
-				int raceMax = race_info.getOrDefault(researchNames[3], 200);
-				int nw = usersLong.get("networth");
-				int rcPercent = (int) raceMax * (1.0 - Math.exp(rc / (-10.0 * nw))));
-				int currPercent = race_info.get(researchNames[4]);
+				Double raceMax = race_info.getOrDefault(researchNames[3], 200.0);
+				long nw = rowLong.get("networth");
+				int rcPercent = (int) (raceMax * (1.0 - Math.exp(rc / (-10.0 * nw))));
+				int currPercent = (int) (Math.ceil(race_info.get(researchNames[4])));
 				if (currPercent > rcPercent)
 					userStatusUpdateStatement.setInt(26 + i, currPercent - 1);
 				else
 					userStatusUpdateStatement.setInt(26 + i, currPercent + 1);
 			}
 			
+			//update energy income
+			//race_special_solar_15
+			long energyProduction = (long)(cmdTickProduction_solar * race_info.getOrDefault("race_special_solar_15", 1.0));
+			energyProduction += cmdTickProduction_fission;
+			double energyResearchFactor = 1.0 + 0.01* race_info.getOrDefault("energy_production", 1.0);
+			energyProduction = (long) (energyProduction * energyResearchFactor);
+			userStatusUpdateStatement.setLong(34, energyProduction);
 			
+			//energy decay
+			long lastTickEnergy = rowLong.get("energy");
+			long energyDecay = (long) (lastTickEnergy * energy_decay_factor);
+			userStatusUpdateStatement.setLong(35, energyDecay);
 			
+			//energy interest
+			long energy_interest = (long) (rowLong.get("energy") * race_info.getOrDefault("race_special_resource_interest", 0.0));
+			userStatusUpdateStatement.setLong(44, energy_interest);
+			
+			//buildings upkeep
+			long buildings_upkeep = 
+            (long) (total_solar_collectors * upkeep_solar_collectors * energyResearchFactor +
+            total_fission_reactors * upkeep_fission_reactors * energyResearchFactor +
+            total_mineral_plants * upkeep_mineral_plants +
+            total_crystal_labs * upkeep_crystal_labs +
+            total_refinement_stations * upkeep_refinement_stations +
+            total_cities * upkeep_cities +
+            total_research_centers * upkeep_research_centers +
+            total_defense_sats * upkeep_defense_sats +
+            total_shield_networks * upkeep_shield_networks);
+			userStatusUpdateStatement.setLong(36, buildings_upkeep);
+			
+			//units upkeep
+			//get unit amounts
+			long [] unitsSums = new long[total_units];
+			unitsSums[0] = statement.executeQuery("SELECT SUM(bomber) FROM app_fleet WHERE id = " + userID).getLong("sum"); 
+			unitsSums[1] = statement.executeQuery("SELECT SUM(fighter) FROM app_fleet WHERE id = " + userID).getLong("sum");
+			unitsSums[2] = statement.executeQuery("SELECT SUM(transport) FROM app_fleet WHERE id = " + userID).getLong("sum");
+			unitsSums[3] = statement.executeQuery("SELECT SUM(cruiser) FROM app_fleet WHERE id = " + userID).getLong("sum");
+			unitsSums[4] = statement.executeQuery("SELECT SUM(carrier) FROM app_fleet WHERE id = " + userID).getLong("sum");
+			unitsSums[5] = statement.executeQuery("SELECT SUM(soldier) FROM app_fleet WHERE id = " + userID).getLong("sum");
+			unitsSums[6] = statement.executeQuery("SELECT SUM(droid) FROM app_fleet WHERE id = " + userID).getLong("sum");
+			unitsSums[7] = statement.executeQuery("SELECT SUM(goliath) FROM app_fleet WHERE id = " + userID).getLong("sum");
+			unitsSums[8] = statement.executeQuery("SELECT SUM(phantom) FROM app_fleet WHERE id = " + userID).getLong("sum");
+			unitsSums[9] = statement.executeQuery("SELECT SUM(wizard) FROM app_fleet WHERE id = " + userID).getLong("sum");
+			unitsSums[10] = statement.executeQuery("SELECT SUM(agent) FROM app_fleet WHERE id = " + userID).getLong("sum");
+			unitsSums[11] = statement.executeQuery("SELECT SUM(ghost) FROM app_fleet WHERE id = " + userID).getLong("sum");
+			unitsSums[12] = statement.executeQuery("SELECT SUM(exploration) FROM app_fleet WHERE id = " + userID).getLong("sum");
+
+			long units_upkeep = 0;
+			for(int i = 0; i < total_units; i++) {
+				units_upkeep += (long)(units_upkeep_costs[i] * unitsSums[i]);
+				networth += (long)(unitsSums[i] * units_nw[i]);
+			}
+			userStatusUpdateStatement.setLong(37, units_upkeep);
+			
+			//portals upkeep
+			int portals_upkeep = (int)(Math.max(0, (Math.pow(Math.max(1, total_portals) - 1, 1.2736) * 10000.0 / (1.0 + rowInt.get("research_percent_culture")/100.0))));
+			userStatusUpdateStatement.setInt(39, portals_upkeep);
+			
+			//population upkeep reduction		
+			long population_upkeep_reduction = population / 35;
+			population_upkeep_reduction = Math.min(population_upkeep_reduction, buildings_upkeep + units_upkeep + portals_upkeep);
+			userStatusUpdateStatement.setLong(38, population_upkeep_reduction);
+			
+			//update resources income
+			//energy
+			long energy_income = energyProduction - energyDecay + energy_interest - units_upkeep - portals_upkeep + population_upkeep_reduction;
+			userStatusUpdateStatement.setLong(46, energy_income);
+
+			//minerals
+		    int mineral_production = (int) (race_info.get("mineral_production") * cmdTickProduction_mineral);
+		    int mineral_decay = 0;
+		    int mineral_interest = (int) (rowLong.get("minerals") * race_info.getOrDefault("race_special_resource_interest", 0.0));
+		    int mineral_income = mineral_production - mineral_decay + mineral_interest;
+		    userStatusUpdateStatement.setInt(40, mineral_production);
+		    userStatusUpdateStatement.setInt(45, mineral_interest);
+		    userStatusUpdateStatement.setInt(47, mineral_income);
+		    
+		    //crystals
+    	    int crystal_production = (int) (race_info.get("crystal_production") * cmdTickProduction_crystal);
+    	    int crystal_decay = (int) (rowLong.get("crystals") * crystal_decay_factor);
+    	    int crystal_interest = (int) (rowLong.get("crystals") * race_info.getOrDefault("race_special_resource_interest", 0.0));
+    	    int crystal_income = crystal_production - crystal_decay + crystal_interest;
+    	    userStatusUpdateStatement.setInt(41, crystal_production);
+    	    userStatusUpdateStatement.setInt(42, crystal_decay);
+    	    userStatusUpdateStatement.setInt(46, crystal_interest);
+    	    userStatusUpdateStatement.setInt(48, crystal_income);
+    	    
+    	    //ectrolium		    	    
+    	    int ectrolium_production = (int) (race_info.get("ectrolium_production") * cmdTickProduction_ectrolium);
+    	    int ectrolium_decay = 0;
+    	    int ectrolium_interest =(int) (rowLong.get("ectrolium") * race_info.getOrDefault("race_special_resource_interest", 0.0));
+    	    int ectrolium_income = ectrolium_production + ectrolium_decay + ectrolium_interest;
+    	    userStatusUpdateStatement.setInt(43, ectrolium_production);
+    	    userStatusUpdateStatement.setInt(47, ectrolium_interest);
+    	    userStatusUpdateStatement.setInt(49, ectrolium_income);
+    	    
+    	    //update total resources
+    	    userStatusUpdateStatement.setLong(50, rowLong.get("energy") + energy_income);
+    	    userStatusUpdateStatement.setLong(51, rowLong.get("minerals") + mineral_income);
+    	    userStatusUpdateStatement.setLong(52, rowLong.get("crystals") + crystal_income);
+    	    userStatusUpdateStatement.setLong(53, rowLong.get("ectrolium") + ectrolium_income);
+					
 			//update research funding
-			userStatusUpdateStatement.setInt(25, Math.max(0, usersLong.get("current_research_funding") * 0.9 ) );
+			userStatusUpdateStatement.setLong(25, (long) Math.max(0, rowLong.get("current_research_funding") * 0.9 ) );
 					
 			//update total buildings
 			userStatusUpdateStatement.setInt(5, total_solar_collectors);
@@ -523,6 +663,11 @@ public class Main
 			userStatusUpdateStatement.setInt(13, total_shield_networks);
 			userStatusUpdateStatement.setInt(14, total_portals);
 			
+			//update networth
+			networth += population * 0.005;
+			networth += (0.001 * totalRcPoints);
+			userStatusUpdateStatement.setLong(54, networth);
+
 			userStatusUpdateStatement.addBatch();
 		}
 		
@@ -545,13 +690,17 @@ public class Main
 	System.out.println("Construction jobs update: " + (double)(jobsUpdate2-jobsUpdate1)/1_000_000_000.0 + " sec.");
 	System.out.println("Planets update: " + (double)(planetsUpdate2-planetsUpdate1)/1_000_000_000.0 + " sec.");
 	System.out.println("Users update: " + (double)(userUpdate2-userUpdate1)/1_000_000_000.0 + " sec.");
-	System.out.println("Total time: "(double)(endTime-startTime)/1_000_000_000.0 + " sec.");
+	System.out.println("Total time: " + (double)(endTime-startTime)/1_000_000_000.0 + " sec.");
+    }
+    
+    private static double calc_overbuild(int size, int buildings) {
+    	return 0;
     }
 	
-	private double battlePortalCalc(int x, int y, LinkedList<Planet> portals, int portalResearch){
-		double cover = 0
+	private static double battlePortalCalc(int x, int y, LinkedList<Planet> portals, int portalResearch){
+		double cover = 0;
 		for (Planet portal : portals){
-		    double d = Math.sqrt(Math.pow((x-portal.x),2) + Math.pow((y-portal.y),2));
+		    double d = Math.sqrt(Math.pow((x-portal.posX),2) + Math.pow((y-portal.posY),2));
 		    cover = Math.max(0, 1.0 - Math.sqrt(d/(7.0*(1.0 + 0.01*portalResearch))));
 		}
 		return cover;
