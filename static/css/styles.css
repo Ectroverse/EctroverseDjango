@@ -57,9 +57,10 @@ strikeout {
 	text-align:center;
 }
 .table {
-	border-spacing: 0px;
+	width: 80%;
+	border-spacing: 5px;
 	border-width: 0px;
-	padding: 0px;
+	padding-top: 0px;
 	margin-left: auto;
 	margin-right: auto;
 }
