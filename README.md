@@ -4,6 +4,8 @@ Put your name after an item if you want to reserve it for yourself, not all item
 
 #### v0.1 Remaining Items
 
+- add units to construction jobs!
+
 - fleets move/exploration/attack (Vladimir) - done
 - battle sequence (Rexer already started it)
 - operations- just scouting for now
@@ -113,8 +115,6 @@ the user name and db name are set in the db: -> environment: in the docker-compo
 
 to run the java tick process:
 1. `docker exec -it ectroversedjango_python_1 /bin/bash`
-2. `cd /java`
+2. `cd java`
 3. `javac Main.java` - if wasnt allready compiled into bytecode
 4. `java -cp postgresql-42.2.19.jar:. Main >> log.txt`
-
-
