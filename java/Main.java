@@ -577,7 +577,7 @@ public class Main
             total_defense_sats * upkeep_defense_sats +
             total_shield_networks * upkeep_shield_networks);
 			userStatusUpdateStatement.setLong(36, buildings_upkeep);
-			
+			System.out.println("test5");
 			//units upkeep
 			//get unit amounts
 			long [] unitsSums = new long[total_units];
@@ -624,7 +624,7 @@ public class Main
 		    userStatusUpdateStatement.setInt(40, mineral_production);
 		    userStatusUpdateStatement.setInt(45, mineral_interest);
 		    userStatusUpdateStatement.setInt(47, mineral_income);
-		    
+		    System.out.println("test6");
 		    //crystals
     	    int crystal_production = (int) (race_info.get("crystal_production") * cmdTickProduction_crystal);
     	    int crystal_decay = (int) (rowLong.get("crystals") * crystal_decay_factor);
@@ -669,8 +669,9 @@ public class Main
 			networth += population * 0.005;
 			networth += (0.001 * totalRcPoints);
 			userStatusUpdateStatement.setLong(54, networth);
-
+			System.out.println("test7");
 			userStatusUpdateStatement.addBatch();
+			System.out.println("test8");
 		}
 		
 		planetsUpdate1 = System.nanoTime();
