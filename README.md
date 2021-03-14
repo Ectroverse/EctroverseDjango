@@ -4,6 +4,8 @@ Put your name after an item if you want to reserve it for yourself, not all item
 
 #### v0.1 Remaining Items
 
+- add units to construction jobs!
+
 - fleets move/exploration/attack (Vladimir) - done
 - battle sequence (Rexer already started it)
 - operations- just scouting for now
