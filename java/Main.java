@@ -2,9 +2,177 @@ import java.sql.*;
 import java.util.*;
 import java.time.Clock; 
 import java.time.Instant; 
+import java.util.concurrent.*;
+//import java.util.Arrays.*;
 
 public class Main
 {
+	//some constants temporarily written here, fetch them from app/constants.py later
+    private static final int total_units = 13;
+	private static final int population_size_factor  = 20;
+	private static final double energy_decay_factor = 0.005;
+	private static final double crystal_decay_factor = 0.02;
+	private static final int upkeep_solar_collectors = 0;
+	private static final int upkeep_fission_reactors = 20;
+	private static final int upkeep_mineral_plants = 2;
+	private static final int upkeep_crystal_labs = 2;
+	private static final int upkeep_refinement_stations = 2;
+	private static final int upkeep_cities = 4;
+	private static final int upkeep_research_centers = 1;
+	private static final int upkeep_defense_sats = 4;
+	private static final int upkeep_shield_networks = 16;
+	private static final int networth_per_building = 8;
+	private static final int building_production_solar = 12;
+	private static final int building_production_fission = 40;
+	private static final int building_production_mineral = 1;
+	private static final int building_production_crystal = 1;
+	private static final int building_production_ectrolium = 1;
+	private static final int building_production_cities = 1000;
+	private static final int building_production_research = 6;
+	private static final double [] unit_upkeep = {2.0, 1.6, 3.2, 12.0, 18.0, 0.4, 0.6, 2.8, 0.0, 0.8, 0.8, 2.4, 60.0};
+	
+	static final HashMap<String,HashMap<String, Double>> race_info_list = new HashMap<>();
+	/* HK = 'HK', _('Harks')
+        MT = 'MT', _('Manticarias')
+        FH = 'FH', _('Foohons')
+        SB = 'SB', _('Spacebornes')
+        DW = 'DW', _('Dreamweavers')
+        WK = 'WK', _('Wookiees')*/
+	static final HashMap<String, Double> harks = new HashMap<>();
+	static final HashMap<String, Double> manticarias = new HashMap<>();
+	static final HashMap<String, Double> foohons = new HashMap<>();
+	static final HashMap<String, Double> spacebournes = new HashMap<>();
+	static final HashMap<String, Double> dreamweavers = new HashMap<>();
+	static final HashMap<String, Double> wookiees = new HashMap<>();
+	static final HashMap<String, String> buildingsNames = new HashMap<>();
+	
+	static {
+	harks.put("pop_growth", 0.8*0.02);
+	harks.put("research_bonus_military",    1.2);
+	harks.put("research_bonus_construction", 1.2);
+	harks.put("research_bonus_tech",         1.2);
+	harks.put("research_bonus_energy",       1.2);
+	harks.put("research_bonus_population",   1.2);
+	harks.put("research_bonus_culture",      0.6);
+	harks.put("research_bonus_operations",   1.2);
+	harks.put("research_bonus_portals",      1.2);
+	harks.put("energy_production",    0.9);
+	harks.put("mineral_production",   1.0);
+	harks.put("crystal_production",   1.25);
+	harks.put("ectrolium_production",   1.0);
+	
+	race_info_list.put("HK",harks);
+	
+	manticarias.put("pop_growth", 0.9*0.02);
+	manticarias.put("research_bonus_military",    0.9);
+	manticarias.put("research_bonus_construction", 0.9);
+	manticarias.put("research_bonus_tech",         0.9);
+	manticarias.put("research_bonus_energy",       0.9);
+	manticarias.put("research_bonus_population",   0.9);
+	manticarias.put("research_bonus_culture",      1.8);
+	manticarias.put("research_bonus_operations",   0.9);
+	manticarias.put("research_bonus_portals",      0.9);
+	manticarias.put("energy_production",    1.4);
+	manticarias.put("mineral_production",   1.0);
+	manticarias.put("crystal_production",   1.0);
+	manticarias.put("ectrolium_production",   1.0);
+	manticarias.put("race_special_solar_15",   1.15);
+	
+	race_info_list.put("MT",manticarias);
+	
+	foohons.put("pop_growth", 0.8*0.02);
+	foohons.put("research_bonus_military",    1.5);
+	foohons.put("research_bonus_construction", 1.5);
+	foohons.put("research_bonus_tech",         1.5);
+	foohons.put("research_bonus_energy",       1.5);
+	foohons.put("research_bonus_population",   1.5);
+	foohons.put("research_bonus_culture",      1.5);
+	foohons.put("research_bonus_operations",   1.5);
+	foohons.put("research_bonus_portals",      1.5);
+	foohons.put("energy_production",    0.8);
+	foohons.put("mineral_production",   1.0);
+	foohons.put("crystal_production",   1.0);
+	foohons.put("ectrolium_production",   1.2);
+	
+	race_info_list.put("FH",foohons);
+
+	spacebournes.put("pop_growth", 1.2*0.02);
+	spacebournes.put("research_bonus_military",    1.1);
+	spacebournes.put("research_bonus_construction", 1.1);
+	spacebournes.put("research_bonus_tech",         0.6);
+	spacebournes.put("research_bonus_energy",       1.1);
+	spacebournes.put("research_bonus_population",   1.1);
+	spacebournes.put("research_bonus_culture",      1.1);
+	spacebournes.put("research_bonus_operations",   1.1);
+	spacebournes.put("research_bonus_portals",      1.1);
+	spacebournes.put("energy_production",    1.3);
+	spacebournes.put("mineral_production",   1.0);
+	spacebournes.put("crystal_production",   1.0);
+	spacebournes.put("ectrolium_production",   1.0);
+	
+	race_info_list.put("SB",spacebournes);
+
+	dreamweavers.put("pop_growth", 1.1*0.02);
+	dreamweavers.put("research_bonus_military",    1.4);
+	dreamweavers.put("research_bonus_construction", 1.4);
+	dreamweavers.put("research_bonus_tech",         2.8);
+	dreamweavers.put("research_bonus_energy",       1.4);
+	dreamweavers.put("research_bonus_population",   1.4);
+	dreamweavers.put("research_bonus_culture",      1.4);
+	dreamweavers.put("research_bonus_operations",   1.4);
+	dreamweavers.put("research_bonus_portals",      1.4);
+	dreamweavers.put("energy_production",    0.8);
+	dreamweavers.put("mineral_production",   1.0);
+	dreamweavers.put("crystal_production",   1.0);
+	dreamweavers.put("ectrolium_production",   1.0);
+	
+	race_info_list.put("DW",dreamweavers);
+	
+	wookiees.put("pop_growth", 1.2*0.02);
+	wookiees.put("research_bonus_military",    1.0);
+	wookiees.put("research_bonus_construction", 2.0);
+	wookiees.put("research_bonus_tech",         1.0);
+	wookiees.put("research_bonus_energy",       1.0);
+	wookiees.put("research_bonus_population",   2.0);
+	wookiees.put("research_bonus_culture",      1.0);
+	wookiees.put("research_bonus_operations",   1.0);
+	wookiees.put("research_bonus_portals",      2.0);
+	wookiees.put("energy_production",    0.7);
+	wookiees.put("mineral_production",   1.25);
+	wookiees.put("crystal_production",   1.25);
+	wookiees.put("ectrolium_production",   1.0);
+	wookiees.put("race_special_resource_private static final interest",   1.005);
+	
+	race_info_list.put("WK",wookiees);
+	
+	buildingsNames.put( "SC", "solar_collectors");
+	buildingsNames.put( "FR", "fission_reactors");
+	buildingsNames.put( "MP", "mineral_plants");
+	buildingsNames.put( "CL", "crystal_labs");
+	buildingsNames.put( "RS", "refinement_stations");
+	buildingsNames.put( "CT", "cities");
+	buildingsNames.put( "RC", "research_centers");
+	buildingsNames.put( "DS", "defense_sats");
+	buildingsNames.put( "SN", "shield_networks");
+	buildingsNames.put( "PL", "portal");
+	}
+	
+	private static final String [][] researchNames = {
+		{"research_points_military", "research_bonus_military", "alloc_research_military", "research_max_military", "research_percent_military"},
+		{"research_points_construction", "research_bonus_construction", "alloc_research_construction", "research_max_construction", "research_percent_construction"},
+		{"research_points_tech", "research_bonus_tech", "alloc_research_tech", "research_max_tech", "research_percent_tech"},
+		{"research_points_energy", "research_bonus_energy", "alloc_research_energy", "research_max_energy", "research_percent_energy"},
+		{"research_points_population", "research_bonus_population", "alloc_research_population", "research_max_population", "research_percent_population" },
+		{"research_points_culture", "research_bonus_culture", "alloc_research_culture", "research_max_culture", "research_percent_culture"},
+		{"research_points_operations", "research_bonus_operations", "alloc_research_operations", "research_max_operations", "research_percent_operations"},
+		{"research_points_portals", "research_bonus_portals", "alloc_research_portals", "research_max_portals", "research_percent_portals"},
+		};
+	
+	private static final double [] units_upkeep_costs = {2.0, 1.6, 3.2, 12.0, 18.0, 0.4, 0.6, 2.8, 0.0, 0.8, 0.8, 2.4, 60.0};
+	
+	private static final double [] units_nw = {4,3,5,12,14,1,1,4,7,2,2,6,30};
+	
+	private static final String [] unit_names = {"bomber", "fighter", "transport", "cruiser", "carrier", "soldier", "droid", "goliath", "phantom", "wizard", "agent", "ghost", "exploration"};
 	
 	class Planet{
 		int posX;
@@ -20,192 +188,62 @@ public class Main
 
 
     public static void main(String[] args) {
-	//some constants temporarily written here, fetch them from app/constants.py later
-    int total_units = 13;
-	int population_size_factor  = 20;
-	double energy_decay_factor = 0.005;
-	double crystal_decay_factor = 0.02;
-	int upkeep_solar_collectors = 0;
-	int upkeep_fission_reactors = 20;
-	int upkeep_mineral_plants = 2;
-	int upkeep_crystal_labs = 2;
-	int upkeep_refinement_stations = 2;
-	int upkeep_cities = 4;
-	int upkeep_research_centers = 1;
-	int upkeep_defense_sats = 4;
-	int upkeep_shield_networks = 16;
-	int networth_per_building = 8;
-	int building_production_solar = 12;
-	int building_production_fission = 40;
-	int building_production_mineral = 1;
-	int building_production_crystal = 1;
-	int building_production_ectrolium = 1;
-	int building_production_cities = 1000;
-	int building_production_research = 6;
-	double [] unit_upkeep = {2.0, 1.6, 3.2, 12.0, 18.0, 0.4, 0.6, 2.8, 0.0, 0.8, 0.8, 2.4, 60.0};
-	HashMap<String,HashMap<String, Double>> race_info_list = new HashMap<>();
-	/* HK = 'HK', _('Harks')
-        MT = 'MT', _('Manticarias')
-        FH = 'FH', _('Foohons')
-        SB = 'SB', _('Spacebornes')
-        DW = 'DW', _('Dreamweavers')
-        WK = 'WK', _('Wookiees')*/
-	HashMap<String, Double> harks = new HashMap<>();
-		harks.put("pop_growth", 0.8*0.02);
-		harks.put("research_bonus_military",    1.2);
-		harks.put("research_bonus_construction", 1.2);
-		harks.put("research_bonus_tech",         1.2);
-		harks.put("research_bonus_energy",       1.2);
-		harks.put("research_bonus_population",   1.2);
-		harks.put("research_bonus_culture",      0.6);
-		harks.put("research_bonus_operations",   1.2);
-		harks.put("research_bonus_portals",      1.2);
-		harks.put("energy_production",    0.9);
-		harks.put("mineral_production",   1.0);
-		harks.put("crystal_production",   1.25);
-		harks.put("ectrolium_production",   1.0);
-	race_info_list.put("HK",harks);
-	HashMap<String, Double> manticarias = new HashMap<>();
-		manticarias.put("pop_growth", 0.9*0.02);
-		manticarias.put("research_bonus_military",    0.9);
-		manticarias.put("research_bonus_construction", 0.9);
-		manticarias.put("research_bonus_tech",         0.9);
-		manticarias.put("research_bonus_energy",       0.9);
-		manticarias.put("research_bonus_population",   0.9);
-		manticarias.put("research_bonus_culture",      1.8);
-		manticarias.put("research_bonus_operations",   0.9);
-		manticarias.put("research_bonus_portals",      0.9);
-		manticarias.put("energy_production",    1.4);
-		manticarias.put("mineral_production",   1.0);
-		manticarias.put("crystal_production",   1.0);
-		manticarias.put("ectrolium_production",   1.0);
-		manticarias.put("race_special_solar_15",   1.15);
-	race_info_list.put("MT",manticarias);
-	HashMap<String, Double> foohons = new HashMap<>();
-		foohons.put("pop_growth", 0.8*0.02);
-		foohons.put("research_bonus_military",    1.5);
-		foohons.put("research_bonus_construction", 1.5);
-		foohons.put("research_bonus_tech",         1.5);
-		foohons.put("research_bonus_energy",       1.5);
-		foohons.put("research_bonus_population",   1.5);
-		foohons.put("research_bonus_culture",      1.5);
-		foohons.put("research_bonus_operations",   1.5);
-		foohons.put("research_bonus_portals",      1.5);
-		foohons.put("energy_production",    0.8);
-		foohons.put("mineral_production",   1.0);
-		foohons.put("crystal_production",   1.0);
-		foohons.put("ectrolium_production",   1.2);
-	race_info_list.put("FH",foohons);
-	HashMap<String, Double> spacebournes = new HashMap<>();
-		spacebournes.put("pop_growth", 1.2*0.02);
-		spacebournes.put("research_bonus_military",    1.1);
-		spacebournes.put("research_bonus_construction", 1.1);
-		spacebournes.put("research_bonus_tech",         0.6);
-		spacebournes.put("research_bonus_energy",       1.1);
-		spacebournes.put("research_bonus_population",   1.1);
-		spacebournes.put("research_bonus_culture",      1.1);
-		spacebournes.put("research_bonus_operations",   1.1);
-		spacebournes.put("research_bonus_portals",      1.1);
-		spacebournes.put("energy_production",    1.3);
-		spacebournes.put("mineral_production",   1.0);
-		spacebournes.put("crystal_production",   1.0);
-		spacebournes.put("ectrolium_production",   1.0);
-	race_info_list.put("SB",spacebournes);
-	HashMap<String, Double> dreamweavers = new HashMap<>();
-		dreamweavers.put("pop_growth", 1.1*0.02);
-		dreamweavers.put("research_bonus_military",    1.4);
-		dreamweavers.put("research_bonus_construction", 1.4);
-		dreamweavers.put("research_bonus_tech",         2.8);
-		dreamweavers.put("research_bonus_energy",       1.4);
-		dreamweavers.put("research_bonus_population",   1.4);
-		dreamweavers.put("research_bonus_culture",      1.4);
-		dreamweavers.put("research_bonus_operations",   1.4);
-		dreamweavers.put("research_bonus_portals",      1.4);
-		dreamweavers.put("energy_production",    0.8);
-		dreamweavers.put("mineral_production",   1.0);
-		dreamweavers.put("crystal_production",   1.0);
-		dreamweavers.put("ectrolium_production",   1.0);
-	race_info_list.put("DW",dreamweavers);
-	HashMap<String, Double> wookiees = new HashMap<>();
-		wookiees.put("pop_growth", 1.2*0.02);
-		wookiees.put("research_bonus_military",    1.0);
-		wookiees.put("research_bonus_construction", 2.0);
-		wookiees.put("research_bonus_tech",         1.0);
-		wookiees.put("research_bonus_energy",       1.0);
-		wookiees.put("research_bonus_population",   2.0);
-		wookiees.put("research_bonus_culture",      1.0);
-		wookiees.put("research_bonus_operations",   1.0);
-		wookiees.put("research_bonus_portals",      2.0);
-		wookiees.put("energy_production",    0.7);
-		wookiees.put("mineral_production",   1.25);
-		wookiees.put("crystal_production",   1.25);
-		wookiees.put("ectrolium_production",   1.0);
-		wookiees.put("race_special_resource_interest",   1.005);
-	race_info_list.put("WK",wookiees);
-	    
-	HashMap<String, String> buildingsNames = new HashMap<>();
-	buildingsNames.put( "SC", "solar_collectors");
-	buildingsNames.put( "FR", "fission_reactors");
-	buildingsNames.put( "MP", "mineral_plants");
-	buildingsNames.put( "CL", "crystal_labs");
-	buildingsNames.put( "RS", "refinement_stations");
-	buildingsNames.put( "CT", "cities");
-	buildingsNames.put( "RC", "research_centers");
-	buildingsNames.put( "DS", "defense_sats");
-	buildingsNames.put( "SN", "shield_networks");
-	buildingsNames.put( "PL", "portal");
-	
-	String [][] researchNames = {
-		{"research_points_military", "research_bonus_military", "alloc_research_military", "research_max_military", "research_percent_military"},
-		{"research_points_construction", "research_bonus_construction", "alloc_research_construction", "research_max_construction", "research_percent_construction"},
-		{"research_points_tech", "research_bonus_tech", "alloc_research_tech", "research_max_tech", "research_percent_tech"},
-		{"research_points_energy", "research_bonus_energy", "alloc_research_energy", "research_max_energy", "research_percent_energy"},
-		{"research_points_population", "research_bonus_population", "alloc_research_population", "research_max_population", "research_percent_population" },
-		{"research_points_culture", "research_bonus_culture", "alloc_research_culture", "research_max_culture", "research_percent_culture"},
-		{"research_points_operations", "research_bonus_operations", "alloc_research_operations", "research_max_operations", "research_percent_operations"},
-		{"research_points_portals", "research_bonus_portals", "alloc_research_portals", "research_max_portals", "research_percent_portals"},
-	};
-	
-	double [] units_upkeep_costs = {2.0, 1.6, 3.2, 12.0, 18.0, 0.4, 0.6, 2.8, 0.0, 0.8, 0.8, 2.4, 60.0};
-	
-	double [] units_nw = {4,3,5,12,14,1,1,4,7,2,2,6,30};
-	
-	String [] unit_names = {"bomber", "fighter", "transport", "cruiser", "carrier", "soldier", "droid", "goliath", "phantom", "wizard", "agent", "ghost", "exploration"};
-
-	
-
-	long startTime = System.nanoTime();
-	long connectionTime = 0;
-	long statTime = 0;
-	long resultTime = 0;
-	long executeBatchTime = 0;
-	long jobsUpdate1 = 0;
-	long jobsUpdate2 = 0;
-	long planetsUpdate1 = 0;
-	long planetsUpdate2 = 0;
-	long userUpdate1 = 0;
-	long userUpdate2 = 0;
-	
-	Connection con = null;
-	try{
-		con = DriverManager.getConnection("jdbc:postgresql://ectroversedjango_db_1:5432/djangodatabase", "admin", "admin12345");
-		connectionTime = System.nanoTime();
-	}
-	catch (Exception e) {
+		long startTime = System.nanoTime();
+		long connectionTime = 0;
 		
-		System.out.println("exception " +  e.getMessage());
-	}
-	System.out.println("connection time " + (double)(connectionTime - startTime)/1_000_000_000.0 + " sec.");
-	
-	while(true){
+		Connection tmpCon = null;
+		try{
+			tmpCon = DriverManager.getConnection("jdbc:postgresql://ectroversedjango_db_1:5432/djangodatabase", "dbadmin", "admin12345");
+			connectionTime = System.nanoTime();
+		}
+		catch (Exception e) {
+			System.out.println("exception " +  e.getMessage());
+			System.out.println("Connection with postgres DB not established, aborting." );
+			System.exit(0);
+		}
+		final Connection con = tmpCon;
+		System.out.println("connection time " + (double)(connectionTime - startTime)/1_000_000_000.0 + " sec.");
 		
-    try {
+		ScheduledExecutorService s = Executors.newSingleThreadScheduledExecutor();
+		Calendar calendar = Calendar.getInstance();
+		Runnable scheduledTask = new Runnable() {
+			public void run() {
+				processTick(con);
+			}
+		};
+		
+		//use this for 10 second tick
+		long millistoNext = secondsToFirstOccurence10(calendar);	
+		s.scheduleAtFixedRate(scheduledTask, millistoNext, 10*1000, TimeUnit.MILLISECONDS);
+		
+		//use this for 10 minute tick
+		// long millistoNext = secondsToFirstOccurence600(calendar);	
+		// s.scheduleAtFixedRate(scheduledTask, millistoNext, 600*1000, TimeUnit.MILLISECONDS);
+	}	
+    
+	private static void processTick(Connection con){
+		long startTime = 0;
+		long resultTime = 0;
+		long executeBatchTime = 0;
+		long jobsUpdate1 = 0;
+		long jobsUpdate2 = 0;
+		long planetsUpdate1 = 0;
+		long planetsUpdate2 = 0;
+		long userUpdate1 = 0;
+		long userUpdate2 = 0;
+		
+		try {
 	 	startTime = System.nanoTime();
-
 		Statement statement = con.createStatement();
 		
-		//update construction jobs	
+		//update tick number
+		ResultSet resultSet = statement.executeQuery("SELECT tick_number FROM app_roundstatus");
+		resultSet.next();
+		int tick_nr = resultSet.getInt("tick_number");
 		
+		statement.executeUpdate("UPDATE app_roundstatus SET tick_number = " + (tick_nr + 1) );
+		
+		//update construction jobs	
 		jobsUpdate1 = System.nanoTime();
 		HashMap<Integer, HashMap<String, Integer>> jobs = execute_jobs(con);
 		jobsUpdate2 = System.nanoTime();
@@ -213,7 +251,7 @@ public class Main
 		 
 		//update fleets
 		 
-		ResultSet resultSet = statement.executeQuery("SELECT * FROM app_userstatus");
+		resultSet = statement.executeQuery("SELECT * FROM app_userstatus");
 	   	ResultSetMetaData rsmd = resultSet.getMetaData();
 	   	ArrayList<String []> columns = new ArrayList<>(rsmd.getColumnCount());
 		 
@@ -314,8 +352,6 @@ public class Main
 			" WHERE id = ?" ; //56 wow what a long string :P
 		 PreparedStatement userStatusUpdateStatement = con.prepareStatement(userStatusUpdateQuery); //mass update, much faster
 
-
-
 		 //loop over users to get their stats
 		while(resultSet.next()){
 
@@ -347,7 +383,6 @@ public class Main
 			usersInt.add(rowInt);
 			usersLong.add(rowLong);
 		}
-			
 
 		//loops over users to uodate their stats and planets --main loop!
 		 for(int j = 0; j < usersInt.size(); j++){
@@ -414,7 +449,6 @@ public class Main
 				
 				HashMap<String, Integer> buildgsBuiltFromJobs = null;
 				
-				
 				if(jobs.containsKey(planetID))
 					buildgsBuiltFromJobs = jobs.get(planetID);
 				else
@@ -436,7 +470,6 @@ public class Main
 				
 				//add planets population to total population
 				population += current_population;
-				
 				
 				//update portal coverage
 				if(resultSet.getBoolean("portal") == true)
@@ -473,7 +506,6 @@ public class Main
 				planetsUpdateStatement.setInt(13, defense_sats);
 				planetsUpdateStatement.setInt(14, shield_networks);	
 				planetsUpdateStatement.setBoolean(15, portal);	
-				
 				if (portal)
 					planetsUpdateStatement.setBoolean(16, false);	
 				else
@@ -583,7 +615,7 @@ public class Main
 			//energy interest
 			long energy_interest = (long) (rowLong.get("energy") * race_info.getOrDefault("race_special_resource_interest", 0.0));
 			userStatusUpdateStatement.setLong(42, energy_interest);
-			
+		
 			//buildings upkeep
 			long buildings_upkeep = 
             (long) (total_solar_collectors * upkeep_solar_collectors * energyResearchFactor +
@@ -684,7 +716,7 @@ public class Main
 			userStatusUpdateStatement.setLong(54, networth);
 			userStatusUpdateStatement.addBatch();
 		}
-		
+	
 		planetsUpdate1 = System.nanoTime();
 		planetsUpdateStatement.executeBatch();
 		planetsUpdate2 = System.nanoTime();
@@ -693,32 +725,23 @@ public class Main
 		userStatusUpdateStatement.executeBatch();
 		userUpdate2 = System.nanoTime();
 
-	}
-	catch (Exception e) {
-            System.out.println("exception " +  e.getMessage());
-       }
-	     
-	long endTime = System.nanoTime();
-	
-	Clock clock = Clock.systemDefaultZone();
-	Instant instant = clock.instant();
-	System.out.println("Tick completion time: " + instant);	
-	System.out.println("Construction jobs update: " + (double)(jobsUpdate2-jobsUpdate1)/1_000_000_000.0 + " sec.");
-	System.out.println("Planets update: " + (double)(planetsUpdate2-planetsUpdate1)/1_000_000_000.0 + " sec.");
-	System.out.println("Users update: " + (double)(userUpdate2-userUpdate1)/1_000_000_000.0 + " sec.");
-	System.out.println("Total time: " + (double)(endTime-startTime)/1_000_000_000.0 + " sec.");
-    
-		try{
-			Thread.sleep(10000);
 		}
-		catch(InterruptedException e){
-			System.out.println(e);
-		}
+		catch (Exception e) {
+				System.out.println("exception " +  e.getMessage());
+		   }
+			 
+		long endTime = System.nanoTime();
+		
+		Clock clock = Clock.systemDefaultZone();
+		Instant instant = clock.instant();
+		System.out.println("Tick completion time: " + instant);	
+		System.out.println("Construction jobs update: " + (double)(jobsUpdate2-jobsUpdate1)/1_000_000_000.0 + " sec.");
+		System.out.println("Planets update: " + (double)(planetsUpdate2-planetsUpdate1)/1_000_000_000.0 + " sec.");
+		System.out.println("Users update: " + (double)(userUpdate2-userUpdate1)/1_000_000_000.0 + " sec.");
+		System.out.println("Total time: " + (double)(endTime-startTime)/1_000_000_000.0 + " sec.");
 	
 	}
 	
-	}	
-    
     private static double calc_overbuild(int size, int buildings) {
     	return 0;
     }
@@ -792,9 +815,30 @@ public class Main
 		catch (Exception e) {
 			
             System.out.println("exception " +  e.getMessage());
+			e.printStackTrace();
+			
         }
 		
 		return planetJobsCombined;
+	}
+	
+	
+	private static long secondsToFirstOccurence10(Calendar calendar) {
+    int seconds = calendar.get(Calendar.SECOND);
+    int millis = calendar.get(Calendar.MILLISECOND);
+    int secondsToNextTenSeconds = 10 - seconds % 10 -1;
+    int millisToNextSecond = 1000 - millis;
+    return secondsToNextTenSeconds*1000 + millisToNextSecond;
+	}
+	
+	private static long secondsToFirstOccurence600(Calendar calendar) {
+	int minutes = calendar.get(Calendar.MINUTE);
+    int seconds = calendar.get(Calendar.SECOND);
+    int millis = calendar.get(Calendar.MILLISECOND);
+	int minutesToNextTenMinutes = 10 - minutes % 10 -1;
+    int secondsToNextMinute = 60 - seconds -1;
+    int millisToNextSecond = 1000 - millis;
+    return minutesToNextTenMinutes*60*1000 + secondsToNextMinute*1000 + millisToNextSecond;
 	}
 
 }
