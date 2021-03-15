@@ -117,4 +117,8 @@ to run the java tick process:
 1. `docker exec -it ectroversedjango_python_1 /bin/bash`
 2. `cd java`
 3. `javac Main.java` - if wasnt allready compiled into bytecode
-4. `java -cp postgresql-42.2.19.jar:. Main >> log.txt`
+4. `java -cp postgresql-42.2.19.jar:. Main >> log.txt &`
+
+to kill it:
+1. `jobs -l` - get the list of currently running jobs
+2. ` kill PID` ,replacing the PID with the process ID of the Main.java
