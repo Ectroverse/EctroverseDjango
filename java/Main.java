@@ -197,11 +197,18 @@ public class Main
 			connectionTime = System.nanoTime();
 		}
 		catch (Exception e) {
+			try{
+				tmpCon.rollback();
+			}
+			catch (Exception ex) {
+				System.out.println("exception " +  ex.getMessage());
+			}
 			System.out.println("exception " +  e.getMessage());
 			System.out.println("Connection with postgres DB not established, aborting." );
 			System.exit(0);
 		}
 		final Connection con = tmpCon;
+		
 		System.out.println("connection time " + (double)(connectionTime - startTime)/1_000_000_000.0 + " sec.");
 		
 		ScheduledExecutorService s = Executors.newSingleThreadScheduledExecutor();
@@ -231,10 +238,29 @@ public class Main
 		long planetsUpdate2 = 0;
 		long userUpdate1 = 0;
 		long userUpdate2 = 0;
+		long test1 = 0;
+		long test2 = 0;
 		
 		try {
+		con.setAutoCommit(false);
 	 	startTime = System.nanoTime();
 		Statement statement = con.createStatement();
+		//statement.executeQuery("BEGIN; ");
+		test1 = System.nanoTime();
+		statement.execute("LOCK TABLE \"PLANET\", app_roundstatus, app_userstatus, app_construction IN ACCESS EXCLUSIVE MODE;");
+
+		
+		/*
+		 try (Statement statement = conn.createStatement()) {
+		  statement.execute("BEGIN");
+		  try {
+			// use statement ...
+			statement.execute("COMMIT");
+		  }
+		  catch (SQLException failure) {
+			statement.execute("ROLLBACK");
+		  }
+		}*/
 		
 		//update tick number
 		ResultSet resultSet = statement.executeQuery("SELECT tick_number FROM app_roundstatus");
@@ -254,6 +280,9 @@ public class Main
 		resultSet = statement.executeQuery("SELECT * FROM app_userstatus");
 	   	ResultSetMetaData rsmd = resultSet.getMetaData();
 	   	ArrayList<String []> columns = new ArrayList<>(rsmd.getColumnCount());
+		
+		test2 = System.nanoTime();
+		System.out.println("Construction jobs update: " + (double)(test2-test1)/1_000_000_000.0 + " sec.");
 		 
 		 //put user table into list with hash maps, as we cannot use nested resultSet
 	  	for(int i = 1; i <= rsmd.getColumnCount(); i++){
@@ -724,11 +753,12 @@ public class Main
 		userUpdate1 = System.nanoTime();
 		userStatusUpdateStatement.executeBatch();
 		userUpdate2 = System.nanoTime();
-
+		con.commit();
 		}
 		catch (Exception e) {
+				
 				System.out.println("exception " +  e.getMessage());
-		   }
+		}
 			 
 		long endTime = System.nanoTime();
 		
@@ -811,12 +841,11 @@ public class Main
 			
 			updateJobsTicks.executeBatch();
 			deleteJobs.executeBatch();
+
 		}
 		catch (Exception e) {
-			
             System.out.println("exception " +  e.getMessage());
 			e.printStackTrace();
-			
         }
 		
 		return planetJobsCombined;
