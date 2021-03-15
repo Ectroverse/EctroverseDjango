@@ -152,7 +152,7 @@ function startTime() {
   s_left = 10 - (s % 10);
   s_left = fixTimeDigits(s_left);
   document.getElementById('headerTime').innerHTML =
-  m_left + ":" + s_left;
+  m_left + ":" + s_left + " current seconds:" + s;
   var t = setTimeout(startTime, 10);
 }
 function fixTimeDigits(i) {
