@@ -246,7 +246,7 @@ public class Main
 	 	startTime = System.nanoTime();
 		Statement statement = con.createStatement();
 		//statement.executeQuery("BEGIN; ");
-		test1 = System.nanoTime();
+		//test1 = System.nanoTime();
 		statement.execute("LOCK TABLE \"PLANET\", app_roundstatus, app_userstatus, app_construction IN ACCESS EXCLUSIVE MODE;");
 
 		
@@ -281,8 +281,8 @@ public class Main
 	   	ResultSetMetaData rsmd = resultSet.getMetaData();
 	   	ArrayList<String []> columns = new ArrayList<>(rsmd.getColumnCount());
 		
-		test2 = System.nanoTime();
-		System.out.println("Construction jobs update: " + (double)(test2-test1)/1_000_000_000.0 + " sec.");
+		//test2 = System.nanoTime();
+		//System.out.println("Construction jobs update: " + (double)(test2-test1)/1_000_000_000.0 + " sec.");
 		 
 		 //put user table into list with hash maps, as we cannot use nested resultSet
 	  	for(int i = 1; i <= rsmd.getColumnCount(); i++){
