@@ -34,7 +34,7 @@
 		<br>
 		<a href="fleets_disband">Disband units</a></td>
 		</div>
-		
+
 	</div>
 	<div class ="right_box" >
 		<div style="width: 50%; margin:0 auto; text-align: left;">
@@ -62,7 +62,7 @@
 		</form>
 		</div>
 	</div>
-	
+
 
 
 	<div class="center_box">
@@ -80,10 +80,10 @@
 				<form action="/fleets_orders" method="POST" name="massFleet" id="form0" onsubmit="hide_hidden();" >
 				{% csrf_token %}
 				{% for fleet_nr, fleet_units  in display_fleet.items %}
-				
+
 					<tr class="spaceUnder">
 					<input type="hidden" id="fleet_nr" name="fleet_nr" value="{{fleet_nr.id}}">
-						
+
 						<td>
 						{% for unit_name, unit_nr in fleet_units.items %}
 							{{unit_name}}: {{unit_nr}}<br>
@@ -96,15 +96,15 @@
 							Station on planet {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
 						{% elif fleet_nr.command_order == 2 %}
 							Move to system {{fleet_nr.x}},{{fleet_nr.y}}
-						{% elif fleet_nr.command_order == 3 %} 
+						{% elif fleet_nr.command_order == 3 %}
 							Merge in system {{fleet_nr.x}},{{fleet_nr.y}}
-						{% elif fleet_nr.command_order == 4 %} 
+						{% elif fleet_nr.command_order == 4 %}
 							Auto merge in system {{fleet_nr.x}},{{fleet_nr.y}}
-						{% elif fleet_nr.command_order == 5 %} 
+						{% elif fleet_nr.command_order == 5 %}
 							Join main fleet at {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
 						{% endif %}
-						
-						</td> 
+
+						</td>
 						<td>
 						{% if fleet_nr.ticks_remaining > 0 %}
 							Moving, {{fleet_nr.ticks_remaining}} week(s)
@@ -119,7 +119,7 @@
 						{% endif %}
 						</td>
 						<td>{{fleet_nr.current_position_x | floatformat}}, {{fleet_nr.current_position_y | floatformat}}</td>
-						 
+
 						<td>
 						<input type="hidden" name="fleet_select" value="0" />
 						<input type="checkbox" name="fleet_select" value="1" />
@@ -127,11 +127,11 @@
 						<!-- <input type="hidden" name="fleet_select" value="0"><input type="checkbox" onclick="this.previousSibling.value=1-this.previousSibling.value" > -->
 						<!-- -->
 						</td>
-						
+
 					</tr>
 
-				{% endfor %} 
-				
+				{% endfor %}
+
 				<tr><td></td>
 				<td></td>
 				<td></td>
@@ -139,13 +139,13 @@
 				<td><input type="submit" value="Order"></td></tr>
 				</form>
 			</table>
-			
+
 			{% else %}
 				None
 			{% endif %}
 			</p>
-	</div>	
-	
+	</div>
+
 	<div class="center_box">
 		<div class="center_box_inside">
 			<b class="spaceUnder">Dispatch a new fleet</b><br>
@@ -166,15 +166,15 @@
 			{% endfor %}
 			</table>
 			X:<input class="spaceUnder" pattern="[0-9]+" type="text" name="X" size="4">
-			Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4"> 
+			Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4">
 			Planet:<input class="spaceUnder" pattern="[0-9]+" type="text" name="I" size="4">
 			<br>
 			<input type="submit" value="Send">
 			</form>
 		</div>
 	</div>
-	
-	
+
+
 	<div class="center_box">
 			<b class="spaceUnder">Exploration teams</b><br>
 			<p>
@@ -189,13 +189,13 @@
 				</tr>
 				<form action="/fleets_orders" method="POST" name="massExplo" id="1" onsubmit="hide_hidden();" >
 				{% csrf_token %}
-				
-				
+
+
 				{% for fleet_nr in display_fleet_exploration %}
-				
+
 					<tr class="spaceUnder">
 					<input type="hidden" id="fleet_nr" name="fleet_nr" value="{{fleet_nr.id}}">
-						
+
 						<td>
 						Exploration ships: {{fleet_nr.exploration}}
 						</td>
@@ -207,8 +207,8 @@
 						{% elif fleet_nr.command_order == 5 %}
 							Join main fleet at {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
 						{% endif %}
-						
-						</td> 
+
+						</td>
 						<td>
 						{% if fleet_nr.ticks_remaining > 0 %}
 							Moving, {{fleet_nr.ticks_remaining}} week(s)
@@ -217,7 +217,7 @@
 						{% endif %}
 						</td>
 						<td>{{fleet_nr.current_position_x | floatformat}}, {{fleet_nr.current_position_y | floatformat}}</td>
-						 
+
 						<td>
 						<input type="hidden" name="fleet_select" value="0" />
 						<input type="checkbox" name="fleet_select" value="1" />
@@ -225,13 +225,13 @@
 						<!-- <input type="hidden" name="fleet_select" value="0"><input type="checkbox" onclick="this.previousSibling.value=1-this.previousSibling.value" > -->
 						<!-- -->
 						</td>
-						
+
 					</tr>
 
-				{% endfor %} 
-				
+				{% endfor %}
+
 				<input type="hidden" id="massExplo1" name="massExplo1" value="1">
-				
+
 				<tr><td></td>
 				<td></td>
 				<td></td>
@@ -239,16 +239,16 @@
 				<td><input type="submit" value="Order"></td></tr>
 				</form>
 			</table>
-			
+
 			{% else %}
 				None
 			{% endif %}
 			</p>
-	</div>	
-	
-	
+	</div>
 
-	
+
+
+
 	<div class="center_box" id="exploration_send" >
 		<div class="center_box_inside">
 			<b class="spaceUnder">Dispatch a new exploration ship</b><br>
@@ -264,7 +264,7 @@
 			</select>
 			<br>
 			X:<input class="spaceUnder" pattern="[0-9]+" type="text" name="X" size="4" value ="{{planet_to_template.x}}">
-			Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4" value ="{{planet_to_template.y}}"> 
+			Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4" value ="{{planet_to_template.y}}">
 			Planet:<input class="spaceUnder" pattern="[0-9]+" type="text" name="I" size="4" value ="{{planet_to_template.i}}">
 			<input type="hidden" name="exploration" value='1'>
 			<br>
@@ -273,10 +273,9 @@
 		</div>
 	</div>
 
-	
+
 </div>
 
 
 
 {% endblock %}
-
