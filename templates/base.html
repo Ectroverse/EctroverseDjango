@@ -83,6 +83,7 @@ body
 
 }
 
+/* sidebar */
 
 .headerplanets{
   vertical-align: middle;
@@ -131,13 +132,6 @@ body
     content:url({% static 'files_014.jpg' %});
 }
 
-.nav_head{
- position: relative;
-}
-
-.nav_navi{
- position: relative;
-}
 
 </style>
 
@@ -149,11 +143,11 @@ function startTime() {
   var s = today.getSeconds();
   <!--m_left = 9 - (m % 10); -->
   m_left = 0;
-  s_left = 10 - (s % 10);
+  s_left = 59 - (s % 60);
   s_left = fixTimeDigits(s_left);
   document.getElementById('headerTime').innerHTML =
-  m_left + ":" + s_left + " current seconds:" + s;
-  var t = setTimeout(startTime, 10);
+  m_left + ":" + s_left;
+  var t = setTimeout(startTime, 60);
 }
 function fixTimeDigits(i) {
   if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
@@ -244,7 +238,7 @@ onload="startTime()">
   <div class="right_side">
        {% include "header.html" %}
 	<!-- Main area content -->
-	{% include "box_top.html" with heading=page_title minwidth="360px" textalign="center"  %}
+	{% include "box_top.html" with heading=page_title minwidth="300px" textalign="center"  %}
 		{% block content %}
 		{% endblock %}
 	{% include "box_bottom.html" %}

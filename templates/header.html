@@ -40,12 +40,6 @@
 
 }
 
-.menu_container {
-	width:100%;
-	height: 63px;
-	position: relative;
-	min-width: 360px;
-}
 
 .menu_container_left{
 	position: absolute;
@@ -129,10 +123,28 @@
     content:url({% static 'i13.jpg' %});
 }
 
+.menu_container_footer_leftmob{
+	position: absolute;
+	width: 18px;
+	height: 42px;
+	left: 76px;
+	top: 21px;
+    content:url({% static 'i13.jpg' %});
+}
+
 .menu_container_footer_mid{
 	position: absolute;
 	height: 42px;
 	left: 217px;
+	right: 49px;
+	top: 21px;
+    background-image:url({% static 'i15.jpg' %});
+}
+
+.menu_container_footer_midmob{
+	position: absolute;
+	height: 42px;
+	left: 92px;
 	right: 49px;
 	top: 21px;
     background-image:url({% static 'i15.jpg' %});
@@ -147,195 +159,12 @@
     content:url({% static 'i17.jpg' %});
 }
 
-.menu_left_align{
-	position: relative;
-	width: 33%;
-	display: inline;
-	height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 3px;
-	overflow: hidden;
-}
-
-.menu_mid_align{
-	position: relative;
-	width: 33%;
-	display: inline;
-	height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 3px;
-	overflow: hidden;
-}
-
-.menu_right_align{
-	position: relative;
-	width: 33%;
-	display: inline;
-	height: 35px;
-	float: left;
-	color:white;
-	text-align: center;
-	top: 3px;
-	overflow: hidden;
-}
-
 .menu_containermob {
 	width:100%;
 	height: 21px;
 	min-width: 360px;
 	background-image:url({% static 'i05.jpg' %});
 	position: relative;
-}
-
-.mob_menu_left_align{
-	position: relative;
-	width: 33%;
-	display: inline;
-	height: 21;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 3px;
-	overflow: hidden;
-}
-
-.mob_menu_mid_align{
-	position: relative;
-	width: 33%;
-	display: inline;
-	height: 21;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 3px;
-	overflow: hidden;
-}
-
-.mob_menu_right_align{
-	position: relative;
-	width: 33%;
-	display: inline;
-	height: 21;
-	float: left;
-	color:white;
-	text-align: center;
-	top: 3px;
-	overflow: hidden;
-}
-
-.menu_left_mobile{
-	position: relative;
-	width: 33%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 4px;
-	/*font-size: max(2vw, 5px);*/
-}
-
-.menu_cn1_mobile{
-	position: relative;
-	width: 33%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 4px;
-	/*font-size: max(2vw, 6px);*/
-}
-
-.menu_right_mobile{
-	position: relative;
-	width: 34%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 4px;
-	/*font-size: max(2vw, 6px);*/
-}
-
-.menu_container_footer_leftmob{
-	position: absolute;
-	width: 18px;
-	height: 42px;
-	left: 76px;
-	top: 21px;
-    content:url({% static 'i13.jpg' %});
-}
-
-.menu_container_footer_midmob{
-	position: absolute;
-	height: 42px;
-	left: 92px;
-	right: 49px;
-	top: 21px;
-    background-image:url({% static 'i15.jpg' %});
-}
-
-.menu_container_footer_rightmob{
-	position: absolute;
-	width: 49px;
-	height: 42px;
-	right: 0px;
-	top: 21px;
-    content:url({% static 'i17.jpg' %});
-}
-
-.menu_leftmob1_align{
-	position: relative;
-	width: 25%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 10px;
-	/*font-size: max(2vw, 6px);*/
-}
-
-.menu_leftmob2_align{
-	position: relative;
-	width: 25%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: center;
-	top: 10px;
-	/*font-size: max(2vw, 6px);*/
-}
-
-.menu_rightmob1_align{
-	position: relative;
-	width: 25%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: left;
-	top: 10px;
-	/*font-size: max(2vw, 6px);*/
-}
-
-.menu_rightmob2_align{
-	position: relative;
-	width: 25%;
-	display: inline;
-	max-height: 35px;
-	float:left;
-	color:white;
-	text-align: left;
-	top: 10px;
-	/*font-size: max(2vw, 6px);*/
 }
 
 .menu_container_btnmob{
@@ -473,7 +302,7 @@
 			<img src="../static/pr3.gif" alt="Ectrolium"> {{status.ectrolium}}
 		</div>
 	</div>
-	<div class="menu_container_footer_rightmob"></div>
+	<div class="menu_container_footer_right"></div>
 </div>
 
 
