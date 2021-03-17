@@ -194,7 +194,23 @@ public class Main
 		Connection tmpCon = null;
 		try{
 			tmpCon = DriverManager.getConnection("jdbc:postgresql://ectroversedjango_db_1:5432/djangodatabase", "dbadmin", "admin12345");
+			
+			//create stored procedure 
+			String createSP = "CREATE OR REPLACE PROCEDURE updatePlanets( "
+				+ " pop_rc DOUBLE PRECISION, race_pop_growth DOUBLE PRECISION, user_id IN \"PLANET\".ID%TYPE)"
+				+ "LANGUAGE SQL"
+				+ " AS $$"
+				+ " UPDATE \"PLANET\" SET max_population = (" + 
+				+ building_production_cities + " * cities +  size * " + population_size_factor + ") *pop_rc WHERE owner_id = user_id;" 
+				+ " UPDATE \"PLANET\" SET current_population = "
+				+ "least(current_population * pop_rc * race_pop_growth, max_population) WHERE owner_id = user_id;" 
+				+ " $$;";
+			
+			Statement statementSP = tmpCon.createStatement();
+			statementSP.execute(createSP);
+			
 			connectionTime = System.nanoTime();
+			
 		}
 		catch (Exception e) {
 			try{
@@ -232,15 +248,15 @@ public class Main
 		long startTime = 0;
 		long resultTime = 0;
 		long executeBatchTime = 0;
-		long jobsUpdate1 = 0;
-		long jobsUpdate2 = 0;
-		long planetsUpdate1 = 0;
-		long planetsUpdate2 = 0;
-		long userUpdate1 = 0;
-		long userUpdate2 = 0;
+		long jobsUpdate1= 0, jobsUpdate2 = 0;
+		long planetsUpdate1 = 0, planetsUpdate2 = 0 ;
+		long userUpdate1 = 0, userUpdate2 = 0;
 		long test1 = 0;
 		long test2 = 0;
-		
+		long postgresProcedureExecTime = 0;
+		long planet_loop = 0;
+		long main_loop1 = 0, main_loop2 = 0;
+
 		try {
 		con.setAutoCommit(false);
 	 	startTime = System.nanoTime();
@@ -299,8 +315,8 @@ public class Main
 		 HashMap<Integer, String> usersRace = new HashMap<>();
 
 		 String planetStatusUpdateQuery = "UPDATE \"PLANET\"  SET" +
-			" current_population = ? ,"+ //1
-			" max_population = ? ," + //2
+			//" current_population = ? ,"+ //1
+			//" max_population = ? ," + //2
 			" protection = ? ," + //3
 			" overbuilt = ? ," + //4
 			" overbuilt_percent = ? ," + //5
@@ -420,9 +436,13 @@ public class Main
 			usersInt.add(rowInt);
 			usersLong.add(rowLong);
 		}
+		
 
 		//loops over users to uodate their stats and planets --main loop!
-		 for(int j = 0; j < usersInt.size(); j++){
+		main_loop1 = System.nanoTime();
+		for(int j = 0; j < usersInt.size(); j++){
+
+			
 			HashMap<String,Integer> rowInt = usersInt.get(j);
 			HashMap<String,Long> rowLong  = usersLong.get(j);
 			int userID = rowInt.get("user_id");
@@ -440,12 +460,12 @@ public class Main
 			int ar = Math.min(rowInt.get("agent_readiness")+2, rowInt.get("agent_readiness_max"));
 			userStatusUpdateStatement.setInt(3, ar);
 
-			test1 = System.nanoTime();
+			//test1 = System.nanoTime();
 
 			ResultSet portalstSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE portal = TRUE AND id = " + userID );
 			
-			test2 = System.nanoTime();
-			System.out.println("Select portals: " + (double)(test2-test1)/1_000_000_000.0 + " sec.");
+			//test2 = System.nanoTime();
+			//System.out.println("Select portals: " + (double)(test2-test1)/1_000_000_000.0 + " sec.");
 			
 			 //this may be quite slow with a lot of portals and planets, could optimize this later
 			LinkedList<Planet> portals = new LinkedList<>();
@@ -479,10 +499,10 @@ public class Main
 			int total_shield_networks = 0;
 			int total_portals = portals.size();
 			
-			test1 = System.nanoTime();
+			//test1 = System.nanoTime();
 			resultSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE owner_id = " + userID);
-			test2 = System.nanoTime();
-			System.out.println("Select planets: " + (double)(test2-test1)/1_000_000_000.0 + " sec.");
+			//test2 = System.nanoTime();
+			//System.out.println("Select planets: " + (double)(test2-test1)/1_000_000_000.0 + " sec.");
 			
 			rsmd = resultSet.getMetaData();
 			int colNumber = rsmd.getColumnCount();
@@ -582,10 +602,23 @@ public class Main
 			" buildings_under_construction = ? " + //18
 			 
 		 	" WHERE id = ?" ; //19*/
+			
+			//update planets using postgres procedure
 
-	
+			
+			//execute stored procedure
+			String runSP = "CALL updatePlanets(?, ?, ?); ";
+			
+			CallableStatement callableStatement = con.prepareCall(runSP); 
+			callableStatement.setDouble(1, (1.00 + 0.01 * rowInt.get("research_percent_population"))); //research factor
+			callableStatement.setDouble(2, race_info.get("pop_growth")); //race bonus for pop growth
+			callableStatement.setInt(3, userID); //user id
+			callableStatement.executeUpdate();
+			test2 = System.nanoTime();
+			postgresProcedureExecTime = test2 - test1;
+			
+			
 			test1 = System.nanoTime();	
-
 			//loop over planets of each user
 			while(resultSet.next()){
 				num_planets++;
@@ -606,17 +639,17 @@ public class Main
 				else
 					buildgsBuiltFromJobs = new HashMap<>();
 		
-				//Update Population
+				//Update Population --update using postgres schedule
 				
-				int max_population = ((int)rowValues[colLocation[19]] * population_size_factor);
-				max_population += ((int)rowValues[colLocation[10]] * building_production_cities);
-				max_population *= (1.00 + 0.01 * rowInt.get("research_percent_population"));
+				//int max_population = ((int)rowValues[colLocation[19]] * population_size_factor);
+				//max_population += ((int)rowValues[colLocation[10]] * building_production_cities);
+				//max_population *= (1.00 + 0.01 * rowInt.get("research_percent_population"));
 				
-				int current_population  = (int) Math.ceil((int)rowValues[colLocation[0]] * race_info.get("pop_growth")*(1.00 + 0.01 * rowInt.get("research_percent_population")));
-				current_population = Math.min(current_population, max_population);
+				//int current_population  = (int) Math.ceil((int)rowValues[colLocation[0]] * race_info.get("pop_growth")*(1.00 + 0.01 * rowInt.get("research_percent_population")));
+				//current_population = Math.min(current_population, max_population);
 				
 				//add planets population to total population
-				population += current_population;
+				population += (int)rowValues[colLocation[0]];
 				
 				
 				
@@ -692,11 +725,12 @@ public class Main
 				//	String sql = "UPDATE \"PLANET\"  SET current_population =  " + current_population +" WHERE id = " + planetID ; //19
 				//	planetsStatement.addBatch(sql);
 				//}
-				
 
+				
+			
 				//add planet only if something has changed
-				if (current_population != (int)rowValues[colLocation[0]] ||
-					max_population != (int)rowValues[colLocation[1]] ||
+				if (//current_population != (int)rowValues[colLocation[0]] ||
+					//max_population != (int)rowValues[colLocation[1]] ||
 					portalCoverage != (int)rowValues[colLocation[2]] ||
 					overbuilt != (double)rowValues[colLocation[3]] ||
 					overbuilt_percent != (double)rowValues[colLocation[4]] ||
@@ -715,34 +749,36 @@ public class Main
 				)
 				{
 					//System.out.println("updating planet nr:" + planetID);
-					planetsUpdateStatement.setInt(1, current_population);
-					planetsUpdateStatement.setInt(2, max_population);
-					planetsUpdateStatement.setInt(3, portalCoverage);
-					planetsUpdateStatement.setDouble(4, overbuilt);
-					planetsUpdateStatement.setDouble(5, overbuilt_percent);
-					planetsUpdateStatement.setInt(6, solar_collectors );
-					planetsUpdateStatement.setInt(7, fission_reactors );
-					planetsUpdateStatement.setInt(8, mineral_plants);
-					planetsUpdateStatement.setInt(9, crystal_labs);
-					planetsUpdateStatement.setInt(10, refinement_stations);
-					planetsUpdateStatement.setInt(11, cities);
-					planetsUpdateStatement.setInt(12, research_centers);
-					planetsUpdateStatement.setInt(13, defense_sats);
-					planetsUpdateStatement.setInt(14, shield_networks);	
-					planetsUpdateStatement.setBoolean(15, portal);	
+					//planetsUpdateStatement.setInt(1, current_population);
+					//planetsUpdateStatement.setInt(2, max_population);
+					planetsUpdateStatement.setInt(1, portalCoverage);
+					planetsUpdateStatement.setDouble(2, overbuilt);
+					planetsUpdateStatement.setDouble(3, overbuilt_percent);
+					planetsUpdateStatement.setInt(4, solar_collectors );
+					planetsUpdateStatement.setInt(5, fission_reactors );
+					planetsUpdateStatement.setInt(6, mineral_plants);
+					planetsUpdateStatement.setInt(7, crystal_labs);
+					planetsUpdateStatement.setInt(8, refinement_stations);
+					planetsUpdateStatement.setInt(9, cities);
+					planetsUpdateStatement.setInt(10, research_centers);
+					planetsUpdateStatement.setInt(11, defense_sats);
+					planetsUpdateStatement.setInt(12, shield_networks);	
+					planetsUpdateStatement.setBoolean(13, portal);	
 					if (portal)
-						planetsUpdateStatement.setBoolean(16, false);	
+						planetsUpdateStatement.setBoolean(14, false);	
 					else
-						planetsUpdateStatement.setBoolean(16, resultSet.getBoolean("portal_under_construction"));	//keep the initial value
-					planetsUpdateStatement.setInt(17, total_buildings);
-					planetsUpdateStatement.setInt(18, buildingsUnderConstr);
-					planetsUpdateStatement.setInt(19, planetID);
+						planetsUpdateStatement.setBoolean(14, resultSet.getBoolean("portal_under_construction"));	//keep the initial value
+					planetsUpdateStatement.setInt(15, total_buildings);
+					planetsUpdateStatement.setInt(16, buildingsUnderConstr);
+					planetsUpdateStatement.setInt(17, planetID);
 
 					planetsUpdateStatement.addBatch();
 				}
 			}
+
 			test2 = System.nanoTime();
-			System.out.println("planet loop: " + (double)(test2-test1)/1_000_000_000.0 + " sec.");
+			planet_loop += test2 - test1;
+			
 
 			//update planets
 			userStatusUpdateStatement.setInt(55, num_planets);
@@ -897,6 +933,7 @@ public class Main
 			userStatusUpdateStatement.setLong(54, networth);
 			userStatusUpdateStatement.addBatch();
 		}
+		main_loop2 = System.nanoTime();
 	
 		planetsUpdate1 = System.nanoTime();
 		planetsUpdateStatement.executeBatch();
@@ -918,9 +955,12 @@ public class Main
 		Clock clock = Clock.systemDefaultZone();
 		Instant instant = clock.instant();
 		System.out.println("Tick completion time: " + instant);	
+		System.out.println("Execute postgres population update procedure: " + (double)(postgresProcedureExecTime)/1_000_000_000.0 + " sec.");
+		System.out.println("planet loop: " + (double)(planet_loop)/1_000_000_000.0 + " sec.");
 		System.out.println("Construction jobs update: " + (double)(jobsUpdate2-jobsUpdate1)/1_000_000_000.0 + " sec.");
 		System.out.println("Planets update: " + (double)(planetsUpdate2-planetsUpdate1)/1_000_000_000.0 + " sec.");
 		System.out.println("Users update: " + (double)(userUpdate2-userUpdate1)/1_000_000_000.0 + " sec.");
+		System.out.println("Main loop: " + (double)(main_loop2-main_loop1)/1_000_000_000.0 + " sec.");
 		System.out.println("Total time: " + (double)(endTime-startTime)/1_000_000_000.0 + " sec.");
 		System.out.println("");
 	}
