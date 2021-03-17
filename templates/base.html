@@ -137,22 +137,29 @@ body
 
 <!-- Tick Timer Script -->
 <script>
-function startTime() {
+
+
+ function startTime() {
   var today = new Date();
   var m = today.getMinutes();
   var s = today.getSeconds();
   <!--m_left = 9 - (m % 10); -->
   m_left = 0;
   s_left = 10 - (s % 10);
-  s_left = fixTimeDigits(s_left);
-  document.getElementById('headerTime').innerHTML =
+  //s_left = fixTimeDigits(s_left);
+  document.getElementById('headerTime').innerHTML = s_left;
   m_left + ":" + s_left;
   var t = setTimeout(startTime, 10);
 }
+
 function fixTimeDigits(i) {
   if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
   return i;
 }
+
+window.onload = function(){
+startTime();
+};
 
 // Toggle check boxes, used on various pages
 	function toggleForm(form_name) {
@@ -179,7 +186,7 @@ function changeslider(newValue,field) {
    margin:0 0 50px 0;
    max-width:100%;
    overflow-x:hidden;"
-onload="startTime()">
+onload="startTime();">
 
 {% if user.is_authenticated %}
 

@@ -441,7 +441,7 @@ public class Main
 		//loops over users to uodate their stats and planets --main loop!
 		main_loop1 = System.nanoTime();
 		for(int j = 0; j < usersInt.size(); j++){
-
+		
 			
 			HashMap<String,Integer> rowInt = usersInt.get(j);
 			HashMap<String,Long> rowLong  = usersLong.get(j);
@@ -449,7 +449,7 @@ public class Main
 			userStatusUpdateStatement.setInt(56, userID);
 			String race = usersRace.get(userID);
 			HashMap<String, Double> race_info = race_info_list.get(race);
-			
+
 
 			 //System.out.println(race_info);
 
@@ -461,21 +461,19 @@ public class Main
 			userStatusUpdateStatement.setInt(3, ar);
 
 			//test1 = System.nanoTime();
-
-			ResultSet portalstSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE portal = TRUE AND id = " + userID );
-			
+			Statement statement3 = con.createStatement();
+			ResultSet portalstSet = statement3.executeQuery("SELECT * FROM \"PLANET\" WHERE portal = TRUE AND owner_id = " + userID );
+		
 			//test2 = System.nanoTime();
 			//System.out.println("Select portals: " + (double)(test2-test1)/1_000_000_000.0 + " sec.");
 			
 			 //this may be quite slow with a lot of portals and planets, could optimize this later
 			LinkedList<Planet> portals = new LinkedList<>();
-			
-			
+
 			while(portalstSet.next()){
-				Planet planet = new Main().new Planet(resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("i"));
+				Planet planet = new Main().new Planet(portalstSet.getInt("x"), portalstSet.getInt("y"), portalstSet.getInt("i"));
 				portals.add(planet);
 			}
-
 
 			long population = 0;
 			long networth = 0;
@@ -503,7 +501,7 @@ public class Main
 			resultSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE owner_id = " + userID);
 			//test2 = System.nanoTime();
 			//System.out.println("Select planets: " + (double)(test2-test1)/1_000_000_000.0 + " sec.");
-			
+
 			rsmd = resultSet.getMetaData();
 			int colNumber = rsmd.getColumnCount();
 			
@@ -547,7 +545,6 @@ public class Main
 
 			}
 
-			
 			/*0 id colTypes[i]: 4
 			1 x colTypes[i]: 4
 			2 y colTypes[i]: 4
@@ -726,8 +723,7 @@ public class Main
 				//	planetsStatement.addBatch(sql);
 				//}
 
-				
-			
+						
 				//add planet only if something has changed
 				if (//current_population != (int)rowValues[colLocation[0]] ||
 					//max_population != (int)rowValues[colLocation[1]] ||
@@ -793,7 +789,6 @@ public class Main
 				racebonus = 1.0;
 
 			long totalRcPoints = 0;
-
 			for(int i = 0; i < researchNames.length; i++){				
 				long rc = (long) (rowLong.get(researchNames[i][0]) +  1.2 * race_info.get(researchNames[i][1])  * rowInt.get(researchNames[i][2]) * 
 				(100.0 *cmdTickProduction_research + rowLong.get("current_research_funding")/10 + artibonus) / 10000.0 + 
@@ -847,8 +842,7 @@ public class Main
 			//units upkeep
 			//get unit amounts
 			long [] unitsSums = new long[total_units];
-			Statement statement2 = con.createStatement();
-			
+			Statement statement2 = con.createStatement();		
 			for(int z = 0; z < unit_names.length; z++){
 				
 				String s = unit_names[z];
@@ -912,7 +906,7 @@ public class Main
     	    userStatusUpdateStatement.setLong(51, Math.max(0, rowLong.get("minerals") + mineral_income));
     	    userStatusUpdateStatement.setLong(52, Math.max(0,rowLong.get("crystals") + crystal_income));
     	    userStatusUpdateStatement.setLong(53, Math.max(0,rowLong.get("ectrolium") + ectrolium_income));
-					
+				
 			//update research funding
 			userStatusUpdateStatement.setLong(25, (long) Math.max(0, rowLong.get("current_research_funding") * 0.9 ) );	
 			//update total buildings
@@ -930,7 +924,7 @@ public class Main
 			//update networth
 			networth += population * 0.005;
 			networth += (0.001 * totalRcPoints);
-			userStatusUpdateStatement.setLong(54, networth);
+			userStatusUpdateStatement.setLong(54, networth);	
 			userStatusUpdateStatement.addBatch();
 		}
 		main_loop2 = System.nanoTime();
@@ -939,17 +933,24 @@ public class Main
 		planetsUpdateStatement.executeBatch();
 		//planetsStatement.executeBatch();
 		planetsUpdate2 = System.nanoTime();
-		
 		userUpdate1 = System.nanoTime();
 		userStatusUpdateStatement.executeBatch();
 		userUpdate2 = System.nanoTime();
 		con.commit();
 		}
 		catch (Exception e) {
+			   try
+				{
+					con.rollback();
+				}
+				catch (SQLException ex)
+				{
+					ex.printStackTrace();
+				}
 				
 				System.out.println("exception " +  e.getMessage());
 		}
-			 
+		 
 		long endTime = System.nanoTime();
 		
 		Clock clock = Clock.systemDefaultZone();

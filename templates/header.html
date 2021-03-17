@@ -15,6 +15,7 @@
 	}
 	window.onload = function() {
 		formatResources({{status.energy}}, {{status.minerals}}, {{status.crystals}}, {{status.ectrolium}});
+		startTime();
 	};
 
 	function numberFormatter(num) {
@@ -46,14 +47,14 @@
 </script>
 
 <style>
-/* width>= 836px - normal desctop mode
+<!-- width>= 836px - normal desctop mode
 	width < 836px and width > 660 still show side menu, but change the appearence of header, dont top show meny yet
 	width <= 660 full mobile version
-*/
+-->
 
 
 @media all and (max-width: 660px){
-/*defined in base, need to clean this all up, but carefully, this shit breaks easily and mayconflict with @media on base page" */
+<!--defined in base, need to clean this all up, but carefully, this shit breaks easily and mayconflict with @media on base page" -->
 }
 
 @media all and (min-width: 661px) and (max-width: 837px) {
@@ -272,7 +273,7 @@
 				Networth : {{status.networth}}
 			</div>
 			<div class = "menu_mid_align">
-				Ticks : <span id="headerTime">
+				Ticks : <span id="headerTime">test</span>
 			</div>
 			<div class = "menu_right_align">
 				Population : {{status.population}}
