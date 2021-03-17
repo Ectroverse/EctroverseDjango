@@ -13,7 +13,35 @@
 			document.getElementById('mobilemenu').style.display = "block";
 			}
 	}
+	window.onload = function() {
+		formatResources({{status.energy}}, {{status.minerals}}, {{status.crystals}}, {{status.ectrolium}});
+	};
 
+	function numberFormatter(num) {
+		ans = num;
+		if(Math.abs(num) > 999999999999){
+			ans = Math.floor(Math.sign(num)*(Math.abs(num)/100000000000)) /10 + 't'
+		}
+		else if(Math.abs(num) > 999999999){
+			ans = Math.floor(Math.sign(num)*(Math.abs(num)/100000000)) /10 + 'b'
+		}	
+		else if(Math.abs(num) > 999999){
+			ans = Math.floor(Math.sign(num)*(Math.abs(num)/100000)) /10 + 'm'
+		}		
+		else if (Math.abs(num) > 999){
+			ans = Math.floor(Math.sign(num)*(Math.abs(num)/100)) /10 + 'k'
+		}
+		return ans;
+	}
+	
+	function formatResources(energy, minerals, crystals, ectrolium){
+		document.getElementById('energy').innerHTML = numberFormatter(energy);
+		document.getElementById('minerals').innerHTML = numberFormatter(minerals);
+		document.getElementById('crystals').innerHTML = numberFormatter(crystals);
+		document.getElementById('ectrolium').innerHTML = numberFormatter(ectrolium);
+	}
+
+	
 
 </script>
 
@@ -196,14 +224,14 @@
 </head>
 
 
-<body>
+<body >
 
 	<div class="menu_containermob content-mobile">
 			<div class="mob_menu_left_align">
 				<div class="content-mobile-menu"><input type="button" value="Menu" onclick="showMenu()" ></div>
 				<div id="mobilemenu" class="mobdrop mobilemenu" style="display: none;">
 					<ul>
-					<li><a href="/headquarters">Headquarters</a></li>
+					<li><a href="/headquarters">Headquarters </a></li>
 					<li><a href="/council">Council</a></li>
 					<li><a href="/units">Units</a></li>
 					<li><a href="/planets">Planets</a></li>
@@ -290,16 +318,16 @@
 	<div class="menu_container_footer_leftmob"></div>
 	<div class="menu_container_footer_midmob">
 		<div class = "menu_leftmob1_align">
-			<img src="../static/pr0.gif" alt="Energy"> {{status.energy}}
+			<img src="../static/pr0.gif" alt="Energy">  <span id="energy"></span> 
 		</div>
 		<div class = "menu_leftmob2_align">
-			<img src="../static/pr1.gif" alt="Mineral"> {{status.minerals}}
+			<img src="../static/pr1.gif" alt="Mineral">  <span id="minerals"></span>
 		</div>
 		<div class = "menu_rightmob1_align">
-			<img src="../static/pr2.gif" alt="Crystal"> {{status.crystals}}
+			<img src="../static/pr2.gif" alt="Crystal">  <span id="crystals"></span> 
 		</div>
 		<div class = "menu_rightmob2_align">
-			<img src="../static/pr3.gif" alt="Ectrolium"> {{status.ectrolium}}
+			<img src="../static/pr3.gif" alt="Ectrolium">  <span id="ectrolium"></span>
 		</div>
 	</div>
 	<div class="menu_container_footer_right"></div>
