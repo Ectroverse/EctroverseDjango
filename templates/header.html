@@ -14,7 +14,7 @@
 			}
 	}
 	window.onload = function() {
-		formatResources({{status.energy}}, {{status.minerals}}, {{status.crystals}}, {{status.ectrolium}});
+		formatResources({{status.energy}}, {{status.minerals}}, {{status.crystals}}, {{status.ectrolium}}, {{status.networth}});
 		startTime();
 	};
 
@@ -35,11 +35,12 @@
 		return ans;
 	}
 	
-	function formatResources(energy, minerals, crystals, ectrolium){
+	function formatResources(energy, minerals, crystals, ectrolium, networth){
 		document.getElementById('energy').innerHTML = numberFormatter(energy);
 		document.getElementById('minerals').innerHTML = numberFormatter(minerals);
 		document.getElementById('crystals').innerHTML = numberFormatter(crystals);
 		document.getElementById('ectrolium').innerHTML = numberFormatter(ectrolium);
+		document.getElementById('networth').innerHTML = numberFormatter(networth);
 	}
 
 	
@@ -260,8 +261,8 @@
 				</div>
 
 			</div>
-			<div class="mob_menu_mid_align">Next tick : </div>
-			<div class="mob_menu_right_align">Networth : {{status.networth}}</div>
+			<div class="mob_menu_mid_align">Next tick : <span id="headerTime1"></span> </div>
+			<div class="mob_menu_right_align">Networth : <span id="networth"></span> </div>
 			<div class="hide_pop "><div class="mob_menu_right_align">Population: {{status.population}}</div></div>
 	</div>
 
@@ -273,7 +274,7 @@
 				Networth : {{status.networth}}
 			</div>
 			<div class = "menu_mid_align">
-				Ticks : <span id="headerTime">test</span>
+				Next tick  : <span id="headerTime2"></span>
 			</div>
 			<div class = "menu_right_align">
 				Population : {{status.population}}

@@ -147,7 +147,8 @@ body
   m_left = 0;
   s_left = 10 - (s % 10);
   //s_left = fixTimeDigits(s_left);
-  document.getElementById('headerTime').innerHTML = s_left;
+  document.getElementById('headerTime1').innerHTML = s_left;
+  document.getElementById('headerTime2').innerHTML = s_left;
   m_left + ":" + s_left;
   var t = setTimeout(startTime, 10);
 }
