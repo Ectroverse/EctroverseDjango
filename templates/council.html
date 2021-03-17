@@ -2,31 +2,44 @@
 
 {% block content %}
 
+<style>
+#content-desktop {display: block;}
+#content-mobile {display: none;}
+
+@media screen and (max-width: 837px) {
+
+#content-desktop {display: none;}
+#content-mobile {display: block;}
+
+}
+
+</style>
+
 
 <br>
 <!--
 if(empired.taxation)
 <i>You Prime Minister has set a taxation level of <span id="counciltax">%.02f</span>%%, this is automaticly deducted from your production.</i>", ( empired.taxation * 100.0 ) );
 -->
+<div id="content-desktop">
 
-<table width="95%"><tr><td width="48%%" align="center" valign="top"><table>
-<tr><td><b>Energy</b></td><td>&nbsp;</td></tr>
-<tr><td>Production</td><td align="right" id="energyproduction">+{{status.energy_production}}</td></tr>
-<!--
-if( maind.infos[INFOS_ENERGY_TAX] )
-	<tr><td>Taxation</td><td align="right" id="energytax">-%lld</td></tr>
--->
-<tr><td>Decay</td><td align="right" id="energydecay">-{{status.energy_decay}}</td></tr>
-<tr><td>Buildings upkeep</td><td align="right" id="buildingupkeep">-{{status.buildings_upkeep}}</td></tr>
-<tr><td>Units upkeep</td><td align="right" id="unitupkeep">-{{status.units_upkeep}}</td></tr>
-<tr><td>Portals upkeep</td><td align="right" id="portalsupkeep">-{{status.portals_upkeep}}</td></tr>
-<tr><td>Population reduction</td><td align="right" id="populationreduction">+{{status.population_upkeep_reduction}}</td></tr>
-{% if status.race == 'WK' %}
-	<tr><td>Interest</td><td align="right" id="energyinterest">+{{status.energy_interest}}</td></tr>
-{% endif %}
-<tr><td>Energy income</td><td align="right" id="energyincome" {% if status.energy_income < 0 %} style="color:red"> {% else %}>+{% endif %}{{status.energy_income}}</td></tr>
-</table><br></td><td width="45%%" align="center" valign="top"><table>
-
+	<table width="95%"><tr><td width="48%%" align="center" valign="top"><table>
+	<tr><td><b>Energy</b></td><td>&nbsp;</td></tr>
+	<tr><td>Production</td><td align="right" id="energyproduction">+{{status.energy_production}}</td></tr>
+	<!--
+	if( maind.infos[INFOS_ENERGY_TAX] )
+		<tr><td>Taxation</td><td align="right" id="energytax">-%lld</td></tr>
+	-->
+	<tr><td>Decay</td><td align="right" id="energydecay">-{{status.energy_decay}}</td></tr>
+	<tr><td>Buildings upkeep</td><td align="right" id="buildingupkeep">-{{status.buildings_upkeep}}</td></tr>
+	<tr><td>Units upkeep</td><td align="right" id="unitupkeep">-{{status.units_upkeep}}</td></tr>
+	<tr><td>Portals upkeep</td><td align="right" id="portalsupkeep">-{{status.portals_upkeep}}</td></tr>
+	<tr><td>Population reduction</td><td align="right" id="populationreduction">+{{status.population_upkeep_reduction}}</td></tr>
+	{% if status.race == 'WK' %}
+		<tr><td>Interest</td><td align="right" id="energyinterest">+{{status.energy_interest}}</td></tr>
+	{% endif %}
+	<tr><td>Energy income</td><td align="right" id="energyincome" {% if status.energy_income < 0 %} style="color:red"> {% else %}>+{% endif %}{{status.energy_income}}</td></tr>
+	</table><br></td><td width="45%%" align="center" valign="top"><table>
 
 <tr><td><b>Resources</b></td><td>&nbsp;</td></tr>
 <tr><td>Mineral produced</td><td align="right" id="mineralproduction">+{{status.mineral_production}}</td></tr>
@@ -99,7 +112,7 @@ if( maind.infos[INFOS_ECTROLIUM_TAX] ) {
     <td></td>
     <td><input type="submit" value="Cancel"></td>
 </tr></table></form>
-	
+
 <br><i>Summary</i><br>
 {% if not constructions %}
 No Buildings Under Construction
@@ -146,4 +159,143 @@ for( a = usums[CMD_UNIT_NUMUSED+1] = 0; a < CMD_UNIT_NUMUSED; a++ ) {
 
 
 </span></td></tr></table>
+</div>
+
+<div id="content-mobile">
+	<div class="divTable">
+		<div class="divTableBody"
+		<div class="divRow">
+			<div class="divColumn">
+				<table width="95%"><tr><td width="100%" align="center" valign="top"><table>
+				<tr><td><b>Energy</b></td><td>&nbsp;</td></tr>
+				<tr><td>Production</td><td align="right" id="energyproduction">+{{status.energy_production}}</td></tr>
+				<tr><td>Decay</td><td align="right" id="energydecay">-{{status.energy_decay}}</td></tr>
+				<tr><td>Buildings upkeep</td><td align="right" id="buildingupkeep">-{{status.buildings_upkeep}}</td></tr>
+				<tr><td>Units upkeep</td><td align="right" id="unitupkeep">-{{status.units_upkeep}}</td></tr>
+				<tr><td>Portals upkeep</td><td align="right" id="portalsupkeep">-{{status.portals_upkeep}}</td></tr>
+				<tr><td>Population reduction</td><td align="right" id="populationreduction">+{{status.population_upkeep_reduction}}</td></tr>
+				{% if status.race == 'WK' %}
+					<tr><td>Interest</td><td align="right" id="energyinterest">+{{status.energy_interest}}</td></tr>
+				{% endif %}
+				<tr><td>Energy income</td><td align="right" id="energyincome" {% if status.energy_income < 0 %} style="color:red"> {% else %}>+{% endif %}{{status.energy_income}}</td></tr>
+				</table></table><br>
+			</div>
+		</div>
+		<div class="divRow">
+			<div class="divColumn">
+			<table width="95%"><tr><td width="100%" align="center" valign="top"><table>
+			<tr><td><b>Resources</b></td><td>&nbsp;</td></tr>
+			<tr><td>Mineral produced</td><td align="right" id="mineralproduction">+{{status.mineral_production}}</td></tr>
+			{% if status.race == 'WK' %}
+				<tr><td>Mineral interest</td><td align="right" id="mineralinterest">+{{status.mineral_interest}}</td></tr>
+			{% endif %}
+			<tr><td>Mineral income</td><td align="right" id="mineralincome">+{{status.mineral_income}}</td></tr>
+			<tr><td>Crystal production</td><td align="right" id="crystalproduction">+{{status.crystal_production}}</td></tr>
+			<tr><td>Crystal decay</td><td align="right" id="crystaldecay">-{{status.crystal_decay}}</td></tr>
+			{% if status.race == 'WK' %}
+				<tr><td>Crystal interest</td><td align="right" id="crystalinterest">+{{status.crystal_interest}}</td></tr>
+			{% endif %}
+			<tr><td>Crystal income</td><td align="right" id="crystalincome" {% if status.crystal_income < 0 %} style="color:red"> {% else %}>+{% endif %}{{status.crystal_income}}</td></tr>
+			<tr><td>Ectrolium produced</td><td align="right" id="ectroliumproduction">+{{status.ectrolium_production}}</td></tr>
+			{% if status.race == 'WK' %}
+				<tr><td>Ectrolium interest</td><td align="right" id="ectroliuminterest">+{{status.ectrolium_interest}}</td></tr>
+			{% endif %}
+			<tr><td>Ectrolium income</td><td align="right" id="ectroliumincome">+{{status.ectrolium_income}}</td></tr>
+			</table></table>
+			</div>
+		</div>
+		<br>
+		<div class="divRow">
+			<div class="divColumn">
+				<table width="95%"><tr><td width="100%" align="center" valign="top"><table>
+					<b>Buildings</b>
+					<br>
+					<table>
+					<tr><td>Solar Collectors</td><td>&nbsp;&nbsp;</td><td align="right">{{status.total_solar_collectors}}</td></tr>
+					<tr><td>Fission Reactors</td><td>&nbsp;&nbsp;</td><td align="right">{{status.total_fission_reactors}}</td></tr>
+					<tr><td>Mineral Plants</td><td>&nbsp;&nbsp;</td><td align="right">{{status.total_mineral_plants}}</td></tr>
+					<tr><td>Crystal Laboratories</td><td>&nbsp;&nbsp;</td><td align="right">{{status.total_crystal_labs}}</td></tr>
+					<tr><td>Refinement Stations</td><td>&nbsp;&nbsp;</td><td align="right">{{status.total_refinement_stations}}</td></tr>
+					<tr><td>Cities</td><td>&nbsp;&nbsp;</td><td align="right">{{status.total_cities}}</td></tr>
+					<tr><td>Research Centers</td><td>&nbsp;&nbsp;</td><td align="right">{{status.total_research_centers}}</td></tr>
+					<tr><td>Defense Satellites</td><td>&nbsp;&nbsp;</td><td align="right">{{status.total_defense_sats}}</td></tr>
+					<tr><td>Shield Network</td><td>&nbsp;&nbsp;</td><td align="right">{{status.total_shield_networks}}</td></tr>
+					<tr><td>Portals</td><td>&nbsp;&nbsp;</td><td align="right">{{status.total_portals}}</td></tr>
+					<tr><td>Total</td><td>&nbsp;&nbsp;</td><td align="right">{{status.total_buildings}}</td></tr>
+					</table><br><br>
+
+
+					<b>Buildings under construction</b><br><span id="council_build_que">
+					<form name="cancelbuild" id="cancel_build" action="/cancelbuild"><table>
+					{% for construction in constructions %}
+					    <tr><td>
+					    {{construction.n}} {{construction.get_building_type_display}}
+					    in {{construction.ticks_remaining}} weeks
+					    at <a href="/planet{{construction.planet.id}}">{{construction.planet.x}},{{construction.planet.y}}:{{construction.planet.i}}</a>
+					    </td><td><input type="checkbox" name="{{construction.id}}"></td></tr>
+					{% endfor %}
+					<tr>
+					    <td></td>
+					    <td><div class="href" onclick="javascript:toggle_form('cancel_build');">Toggle</font></div></td>
+					</tr>
+					<tr>
+					    <td></td>
+					    <td><input type="submit" value="Cancel"></td>
+					</tr></table></form>
+
+					<br><i>Summary</i><br>
+					{% if not constructions %}
+					No Buildings Under Construction
+					{% else %}
+					    {% for building, num in build_list.items %}
+					    {{num}} {{building}}<br>
+					    {% endfor %}
+					{% endif %}
+					</span></td></table>
+			</div>
+		</div>
+		<div class="divRow">
+			<div class="divColumn">
+				<table width="95%"><tr><td width="100%" align="center" valign="top"><table>
+					<b>Units</b><br><table>
+
+					<!--
+					for unit in unit-type
+						<tr><td>%s</td><td>&nbsp;</td><td align="right" id="UNIT-NAME">%lld</td></tr>
+					-->
+
+
+					<tr><td>Total</td><td>&nbsp;</td><td id="untnum">%lld</td></tr></table><br><br>
+					<b>Units under construction</b><br><span id="council_unit_que"><form name="cancelunit" id="cancel_units" action="cancelbuild"><table>
+
+					<!--
+					for unit-under-construction in list-of-unit-construction
+						<tr><td>%lld %s in %d weeks</td><td><input type="checkbox" name="b%d"></td></tr>", (long long)build[a].quantity, cmdUnitName[ build[a].type & 0xFFFF ], build[a].time, a);
+					-->
+
+
+					<tr><td></td><td><div class="href" onclick="javascript:toggle_form('cancel_units');">Toggle</font></div></td></tr>
+					<tr><td></td><td><input type="submit" value="Cancel"></td></tr></table></form>
+
+
+					<br><i>Summary</i><br>
+					<!--
+					for( a = usums[CMD_UNIT_NUMUSED+1] = 0; a < CMD_UNIT_NUMUSED; a++ ) {
+						if( !( usums[a] ) )
+							continue;
+						%lld %s<br>", (long long)usums[a], cmdUnitName[a] );
+						usums[CMD_UNIT_NUMUSED+1] += usums[a];
+					}
+					-->
+					<i>Total of X units under construction</i><br>
+
+
+					</span></td></tr></table>
+			</div>
+		</div>
+	</div>
+	</div>
+</div>
+
+
 {% endblock %}

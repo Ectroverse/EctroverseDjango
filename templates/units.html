@@ -8,7 +8,7 @@
 #content-desktop {display: block;}
 #content-mobile {display: none;}
 
-@media screen and (max-width: 660px) {
+@media screen and (max-width: 837px) {
 
 #content-desktop {display: none;}
 #content-mobile {display: block;}
@@ -16,7 +16,6 @@
 }
 
 </style>
-<form action="/units" method="POST">
 
   <div id="content-mobile">
   {% if msg %}
@@ -24,52 +23,47 @@
       {{msg|safe}}
       <br>
   {% endif %}
+  <form action="/units" method="POST">
   {% csrf_token %}
-  <table cellspacing="6" cellpadding="0" width="90%" border="0" align="center">
-    <br>
-    <a href="info?2fix&amp;type=units&amp;request=ajax" rel="ajaxpanel" data-loadtype="ajax">Build Units</a>
-    <br>
-      <tr>
-        <td ><b>Unit</b></td>
-        <td ><b>Cost</b></td>
-        <td ><b>Owned</b></td>
-        <td ><b>Build</b></td>
-      </tr>
-
-
-
-      {% for unit in unit_dict %}
-        {% if unit.cost == None %}
-            <tr>
-    		        <td style="padding:5px" valign="top"><font color="#FFFFFF">{{unit.label}}</font><br>
-                  <img src="{% static '/units/'|add:unit.label|add:'.png' %}" width="50" height="50" title ="{{unit.label}}" style="padding-top :5px;"></td>
-                  <td style="padding:5px" valign="top" nowrap><font color="#FF0000">Unavailable<br>Tech too low</font></td>
-                  <td style="padding:5px" valign="top" align="center">{{unit.owned}}</td>
-                  <td style="padding:10px" valign="top">&nbsp;</td>
-            </tr>
-    	   {% else %}
-            <tr>
-    		        <td style="padding:5px" valign="top"><font color="#FFFFFF">{{unit.label}}</font><br>
-		                <img src="{% static '/units/'|add:unit.label|add:'.png' %}" width="50" height="50" title ="{{unit.label}}" style="padding-top :5px;"></td>
-                    <td style="padding:5px" valign="top" nowrap>
-                      {% for resource in unit.cost %}
-                      {% if resource.value > 0 %}
-                      {{resource.value}} {{resource.name}} <br>
-                      {% endif %}
-                      {% endfor %}
-                      {% if unit.penalty > 0 %}
-                      <font color="#FF2020">Tech : +{{unit.penalty}}% costs</font><br>
-          {% endif %}
-                    </td>
-                    <td style="padding:5px" valign="top" align="center">{{unit.owned}}</td>
-                    <td style="padding:5px" valign="top" align="center"><input type="text" pattern="[0-9]+" maxlength="9" name="{{unit.i}}" size="8"></td>
-            </tr>
-          {% endif %}
+  <div class="divTable">
+    <div class="divTableBody"
+    <div class="divRow">
+      <div class="divColumn">Units</div>
+      <div class="divColumn">Cost</div>
+      <div class="divColumn">Owned</div>
+      <div class="divColumn">Build</div>
+    </div>
+    {% for unit in unit_dict %}
+      {% if unit.cost == None %}
+        <div class="divRow">
+          <div class="divColumn"><font color="#FFFFFF">{{unit.label}}</font><br>
+            <img src="{% static '/units/'|add:unit.label|add:'.png' %}" width="50" height="50" title ="{{unit.label}}" style="padding-top :5px;"></div>
+          <div class="divColumn"><font color="#FF0000">Unavailable<br>Tech too low</font></div>
+          <div class="divColumn">{{unit.owned}}</div>
+          <div class="divColumn">&nbsp;</div>
+        </div>
+      {% else %}
+        <div class="divRow">
+          <div class="divColumn"><font color="#FFFFFF">{{unit.label}}</font><br>
+            <img src="{% static '/units/'|add:unit.label|add:'.png' %}" width="50" height="50" title ="{{unit.label}}" style="padding-top :5px;"></div>
+            <div class="divColumn">
+            {% for resource in unit.cost %}
+              {% if resource.value > 0 %}
+                {{resource.value}} {{resource.name}} <br>
+              {% endif %}
+            {% endfor %}
+            {% if unit.penalty > 0 %}
+                <font color="#FF2020">Tech : +{{unit.penalty}}% costs</font><br>
+            {% endif %}</div>
+          <div class="divColumn">{{unit.owned}}</div>
+          <div class="divColumn"><input type="text" pattern="[0-9]+" maxlength="9" name="{{unit.i}}" size="5"></div>
+        </div>
+        {% endif %}
 
     {% endfor %}
-    </table>
-    <br>
-<button type="submit" formmethod="POST">Build</button>
+    </div>
+    <button type="submit" formmethod="POST">Build</button>
+  </form>
   </div>
 
 
@@ -79,7 +73,7 @@
       {{msg|safe}}
       <br>
   {% endif %}
-  <form action="/units" method="POST">
+    <form action="/units" method="POST">
   {% csrf_token %}
   <table cellspacing="6" cellpadding="0" width="90%" border="0" align="center">
 
@@ -130,10 +124,10 @@
   </table>
   <br>
 <button type="submit" formmethod="POST">Build</button>
-
-  </div>
-
 </form>
+  </div>
+  <br>
+
 
 
 

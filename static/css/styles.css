@@ -57,7 +57,7 @@ strikeout {
 	text-align:center;
 }
 .table {
-	width: 80%;
+	width: 90%;
 	border-spacing: 5px;
 	border-width: 0px;
 	padding-top: 0px;
@@ -294,7 +294,7 @@ font-color: white;
         margin: 0 auto;
         text-align: center;
         font-size: 15px;
-		max-width: 90%;
+		max-width: 100%;
     }
 
 
@@ -430,13 +430,13 @@ font-color: white;
 
 .left_box{
   width: 50%;
-  float: left;
+	vertical-align: left;
   margin:10px auto;
 }
 
 .right_box{
-  width: 50%;
-  float: right;
+  width: 50;
+	vertical-align: right;
   margin:10px auto;
 }
 
@@ -457,6 +457,27 @@ font-color: white;
 	width: 100%;
 	margin:20 auto;
 	text-align: center;
+}
+
+.hq{
+	display:inline-flex;
+	gap: 20px;
+}
+
+.divTable{
+	display: table;
+	width: 100%;
+}
+.divRow {
+	display: table-row;
+}
+
+.divColumn {
+	display: table-cell;
+	padding: 3px 10px;
+}
+.divTableBody {
+	display: table-row-group;
 }
 
 
@@ -626,4 +647,177 @@ tr.spaceUnder>td {
 
 .spaceUnder{
 margin-bottom: 10px;
+}
+
+.nav_head{
+ position: relative;
+}
+
+.nav_navi{
+ position: relative;
+}
+
+.menu_container {
+	width:100%;
+	height: 63px;
+	position: relative;
+	min-width: 360px;
+}
+
+
+.menu_left_align{
+	position: relative;
+	width: 33%;
+	display: inline;
+	height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 3px;
+	overflow: hidden;
+}
+
+.menu_mid_align{
+	position: relative;
+	width: 33%;
+	display: inline;
+	height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 3px;
+	overflow: hidden;
+}
+
+.menu_right_align{
+	position: relative;
+	width: 33%;
+	display: inline;
+	height: 35px;
+	float: left;
+	color:white;
+	text-align: center;
+	top: 3px;
+	overflow: hidden;
+}
+
+.mob_menu_left_align{
+	position: relative;
+	width: 33%;
+	display: inline;
+	height: 21;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 3px;
+	overflow: hidden;
+}
+
+.mob_menu_mid_align{
+	position: relative;
+	width: 33%;
+	display: inline;
+	height: 21;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 3px;
+	overflow: hidden;
+}
+
+.mob_menu_right_align{
+	position: relative;
+	width: 33%;
+	display: inline;
+	height: 21;
+	float: left;
+	color:white;
+	text-align: center;
+	top: 3px;
+	overflow: hidden;
+}
+
+.menu_left_mobile{
+	position: relative;
+	width: 33%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 4px;
+	/*font-size: max(2vw, 5px);*/
+}
+
+.menu_cn1_mobile{
+	position: relative;
+	width: 33%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 4px;
+	/*font-size: max(2vw, 6px);*/
+}
+
+.menu_right_mobile{
+	position: relative;
+	width: 34%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 4px;
+	/*font-size: max(2vw, 6px);*/
+}
+
+
+.menu_leftmob1_align{
+	position: relative;
+	width: 25%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 10px;
+	/*font-size: max(2vw, 6px);*/
+}
+
+.menu_leftmob2_align{
+	position: relative;
+	width: 25%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: center;
+	top: 10px;
+	/*font-size: max(2vw, 6px);*/
+}
+
+.menu_rightmob1_align{
+	position: relative;
+	width: 25%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: left;
+	top: 10px;
+	/*font-size: max(2vw, 6px);*/
+}
+
+.menu_rightmob2_align{
+	position: relative;
+	width: 25%;
+	display: inline;
+	max-height: 35px;
+	float:left;
+	color:white;
+	text-align: left;
+	top: 10px;
+	/*font-size: max(2vw, 6px);*/
 }
