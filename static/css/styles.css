@@ -430,13 +430,13 @@ font-color: white;
 
 .left_box{
   width: 50%;
-	vertical-align: left;
+	float: left;
   margin:10px auto;
 }
 
 .right_box{
-  width: 50;
-	vertical-align: right;
+  width: 50%;
+	float: right;
   margin:10px auto;
 }
 
@@ -476,6 +476,7 @@ font-color: white;
 	display: table-cell;
 	padding: 3px 10px;
 }
+
 .divTableBody {
 	display: table-row-group;
 }
