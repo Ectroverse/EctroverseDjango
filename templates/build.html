@@ -31,6 +31,9 @@ The overbuilding penalty for this planet is <font color="#FF0000"><b>+{{planet.o
     <td><b>&nbsp;&nbsp;Owned&nbsp;&nbsp;</b></td>
     <td><b>Build</b></td>
 </tr>
+
+
+
 {% for cost in costs %}
 <tr style="line-height: 1;">
 	<td><img src="{% static '/buildings/'|add:cost.name|add:'.png' %}" width="70" height="70" title ="{{cost.name}}"></td>
@@ -55,7 +58,7 @@ The overbuilding penalty for this planet is <font color="#FF0000"><b>+{{planet.o
             {% endif %}
         {% endfor %}
         {% if cost.penalty > 0 %}
-            <font color="#FF2020">Tech : +{{cost.penalty}}% costs</font><br>
+            <font color="#FF2020">Tech : +{{cost.penalty}}% costs</font><br>	
         {% endif %}
         </td>
         <td valign="top" align="center">{{cost.owned}}</td>

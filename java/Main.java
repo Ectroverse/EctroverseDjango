@@ -8,6 +8,7 @@ import java.util.concurrent.*;
 public class Main
 {
 	//some constants temporarily written here, fetch them from app/constants.py later
+	private static final int news_delete_ticks = 288; //teo days in 10min server
     private static final int total_units = 13;
 	private static final int population_size_factor  = 200;
 	private static final double energy_decay_factor = 0.005;
@@ -603,16 +604,13 @@ public class Main
 			//update planets using postgres procedure
 
 			
-			//execute stored procedure
+			//execute stored procedure -- update planets population
 			String runSP = "CALL updatePlanets(?, ?, ?); ";
 			
 			CallableStatement callableStatement = con.prepareCall(runSP); 
-			System.out.println("rc pop " + (1.00 + 0.01 * rowInt.get("research_percent_population")));
-			
 			callableStatement.setDouble(1, (1.00 + 0.01 * rowInt.get("research_percent_population"))); //research factor
 			callableStatement.setDouble(2, race_info.get("pop_growth")); //race bonus for pop growth
 			
-			System.out.println("pop_growth " + race_info.get("pop_growth"));
 			
 			callableStatement.setInt(3, userID); //user id
 			callableStatement.executeUpdate();
@@ -984,6 +982,14 @@ public class Main
 		
 		statement.execute(updateEmpireRanks);
 		
+		//purge old news
+		String deletePersonalNews = "DELETE FROM app_news WHERE is_personal_news = false AND " + tick_nr + "  - tick_number > " + news_delete_ticks + " ;"; 
+		String deleteEmpireNews =  "DELETE FROM app_news WHERE is_personal_news = true AND is_read = true AND "+
+									tick_nr + "  - tick_number > " + news_delete_ticks + " ;"; 
+															
+		statement.execute(deletePersonalNews);		
+		statement.execute(deleteEmpireNews);		
+		
 		
 		con.commit();
 		}
@@ -1016,7 +1022,8 @@ public class Main
 	}
 	
     private static double calc_overbuild(int size, int buildings) {
-    	return 0;
+		if (buildings <= size) return 1.0;
+    	return Math.pow(((double)buildings/(double)size),2);
     }
 	
 	private static double battlePortalCalc(int x, int y, LinkedList<Planet> portals, int portalResearch){

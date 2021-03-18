@@ -445,12 +445,11 @@ def build(request, planet_id):
     for building in building_list:
         # Below doesn't include overbuild, it gets added below
         cost_list, penalty = building.calc_cost(1, status.research_percent_construction, status.research_percent_tech)
-
         # Add resource names to the cost_list, for the sake of the for loop in the view
         if cost_list:  # Remember that cost_list will be None if the tech is too low
             cost_list_labeled = []
             for i in range(5):  # 4 types of resources plus time
-                cost_list_labeled.append({"value": int(np.ceil(cost_list[i] * planet.overbuilt)),
+                cost_list_labeled.append({"value": int(np.ceil(cost_list[i] * max(1, planet.overbuilt))),
                                           "name": resource_names[i]})
         else:
             cost_list_labeled = None  # Tech was too low
