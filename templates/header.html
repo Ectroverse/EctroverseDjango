@@ -14,7 +14,7 @@
 			}
 	}
 	window.onload = function() {
-		formatResources({{status.energy}}, {{status.minerals}}, {{status.crystals}}, {{status.ectrolium}}, {{status.networth}});
+		formatResources({{status.energy}}, {{status.minerals}}, {{status.crystals}}, {{status.ectrolium}}, {{status.networth}}, {{status.population}});
 		startTime();
 	};
 
@@ -35,12 +35,13 @@
 		return ans;
 	}
 	
-	function formatResources(energy, minerals, crystals, ectrolium, networth){
+	function formatResources(energy, minerals, crystals, ectrolium, networth, population){
 		document.getElementById('energy').innerHTML = numberFormatter(energy);
 		document.getElementById('minerals').innerHTML = numberFormatter(minerals);
 		document.getElementById('crystals').innerHTML = numberFormatter(crystals);
 		document.getElementById('ectrolium').innerHTML = numberFormatter(ectrolium);
 		document.getElementById('networth').innerHTML = numberFormatter(networth);
+		document.getElementById('population').innerHTML = numberFormatter(population);
 	}
 
 	
@@ -263,7 +264,7 @@
 			</div>
 			<div class="mob_menu_mid_align">Next tick : <span id="headerTime1"></span> </div>
 			<div class="mob_menu_right_align">Networth : <span id="networth"></span> </div>
-			<div class="hide_pop "><div class="mob_menu_right_align">Population: {{status.population}}</div></div>
+			<div class="hide_pop "><div class="mob_menu_right_align">Population: <span id="population"></span> </div></div>
 	</div>
 
 	<div class="menu_container content-desktop">

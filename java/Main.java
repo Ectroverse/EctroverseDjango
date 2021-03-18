@@ -9,7 +9,7 @@ public class Main
 {
 	//some constants temporarily written here, fetch them from app/constants.py later
     private static final int total_units = 13;
-	private static final int population_size_factor  = 20;
+	private static final int population_size_factor  = 200;
 	private static final double energy_decay_factor = 0.005;
 	private static final double crystal_decay_factor = 0.02;
 	private static final int upkeep_solar_collectors = 0;
@@ -27,7 +27,7 @@ public class Main
 	private static final int building_production_mineral = 1;
 	private static final int building_production_crystal = 1;
 	private static final int building_production_ectrolium = 1;
-	private static final int building_production_cities = 1000;
+	private static final int building_production_cities = 10000;
 	private static final int building_production_research = 6;
 	private static final double [] unit_upkeep = {2.0, 1.6, 3.2, 12.0, 18.0, 0.4, 0.6, 2.8, 0.0, 0.8, 0.8, 2.4, 60.0};
 	
@@ -203,7 +203,7 @@ public class Main
 				+ " UPDATE \"PLANET\" SET max_population = (" + 
 				+ building_production_cities + " * cities +  size * " + population_size_factor + ") *pop_rc WHERE owner_id = user_id;" 
 				+ " UPDATE \"PLANET\" SET current_population = "
-				+ "least(current_population * pop_rc * race_pop_growth, max_population) WHERE owner_id = user_id;" 
+				+ "greatest(least(current_population + current_population * pop_rc * race_pop_growth, max_population),100) WHERE owner_id = user_id;" 
 				+ " $$;";
 			
 			Statement statementSP = tmpCon.createStatement();
@@ -607,8 +607,13 @@ public class Main
 			String runSP = "CALL updatePlanets(?, ?, ?); ";
 			
 			CallableStatement callableStatement = con.prepareCall(runSP); 
+			System.out.println("rc pop " + (1.00 + 0.01 * rowInt.get("research_percent_population")));
+			
 			callableStatement.setDouble(1, (1.00 + 0.01 * rowInt.get("research_percent_population"))); //research factor
 			callableStatement.setDouble(2, race_info.get("pop_growth")); //race bonus for pop growth
+			
+			System.out.println("pop_growth " + race_info.get("pop_growth"));
+			
 			callableStatement.setInt(3, userID); //user id
 			callableStatement.executeUpdate();
 			test2 = System.nanoTime();
@@ -790,25 +795,52 @@ public class Main
 
 			long totalRcPoints = 0;
 			for(int i = 0; i < researchNames.length; i++){				
-				long rc = (long) (rowLong.get(researchNames[i][0]) +  1.2 * race_info.get(researchNames[i][1])  * rowInt.get(researchNames[i][2]) * 
-				(100.0 *cmdTickProduction_research + rowLong.get("current_research_funding")/10 + artibonus) / 10000.0 + 
-				1.2 * (racebonus * rowLong.get("population") / (600.0*100.0) ));
+				long rc = (long) (
+				rowLong.get(researchNames[i][0]) +
+				1.2 * race_info.get(researchNames[i][1])  * rowInt.get(researchNames[i][2])
+				* (cmdTickProduction_research + rowLong.get("current_research_funding")/100 + artibonus +
+				(racebonus * rowLong.get("population") / 6000.0) )  / 100
+				);			
 				
 				rc = Math.max(0, rc);
 				totalRcPoints += rc;
 				userStatusUpdateStatement.setLong(15 + i, rc);
 				Double raceMax = race_info.getOrDefault(researchNames[i][3], 200.0);
 				long nw = rowLong.get("networth");
-				int rcPercent = (int) (raceMax * (1.0 - Math.exp(rc / (-10.0 * nw))));
-				int currPercent = (int) (Math.ceil(rowInt.get(researchNames[i][4])));
+				int rcPercent = (int) Math.floor(raceMax * (1.0 - Math.exp(rc / (-10.0 * nw))));
+				int currPercent = (int) (rowInt.get(researchNames[i][4]));			
 				
-				if (currPercent > rcPercent)
+				if (rcPercent > currPercent )
+					userStatusUpdateStatement.setInt(24 + i, currPercent + 1);
+				else if (rcPercent < currPercent )
 					userStatusUpdateStatement.setInt(24 + i, currPercent - 1);
 				else
-					userStatusUpdateStatement.setInt(24 + i, currPercent + 1);
+					userStatusUpdateStatement.setInt(24 + i, currPercent);
 			}
+			
+			/*
+			" research_points_military   = ? ," + //15
+			" research_points_construction   = ? ," + //16
+			" research_points_tech   = ? ," + //17
+			" research_points_energy    = ? ," + //18
+			" research_points_population   = ? ," + //19
+			" research_points_culture    = ? ," + //20
+			" research_points_operations   = ? ," + //21
+			" research_points_portals    = ? ," + //22
+			" current_research_funding    = ? ," + //23
+			" research_percent_military   = ? ," + //24
+			" research_percent_construction    = ? ," + //25
+			" research_percent_tech            = ? ," + //26
+			" research_percent_energy          = ? ," + //27
+			" research_percent_population      = ? ," + //28
+			" research_percent_culture         = ? ," + //29
+			" research_percent_operations      = ? ," + //30
+			" research_percent_portals         = ? ," + //31
+			
+			*/
+			
+			
 			long current_research_funding  = rowLong.get("current_research_funding") * 9 / 10;
-			userStatusUpdateStatement.setLong(23, current_research_funding);
 
 			//update energy income
 			//race_special_solar_15
@@ -908,7 +940,7 @@ public class Main
     	    userStatusUpdateStatement.setLong(53, Math.max(0,rowLong.get("ectrolium") + ectrolium_income));
 				
 			//update research funding
-			userStatusUpdateStatement.setLong(25, (long) Math.max(0, rowLong.get("current_research_funding") * 0.9 ) );	
+			userStatusUpdateStatement.setLong(23, (long) Math.max(0, rowLong.get("current_research_funding") * 0.9 ) );	
 			//update total buildings
 			userStatusUpdateStatement.setInt(5, total_solar_collectors);
 			userStatusUpdateStatement.setInt(6, total_fission_reactors);
@@ -936,6 +968,23 @@ public class Main
 		userUpdate1 = System.nanoTime();
 		userStatusUpdateStatement.executeBatch();
 		userUpdate2 = System.nanoTime();
+		
+		//update empire ranks
+		String updateEmpireRanks = 
+		"UPDATE app_empire "+
+		"SET numplayers = GroupedUserTable.num_players , "+
+			"planets = GroupedUserTable.sum_planets, "+
+			"networth = sum_networth "+
+		"FROM ( "+
+			"SELECT empire_id, COUNT(id) as num_players ,SUM(num_planets) as sum_planets, SUM(networth) as sum_networth "+
+			"FROM app_userstatus GROUP BY empire_id ) AS GroupedUserTable "+
+		"WHERE "+
+			"app_empire.id = GroupedUserTable.empire_id;";
+		
+		
+		statement.execute(updateEmpireRanks);
+		
+		
 		con.commit();
 		}
 		catch (Exception e) {
