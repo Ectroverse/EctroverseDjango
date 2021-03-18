@@ -6,6 +6,7 @@ import time
 import matplotlib.pyplot as plt
 import random
 from app.map_settings import *
+from django.db import transaction
 
 def random_combination(iterable, r):
     pool = tuple(iterable)
@@ -31,12 +32,18 @@ def fill_system(x,y):
 
 
 class Command(BaseCommand): # must be called command, use file name to name the functionality
+    @transaction.atomic
     def handle(self, *args, **options):
         start_t = time.time()
         Planet.objects.all().delete() # remove all planets
         Empire.objects.all().delete() # remove all empires
         RoundStatus.objects.all().delete()
         Relations.objects.all().delete()
+        News.objects.all().delete()
+        Construction.objects.all().delete()
+        Fleet.objects.all().delete()
+        UnitConstruction.objects.all().delete()
+        Messages.objects.all().delete()
         planet_buffer = [] # MUCH quicker to save them all at once, like 100x faster
         empires_buffer = []
         RoundStatus.objects.create()
@@ -91,11 +98,87 @@ class Command(BaseCommand): # must be called command, use file name to name the 
         Empire.objects.bulk_create(empires_buffer)
         print("Saving planets to db took this many seconds", time.time() - start_tt)
 
+        # reset round user data
+        for status in UserStatus.objects.all():
+
+            Fleet.objects.create(owner=status.user, main_fleet=True)
+
+            status.fleet_readiness = 100
+            status.psychic_readiness = 100
+            status.agent_readiness = 100
+
+            # Loop through user's planets, lines 499 - 608 in cmdtick.c
+            status.population = 0  # clear user's population
+            status.num_planets = 1
+            status.total_solar_collectors = 0
+            status.total_fission_reactors = 0
+            status.total_mineral_plants = 0
+            status.total_crystal_labs = 0
+            status.total_refinement_stations = 0
+            status.total_cities = 0
+            status.total_research_centers = 0
+            status.total_defense_sats = 0
+            status.total_shield_networks = 0
+            status.total_portals = 0
+
+            status.total_buildings = 0
+
+            status.research_points_military = 0
+            status.research_points_construction = 0
+            status.research_points_tech = 0
+            status.research_points_energy = 0
+            status.research_points_population = 0
+            status.research_points_culture = 0
+            status.research_points_operations = 0
+            status.research_points_portals = 0
+
+            status.current_research_funding = 0
+
+            status.research_percent_military = 0
+            status.research_percent_construction = 0
+            status.research_percent_tech = 0
+            status.research_percent_energy = 0
+            status.research_percent_population = 0
+            status.research_percent_culture = 0
+            status.research_percent_operations = 0
+            status.research_percent_portals = 0
+
+
+            status.energy_production = 0
+            status.energy_decay = 0
+            status.buildings_upkeep = 0
+            status.units_upkeep = 0
+            status.population_upkeep_reduction = 0
+            status.portals_upkeep = 0
+            status.population_upkeep_reduction = 0
+
+            status.crystal_production = 0
+            status.crystal_decay = 0
+            status.mineral_production = 0
+            status.ectrolium_production = 0
+
+            status.energy_income = 0
+            status.mineral_income = 0
+            status.crystal_income = 0
+            status.ectrolium_income = 0
+
+            status.energy_interest = 0
+            status.mineral_interest = 0
+            status.crystal_interest = 0
+            status.ectrolium_interest = 0
+            status.energy = 120000
+            status.minerals = 10000
+            status.crystals = 5000
+            status.ectrolium = 5000
+
+            status.networth += 1
+            status.save()
+
 
         # TEMPORARY - assign all planets to admin user, for debugging sake
         # all_planets = Planet.objects.all()
-        all_planets_without_home = Planet.objects.all().filter(home_planet=False)
-        all_planets_without_home.update(owner=User.objects.get(username='admin'))
+        # all_planets_without_home = Planet.objects.all().filter(home_planet=False)
+        # all_planets_without_home.update(owner=User.objects.get(username='admin'))
 
         #Give empire 0 to the admin
         # admin = UserStatus.objects.get(user=User.objects.get(username='admin'))
@@ -108,4 +191,4 @@ class Command(BaseCommand): # must be called command, use file name to name the 
 
         # num_planets = all_planets.count()
         # print("Num planets:", num_planets)
-        print("Generating planets took " + str(time.time() - start_t) + "seconds")
+        print("Generating planetsand resetting users took " + str(time.time() - start_t) + "seconds")

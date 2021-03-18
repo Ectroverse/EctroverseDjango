@@ -605,6 +605,7 @@ public class Main
 
 			
 			//execute stored procedure -- update planets population
+			test1 = System.nanoTime();
 			String runSP = "CALL updatePlanets(?, ?, ?); ";
 			
 			CallableStatement callableStatement = con.prepareCall(runSP); 
@@ -708,6 +709,10 @@ public class Main
                 networth += (int)rowValues[colLocation[26]] * 5.0;
                 networth += (int)rowValues[colLocation[19]] * 1.75; //size
 				int buildingsUnderConstr = (int)rowValues[colLocation[17]] - (total_buildings - (int)rowValues[colLocation[16]]); //total new - total old, change it!! might not work when raze
+				buildingsUnderConstr = Math.max(0 , buildingsUnderConstr);
+				/*
+							case "total_buildings": colLocation[16] = i; break; 
+					case "buildings_under_construction": colLocation[17] = i; break;*/
 				
 				//update player production
 				cmdTickProduction_solar += (building_production_solar * solar_collectors) * (1 + (int)rowValues[colLocation[22]] /100.0);
@@ -719,7 +724,12 @@ public class Main
 				cmdTickProduction_research += building_production_research * research_centers;
 				
 				double overbuilt = (double)(calc_overbuild((int)rowValues[colLocation[19]], total_buildings + buildingsUnderConstr));
+				
                 double overbuilt_percent = (double)((overbuilt-1.0)*100); 
+				
+				System.out.println("(int)rowValues[colLocation[19]]" + (int)rowValues[colLocation[19]]);
+				System.out.println("total_buildings + " +total_buildings +  " buildingsUnderConstr " + buildingsUnderConstr);
+				System.out.println("overbuilt_percent" + overbuilt_percent);
 
 				//if (current_population != (int)rowValues[colLocation[0]]){
 				//	String sql = "UPDATE \"PLANET\"  SET current_population =  " + current_population +" WHERE id = " + planetID ; //19
@@ -1023,7 +1033,7 @@ public class Main
 	
     private static double calc_overbuild(int size, int buildings) {
 		if (buildings <= size) return 1.0;
-    	return Math.pow(((double)buildings/(double)size),2);
+    	return Math.pow((buildings/(double)size),2);
     }
 	
 	private static double battlePortalCalc(int x, int y, LinkedList<Planet> portals, int portalResearch){
