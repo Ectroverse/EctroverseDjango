@@ -103,10 +103,13 @@ def calc_overbuild(planet_size, total_buildings): # include buildings under cons
 
 # Return overbuild multiplier given a certain number of buildings being built, the C code did this in an inefficient for loop
 def calc_overbuild_multi(planet_size, planet_buildings, new_buildings): # planet_buildings just includes existing and under construction
+    if new_buildings == 0:
+        return 0
     ob = min(max(0, planet_size - planet_buildings), new_buildings) # number of slots left on the planet, or N, whichever one is smaller
-    new_buildings -= ob # remove it from N to find what's left to build
-    ob += (sum_of_squares(new_buildings + max(planet_buildings,planet_size)) - sum_of_squares(max(planet_buildings,planet_size))) / (planet_size**2)
-    return ob
+    built = new_buildings - ob # remove it from N to find what's left to build
+    ob += (sum_of_squares(built + max(planet_buildings,planet_size)) - sum_of_squares(max(planet_buildings,planet_size))) / (planet_size**2)
+    print("ob", ob, " new_buildings" , new_buildings)
+    return ob / new_buildings
 
 # The original C code did a for loop for this calc =)
 def sum_of_squares(N):

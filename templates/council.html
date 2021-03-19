@@ -126,15 +126,28 @@ No Buildings Under Construction
 
 <td align="center" valign="top">
 <b>Units</b><br><table>
-
+{% for unit in main_fleet %}
+    <tr><td>
+    {{unit.name}} </td>
+	<td>{{unit.value}}</td>
+	</tr>
+{% endfor %}
 <!--
 for unit in unit-type
 	<tr><td>%s</td><td>&nbsp;</td><td align="right" id="UNIT-NAME">%lld</td></tr>
 -->
 
-
-<tr><td>Total</td><td>&nbsp;</td><td id="untnum">%lld</td></tr></table><br><br>
+<tr><td><b>Total</b></td><td id="untnum">{{unit_total}}</td></tr></table><br><br>
 <b>Units under construction</b><br><span id="council_unit_que"><form name="cancelunit" id="cancel_units" action="cancelbuild"><table>
+
+{% for unit in built_fleet %}
+    <tr>
+	<td>{{unit.n}}</td>
+    <td>{{unit.unit_type}} </td>
+	<td>in {{unit.ticks_remaining}} weeks</td>
+	</td><td><input type="checkbox" name="{{construction.id}}"></td></tr>
+	</tr>
+{% endfor %}
 
 <!--
 for unit-under-construction in list-of-unit-construction

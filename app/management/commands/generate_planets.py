@@ -106,6 +106,16 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             status.fleet_readiness = 100
             status.psychic_readiness = 100
             status.agent_readiness = 100
+            status.fleet_readiness_max = 100
+            status.psychic_readiness_max = 100
+            status.agent_readiness_max = 100
+
+            status.long_range_attack_percent = 200
+            status.air_vs_air_percent = 200
+            status.ground_vs_air_percent = 200
+            status.ground_vs_ground_percent = 200
+
+            status.post_attack_order = 2
 
             # Loop through user's planets, lines 499 - 608 in cmdtick.c
             status.population = 0  # clear user's population
@@ -172,7 +182,17 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             status.ectrolium = 5000
 
             status.networth += 1
+
+            status.empire_role = 'P'
+            status.votes = 0
+
+            status.mail_flag = 0
+            status.construction_flag = 0
+            status.economy_flag = 0
+            status.military_flag = 0
+
             status.save()
+
 
 
         # TEMPORARY - assign all planets to admin user, for debugging sake

@@ -181,6 +181,22 @@ def council(request):
     status = get_object_or_404(UserStatus, user=request.user)
     constructions = Construction.objects.filter(user=request.user)
     # Make list of total buildings under construction for each building type
+    main_fleet_list = []
+    main_fleet = Fleet.objects.get(owner=request.user, main_fleet=True)
+    unit_total = 0
+    for unit in unit_info["unit_list"]:
+        num = getattr(main_fleet, unit)
+        if num:
+            main_fleet_list.append({"name": unit_info[unit]["label"], "value": num})
+            unit_total += num
+
+    # built_fleet_list = []
+    built_fleet = UnitConstruction.objects.filter(user=request.user)
+    print(built_fleet)
+    # unit_total_built = 0
+    # for bf in built_fleet:
+    #     main_fleet_list.append({"name": built_fleet, "value": num})
+    #     unit_total_built += num
     build_list = {}
     for construction in constructions:
         label = construction.get_building_type_display()  # get_X_display() is the trick for getting the full label of the textchoice
@@ -188,6 +204,9 @@ def council(request):
     context = {"status": status,
                "constructions": constructions,
                "build_list": build_list,
+               "main_fleet" : main_fleet_list,
+               "unit_total" : unit_total,
+               "built_fleet" : built_fleet,
                "page_title": "Council"}
     return render(request, "council.html", context)
 
@@ -391,6 +410,7 @@ def build(request, planet_id):
                 # calc_building_cost was designed to give the View what it needed, so pull out just the values and multiply by num
                 total_resource_cost, penalty = building.calc_cost(num, status.research_percent_construction,
                                                                   status.research_percent_tech)
+
                 if not total_resource_cost:
                     msg += 'Not enough tech research to build ' + building.label + '<br>'
                     continue
@@ -423,6 +443,12 @@ def build(request, planet_id):
 
                 # Create new construction job
                 msg += 'Building ' + str(num) + ' ' + building.label + '<br>'
+                msg += 'Total costs: <br>'
+                msg += 'Energy: ' + str(total_resource_cost.ene) + '<br>'
+                msg += 'Minerals: ' + str(total_resource_cost.min) + '<br>'
+                msg += 'Crystals: ' + str(total_resource_cost.cry) + '<br>'
+                msg += 'Ectrolium: ' + str(total_resource_cost.ect) + '<br>'
+
                 Construction.objects.create(user=request.user,
                                             planet=planet,
                                             n=num,

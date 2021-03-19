@@ -283,6 +283,7 @@ public class Main
 		ResultSet resultSet = statement.executeQuery("SELECT tick_number FROM app_roundstatus");
 		resultSet.next();
 		int tick_nr = resultSet.getInt("tick_number");
+
 		
 		statement.executeUpdate("UPDATE app_roundstatus SET tick_number = " + (tick_nr + 1) );
 		
@@ -292,7 +293,10 @@ public class Main
 		jobsUpdate2 = System.nanoTime();
 		//update units jobs
 		 
-		//update fleets
+		 
+		//update fleet construction time
+		statement.execute("UPDATE app_unitconstruction SET ticks_remaining = ticks_remaining - 1;");
+	
 		 
 		resultSet = statement.executeQuery("SELECT * FROM app_userstatus");
 	   	ResultSetMetaData rsmd = resultSet.getMetaData();
@@ -314,6 +318,7 @@ public class Main
 		 ArrayList<HashMap<String, Integer>> usersInt = new ArrayList<>();
 		 ArrayList<HashMap<String, Long>> usersLong = new ArrayList<>();
 		 HashMap<Integer, String> usersRace = new HashMap<>();
+		 
 
 		 String planetStatusUpdateQuery = "UPDATE \"PLANET\"  SET" +
 			//" current_population = ? ,"+ //1
@@ -450,7 +455,38 @@ public class Main
 			userStatusUpdateStatement.setInt(56, userID);
 			String race = usersRace.get(userID);
 			HashMap<String, Double> race_info = race_info_list.get(race);
+			
+						
+			//update fleets
+			String unitsQuery = 
+			" SELECT unit_type, SUM(n) as num_units FROM app_unitconstruction WHERE ticks_remaining = 0 AND user_id = " + userID
+			+ " GROUP BY unit_type; ";
+			resultSet = statement.executeQuery(unitsQuery);
+			
+			HashMap<String, Integer> unitsBuilt = new HashMap<>();
+			while (resultSet.next()){
+				unitsBuilt.put(resultSet.getString("unit_type"), resultSet.getInt("num_units"));
+			}
+			
+			
+			String fleetUpdateQuery = "UPDATE app_fleet SET" +
+			" bomber = bomber + " + unitsBuilt.getOrDefault("bomber",0)  +
+			" , fighter = fighter + " + unitsBuilt.getOrDefault("fighter",0)  +
+			" , transport = transport + " + unitsBuilt.getOrDefault("transport",0)  +
+			" , cruiser = cruiser + " + unitsBuilt.getOrDefault("cruiser",0)  +
+			" , carrier = carrier + " + unitsBuilt.getOrDefault("carrier",0)  +
+			" , soldier = soldier + " + unitsBuilt.getOrDefault("soldier",0)  +
+			" , droid = droid + " + unitsBuilt.getOrDefault("droid",0)  +
+			" , goliath = goliath + " + unitsBuilt.getOrDefault("goliath",0)  +
+			" , phantom = phantom + " + unitsBuilt.getOrDefault("phantom",0)  +
+			" , wizard = wizard + " + unitsBuilt.getOrDefault("wizard",0)  +
+			" , agent = agent + " + unitsBuilt.getOrDefault("agent",0)  +
+			" , ghost = ghost + " + unitsBuilt.getOrDefault("ghost",0)  +
+			" , exploration = exploration + " + unitsBuilt.getOrDefault("exploration",0)  +
+			" WHERE owner_id = " + userID +
+			" AND main_fleet = true;";
 
+			statement.execute(fleetUpdateQuery);
 
 			 //System.out.println(race_info);
 
@@ -998,7 +1034,10 @@ public class Main
 									tick_nr + "  - tick_number > " + news_delete_ticks + " ;"; 
 															
 		statement.execute(deletePersonalNews);		
-		statement.execute(deleteEmpireNews);		
+		statement.execute(deleteEmpireNews);	
+
+		//delete elapsed fleet construction
+		statement.execute("DELETE FROM app_unitconstruction WHERE ticks_remaining = 0;");
 		
 		
 		con.commit();
