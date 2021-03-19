@@ -74,6 +74,8 @@ strikeout {
   td {
     padding-right: 10px;
 	text-align: left;
+	white-space:nowrap;
+  vertical-align:top;
   }
 }
 
@@ -225,7 +227,7 @@ body {
 	border-bottom-width: 1px
 }
 .quote {
-	padding:12px;
+	padding:10px 20px 10px 10px;
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 11px;
 	color: #8BC7FF;
@@ -287,6 +289,7 @@ font-color: white;
 
     .display_box_wrapper {
         color: #FFFFFF;
+				display:block;
 
     }
 
@@ -466,7 +469,7 @@ font-color: white;
 
 .divTable{
 	display: table;
-	width: 100%;
+	width: 95%;
 }
 .divRow {
 	display: table-row;
