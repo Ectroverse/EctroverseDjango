@@ -2,15 +2,19 @@
 
 {% block content %}
 
-<script>
-function showDiv() {
+<head>
 
-   if (document.getElementById('old_news').style.display == "block")
-		document.getElementById('old_news').style.display = "none";
-	else
-		document.getElementById('old_news').style.display = "block";
-}
-</script>
+  <script>
+    function showDiv() {
+
+      if (document.getElementById('old_news').style.display == "block")
+		    document.getElementById('old_news').style.display = "none";
+	       else
+		       document.getElementById('old_news').style.display = "block";
+         }
+  </script>
+
+</head>
 
 <br>
 <div class="container">
@@ -42,6 +46,14 @@ function showDiv() {
     <br>
     <br>
   <div class="row">
+    <div class="content-mobile">
+    <div class="genwhite">Resources
+      <br><img src="../static/pr0.gif" alt="Energy"> Energy : {{status.energy}}
+      <br><img src="../static/pr1.gif" alt="Mineral"> Mineral : <span id="mineral">{{status.minerals}}</span>
+      <br><img src="../static/pr2.gif" alt="Crystal"> Crystal : <span id="crystal">{{status.crystals}}</span>
+      <br><img src="../static/pr3.gif" alt="Ectrolium"> Ectrolium : <span id="ectrolium">{{status.ectrolium}}</span>
+    </div>
+    <br></div>
     <div class="genwhite"><i>Message from Administration:</i></div>
     <div class="quote">
       Insert msg here
@@ -67,5 +79,8 @@ function showDiv() {
         {% endif %}
     </div>
   </div>
+
+
+
 
 {% endblock %}
