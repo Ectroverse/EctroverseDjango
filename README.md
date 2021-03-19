@@ -4,7 +4,8 @@ Put your name after an item if you want to reserve it for yourself, not all item
 
 #### v0.1 Remaining Items
 left to do:
-- fleets move/exploration/attack - add to process tick in java
+- fleets move add to process tick in java
+- fleets merge add to process tick in java
 - battle sequence 
 - operations- just scouting for now
 - news - add built stuff to news in process tick 
