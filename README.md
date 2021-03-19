@@ -9,6 +9,7 @@ left to do:
 - operations- just scouting for now
 - news - add built stuff to news in process tick 
 - give portal on home planet
+- MAP!!!!!
 
 #### v0.2 Remaining Items
 
