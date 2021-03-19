@@ -115,7 +115,7 @@ if( maind.infos[INFOS_ECTROLIUM_TAX] ) {
 
 <br><i>Summary</i><br>
 {% if not constructions %}
-No Buildings Under Construction
+No buildings under construction
 {% else %}
     {% for building, num in build_list.items %}
     {{num}} {{building}}<br>
@@ -142,8 +142,8 @@ for unit in unit-type
 
 {% for unit in built_fleet %}
     <tr>
-	<td>{{unit.n}}</td>
-    <td>{{unit.unit_type}} </td>
+	<td>{{unit.number}}</td>
+    <td>{{unit.name}}</td>
 	<td>in {{unit.ticks_remaining}} weeks</td>
 	</td><td><input type="checkbox" name="{{construction.id}}"></td></tr>
 	</tr>
@@ -160,15 +160,13 @@ for unit-under-construction in list-of-unit-construction
 
 
 <br><i>Summary</i><br>
-<!--
-for( a = usums[CMD_UNIT_NUMUSED+1] = 0; a < CMD_UNIT_NUMUSED; a++ ) {
-	if( !( usums[a] ) )
-		continue;
-	%lld %s<br>", (long long)usums[a], cmdUnitName[a] );
-	usums[CMD_UNIT_NUMUSED+1] += usums[a];
-}
--->
-<i>Total of X units under construction</i><br>
+{% if not total_fleet_built %}
+No units under construction
+{% else %}
+	{% for unit, num in total_fleet_built.items %}
+	{{num}} {{unit}}<br>
+	{% endfor %}
+{% endif %}
 
 
 </span></td></tr></table>
@@ -272,36 +270,37 @@ for( a = usums[CMD_UNIT_NUMUSED+1] = 0; a < CMD_UNIT_NUMUSED; a++ ) {
 				<table width="95%"><tr><td width="100%" align="center" valign="top"><table>
 					<b>Units</b><br><table>
 
-					<!--
-					for unit in unit-type
-						<tr><td>%s</td><td>&nbsp;</td><td align="right" id="UNIT-NAME">%lld</td></tr>
-					-->
+					{% for unit in main_fleet %}
+						<tr><td>
+						{{unit.name}} </td>
+						<td>{{unit.value}}</td>
+						</tr>
+					{% endfor %}
 
 
-					<tr><td>Total</td><td>&nbsp;</td><td id="untnum">%lld</td></tr></table><br><br>
+					<tr><td>Total</td><td id="untnum">{{unit_total}}</td></tr></table><br><br>
 					<b>Units under construction</b><br><span id="council_unit_que"><form name="cancelunit" id="cancel_units" action="cancelbuild"><table>
 
-					<!--
-					for unit-under-construction in list-of-unit-construction
-						<tr><td>%lld %s in %d weeks</td><td><input type="checkbox" name="b%d"></td></tr>", (long long)build[a].quantity, cmdUnitName[ build[a].type & 0xFFFF ], build[a].time, a);
-					-->
-
+					{% for unit in built_fleet %}
+						<tr>
+						<td>{{unit.number}}</td>
+						<td>{{unit.name}}</td>
+						<td>in {{unit.ticks_remaining}} weeks</td>
+						</td><td><input type="checkbox" name="{{construction.id}}"></td></tr>
+						</tr>
+					{% endfor %}
 
 					<tr><td></td><td><div class="href" onclick="javascript:toggle_form('cancel_units');">Toggle</font></div></td></tr>
 					<tr><td></td><td><input type="submit" value="Cancel"></td></tr></table></form>
 
-
 					<br><i>Summary</i><br>
-					<!--
-					for( a = usums[CMD_UNIT_NUMUSED+1] = 0; a < CMD_UNIT_NUMUSED; a++ ) {
-						if( !( usums[a] ) )
-							continue;
-						%lld %s<br>", (long long)usums[a], cmdUnitName[a] );
-						usums[CMD_UNIT_NUMUSED+1] += usums[a];
-					}
-					-->
-					<i>Total of X units under construction</i><br>
-
+					{% if not total_fleet_built %}
+					No units under construction
+					{% else %}
+						{% for unit, num in total_fleet_built.items %}
+						{{num}} {{unit}}<br>
+						{% endfor %}
+					{% endif %}
 
 					</span></td></tr></table>
 			</div>

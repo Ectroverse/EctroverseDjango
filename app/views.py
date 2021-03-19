@@ -190,9 +190,16 @@ def council(request):
             main_fleet_list.append({"name": unit_info[unit]["label"], "value": num})
             unit_total += num
 
-    # built_fleet_list = []
+    built_fleet_list = []
+    total_fleet_built = {}
     built_fleet = UnitConstruction.objects.filter(user=request.user)
-    print(built_fleet)
+    for fl in built_fleet:
+        built_fleet_list.append({"name": unit_info[fl.unit_type]['label'], "number": fl.n, "ticks_remaining": fl.ticks_remaining})
+        if unit_info[fl.unit_type]['label'] not in total_fleet_built:
+            total_fleet_built[unit_info[fl.unit_type]['label']] = fl.n
+        else:
+            total_fleet_built[unit_info[fl.unit_type]['label']] += fl.n
+
     # unit_total_built = 0
     # for bf in built_fleet:
     #     main_fleet_list.append({"name": built_fleet, "value": num})
@@ -206,7 +213,8 @@ def council(request):
                "build_list": build_list,
                "main_fleet" : main_fleet_list,
                "unit_total" : unit_total,
-               "built_fleet" : built_fleet,
+               "built_fleet" : built_fleet_list,
+               "total_fleet_built": total_fleet_built,
                "page_title": "Council"}
     return render(request, "council.html", context)
 
