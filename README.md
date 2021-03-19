@@ -12,6 +12,8 @@ left to do:
 
 #### v0.2 Remaining Items
 
+- cancel buildings/fleets
+- scouting page
 - add proper design to rankings tables
 - add deletion possibility to account (Vladimir)
 - improve html design inside, some parts are shown badly on phone
