@@ -3,17 +3,12 @@
 Put your name after an item if you want to reserve it for yourself, not all items need assignments though
 
 #### v0.1 Remaining Items
-
-- add units to construction jobs!
-
-- fleets move/exploration/attack (Vladimir) - done
-- battle sequence (Rexer already started it)
+left to do:
+- fleets move/exploration/attack - add to process tick in java
+- battle sequence 
 - operations- just scouting for now
-- news - in progress (Vladimir)
-- auto tick update via cronjob (Rexer) - done
-- 2 players registered into 1 empire? (Vladimir)
-- when a player is deleted from an empire decrease its number of players (Vladimir)
-- give portal on home planet, fix empire 0 (or 1 whatever) for admin - done
+- news - add built stuff to news in process tick 
+- give portal on home planet
 
 #### v0.2 Remaining Items
 
