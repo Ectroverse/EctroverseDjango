@@ -511,7 +511,7 @@ def ranking(request):
     status = get_object_or_404(UserStatus, user=request.user)
     table = UserRankTable(UserStatus.objects.exclude(race__isnull=True).exclude(race__exact='')
                           .exclude(empire__isnull=True)
-                          , order_by=("-num_planets"))
+                          , order_by=("-num_planets", "-networth"))
     context = {"table": table,
                "page_title": "Faction ranking",
                "status": status}
@@ -523,7 +523,7 @@ def ranking(request):
 def empire_ranking(request):
     status = get_object_or_404(UserStatus, user=request.user)
     empire = status.empire
-    table = EmpireRankTable(Empire.objects.all().filter(numplayers__gt=0), order_by=("-planets"))
+    table = EmpireRankTable(Empire.objects.all().filter(numplayers__gt=0), order_by=("-planets", "-networth"))
     context = {"table": table,
                "page_title": "Empire ranking",
                "status": status,
@@ -817,7 +817,7 @@ def fleets(request):
     if 'error' in request.session:
         error = request.session['error']
         request.session['error'] = ''
-        
+
     planet_to_template = None
     if request.method == 'POST' and 'explore_planet' in request.POST:
         try:
@@ -1747,7 +1747,3 @@ def bulk_del_message_in(request):
 def custom_logout(request):
     logout(request)
     return HttpResponseRedirect('/')
-
-
-
-
