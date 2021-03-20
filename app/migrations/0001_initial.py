@@ -92,7 +92,7 @@ class Migration(migrations.Migration):
                 ('total_research_centers', models.IntegerField(default=0)),
                 ('total_defense_sats', models.IntegerField(default=0)),
                 ('total_shield_networks', models.IntegerField(default=0)),
-                ('total_portals', models.IntegerField(default=1)),
+                ('total_portals', models.IntegerField(default=0)),
                 ('total_buildings', models.IntegerField(default=1)),
                 ('fleet_readiness', models.IntegerField(default=0)),
                 ('psychic_readiness', models.IntegerField(default=0)),
