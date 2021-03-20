@@ -25,16 +25,16 @@
 		}
 		else if(Math.abs(num) > 999999999){
 			ans = Math.floor(Math.sign(num)*(Math.abs(num)/100000000)) /10 + 'b'
-		}	
+		}
 		else if(Math.abs(num) > 999999){
 			ans = Math.floor(Math.sign(num)*(Math.abs(num)/100000)) /10 + 'm'
-		}		
+		}
 		else if (Math.abs(num) > 999){
 			ans = Math.floor(Math.sign(num)*(Math.abs(num)/100)) /10 + 'k'
 		}
 		return ans;
 	}
-	
+
 	function formatResources(energy, minerals, crystals, ectrolium, networth, population){
 		document.getElementById('energy').innerHTML = numberFormatter(energy);
 		document.getElementById('minerals').innerHTML = numberFormatter(minerals);
@@ -44,7 +44,7 @@
 		document.getElementById('population').innerHTML = numberFormatter(population);
 	}
 
-	
+
 
 </script>
 
@@ -241,7 +241,7 @@
 					<li><a href="/empire{{status.empire_id}}">Empire</a>
 					<li><a href="/famaid">-Send aid</a></li>
 					<li><a href="/famgetaid">-Receive aid</a></li>
-					<li><a href="/famnews" style="color:red;">-News</a></li>
+					<li><a href="/famnews">-News</a></li>
 					<li><a href="/relations">-Relations</a></li>
 					<li><a href="/fleets">Fleets</a>
 					<li><a href="/map">Galaxy map</a>
@@ -321,13 +321,13 @@
 	<div class="menu_container_footer_leftmob"></div>
 	<div class="menu_container_footer_midmob">
 		<div class = "menu_leftmob1_align">
-			<img src="../static/pr0.gif" alt="Energy">  <span id="energy"></span> 
+			<img src="../static/pr0.gif" alt="Energy">  <span id="energy"></span>
 		</div>
 		<div class = "menu_leftmob2_align">
 			<img src="../static/pr1.gif" alt="Mineral">  <span id="minerals"></span>
 		</div>
 		<div class = "menu_rightmob1_align">
-			<img src="../static/pr2.gif" alt="Crystal">  <span id="crystals"></span> 
+			<img src="../static/pr2.gif" alt="Crystal">  <span id="crystals"></span>
 		</div>
 		<div class = "menu_rightmob2_align">
 			<img src="../static/pr3.gif" alt="Ectrolium">  <span id="ectrolium"></span>
