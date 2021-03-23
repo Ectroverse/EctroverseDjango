@@ -268,7 +268,6 @@ public class Main
 		con.setAutoCommit(false);
 	 	startTime = System.nanoTime();
 		Statement statement = con.createStatement();
-		Statement statement2 = con.createStatement();
 		//statement.executeQuery("BEGIN; ");
 		//test1 = System.nanoTime();
 		statement.execute("LOCK TABLE \"PLANET\", app_roundstatus, app_userstatus, app_construction IN ACCESS EXCLUSIVE MODE;");
@@ -411,13 +410,12 @@ public class Main
 			" num_planets = ? " + //55
 
 			" WHERE id = ?" ; //56 wow what a long string :P
-		PreparedStatement userStatusUpdateStatement = con.prepareStatement(userStatusUpdateQuery); //mass update, much faster
+		 PreparedStatement userStatusUpdateStatement = con.prepareStatement(userStatusUpdateQuery); //mass update, much faster
 		 
 		 
 		String planetStatusUpdateQuery2 = "UPDATE \"PLANET\"  SET" +
 			" current_population = ? "+	 //1		 
 			" WHERE id = ?"  ; //2
-			
 			
 		 //loop over users to get their stats
 		while(resultSet.next()){
@@ -565,10 +563,6 @@ public class Main
                 double cur_y = y_move_calc(speed, x, current_position_x, y, current_position_y);
 				--ticks_rem;
 				
-				
-				System.out.println(" x " + x + " y " + y + " co: " + resultSet.getInt("command_order"));
-				
-				
 				if (ticks_rem == 0){
 					if (resultSet.getInt("command_order") == 5){ //return to main fleet
 						fleetUpdateQuery = "UPDATE app_fleet SET" +
@@ -585,40 +579,31 @@ public class Main
 						" , agent = agent + " + resultSet.getLong("agent")  +
 						" , ghost = ghost + " + resultSet.getLong("ghost")  +
 						" , exploration = exploration + " + resultSet.getLong("exploration")  +
-						" WHERE owner_id = " + resultSet.getInt("owner_id") +
+						" WHERE owner_id = " + fleet_id +
 						" AND main_fleet = true;";
 						
 						statement3.execute(fleetUpdateQuery);
 						statement3.execute("DELETE FROM app_fleet WHERE id = " + fleet_id + ";");
-						continue;
-					}
-					else if (resultSet.getInt("command_order") == 10){ //explore a planet
-						ResultSet exploredPlanet = statement2.executeQuery("SELECT * FROM \"PLANET\" WHERE x = " + resultSet.getInt("x") 
-						+ " AND y = " + resultSet.getInt("y") + " AND i = " + resultSet.getInt("i") + " AND owner_id IS NULL;");
-						exploredPlanet.next();
-						System.out.println("test1" + exploredPlanet.getInt("y"));
-						if(exploredPlanet != null){
-							System.out.println("test2");
-							statement2.execute("UPDATE \"PLANET\" SET owner_id = " + userID + " WHERE id = "+ exploredPlanet.getInt("id") + ";");
-							statement2.execute("DELETE FROM app_fleet WHERE id = " + resultSet.getInt("id") + ";");
-						}
-						continue;
 					}
 					else{
 					//merge all fleet later when all are processed
 					fleetMoveUpdateStatement.setDouble(1, x);
 					fleetMoveUpdateStatement.setDouble(2, y);
+					fleetMoveUpdateStatement.setInt(3, x);
+					fleetMoveUpdateStatement.setInt(4, y);
+					fleetMoveUpdateStatement.setInt(5, ticks_rem);
+					fleetMoveUpdateStatement.setInt(6, fleet_id);
 					}
 				}
 				else{
 					fleetMoveUpdateStatement.setDouble(1, cur_x);
 					fleetMoveUpdateStatement.setDouble(2, cur_y);
-				}
 					fleetMoveUpdateStatement.setInt(3, x);
 					fleetMoveUpdateStatement.setInt(4, y);
 					fleetMoveUpdateStatement.setInt(5, ticks_rem);
 					fleetMoveUpdateStatement.setInt(6, fleet_id);
-				//System.out.println(fleetMoveUpdateStatement);
+				}
+				System.out.println(fleetMoveUpdateStatement);
 				fleetMoveUpdateStatement.addBatch();
 			}
 			fleetMoveUpdateStatement.executeBatch();
@@ -874,6 +859,10 @@ public class Main
 				double overbuilt = (double)(calc_overbuild((int)rowValues[colLocation[19]], total_buildings + buildingsUnderConstr));
 				
                 double overbuilt_percent = (double)((overbuilt-1.0)*100); 
+				
+				System.out.println("(int)rowValues[colLocation[19]]" + (int)rowValues[colLocation[19]]);
+				System.out.println("total_buildings + " +total_buildings +  " buildingsUnderConstr " + buildingsUnderConstr);
+				System.out.println("overbuilt_percent" + overbuilt_percent);
 
 				//if (current_population != (int)rowValues[colLocation[0]]){
 				//	String sql = "UPDATE \"PLANET\"  SET current_population =  " + current_population +" WHERE id = " + planetID ; //19
@@ -1026,7 +1015,7 @@ public class Main
 			//units upkeep
 			//get unit amounts
 			long [] unitsSums = new long[total_units];
-			statement2 = con.createStatement();		
+			Statement statement2 = con.createStatement();		
 			for(int z = 0; z < unit_names.length; z++){
 				
 				String s = unit_names[z];
@@ -1110,61 +1099,6 @@ public class Main
 			networth += (0.001 * totalRcPoints);
 			userStatusUpdateStatement.setLong(54, networth);	
 			userStatusUpdateStatement.addBatch();
-			
-			
-			
-			//udate merging fleets
-			ResultSet mergingFleets = statement.executeQuery("SELECT * FROM app_fleet WHERE (command_order = 3 OR command_order = 4) AND owner_id = " + userID + ";");
-			
-			HashMap<String, LinkedList<Integer>> fleetMarge = new HashMap<>();
-			
-			while(mergingFleets.next()){
-				String p = "x" + mergingFleets.getInt("x") + "y" + mergingFleets.getInt("y");
-				if (!fleetMarge.containsKey(p))
-					fleetMarge.put(p, new LinkedList<Integer>());
-				fleetMarge.get(p).add(mergingFleets.getInt("id"));
-			}
-			
-			String fleetMergeQuery = "UPDATE app_fleet SET" +
-						" bomber = ?" + //1
-						" , fighter = ? "+ //2
-						" , transport = ? "+ //3
-						" , cruiser = ? " + //4
-						" , carrier = ? " + //5
-						" , soldier = ? " + //6
-						" , droid = ? " + //7
-						" , goliath = ? "+ //8
-						" , phantom = ? " + //9
-						" , wizard = ? " + //10
-						" , agent = ? " + //11
-						" , ghost = ? "+ //12
-						" , exploration = ? "+ //13
-						" WHERE id = ?"; //14
-
-			PreparedStatement fleetMergeUpdateStatement = con.prepareStatement(fleetMergeQuery); 
-			
-			for(LinkedList<Integer> idList : fleetMarge.values()){
-				if (idList.size() > 1){
-					long [] unit = new long[unit_names.length];
-					int firstId = idList.getFirst();
-					for (Integer id : idList) {
-						ResultSet fleet = statement.executeQuery("SELECT * FROM app_fleet WHERE id = " + id + ";");
-						fleet.next();
-						for(int i =0; i < unit_names.length; i++){
-							unit[i] += fleet.getLong(unit_names[i]);
-						}
-						if (id != firstId)
-							statement.execute("DELETE FROM app_fleet WHERE id = " + id + ";");
-					}
-					for(int i =0; i < unit_names.length; i++){
-						fleetMergeUpdateStatement.setLong(i+1, unit[i]);
-					}
-
-					fleetMergeUpdateStatement.setInt(unit_names.length+1 , firstId);
-					fleetMergeUpdateStatement.addBatch();
-				}
-			}
-			fleetMergeUpdateStatement.executeBatch();
 		}
 		main_loop2 = System.nanoTime();
 	
@@ -1191,12 +1125,15 @@ public class Main
 		
 		statement.execute(updateEmpireRanks);
 		
-		
-		
 		//merge fleets
+		//make allmerged fleets "unmerged" to merge them with possible new ones
+
 		
-		/*
-		statement.execute("UPDATE app_fleet SET command_order = 3 WHERE command_order = 6 ");	
+		statement.execute("UPDATE app_fleet SET command_order = 3 WHERE 	"+
+		
+		 (SELECT x,y, COUNT(*),owner_id as id  FROM app_fleet GROUP BY x,y,owner_id) ;
+		");
+		
 		String mergeUpdateQuery= 
 		"INSERT INTO app_fleet (main_fleet, bomber, fighter, transport, cruiser, carrier, soldier, droid, goliath, phantom, "+
 		" wizard, agent, ghost, exploration, x , y , command_order, ticks_remaining, current_position_x,  current_position_y, " + 
@@ -1223,11 +1160,18 @@ public class Main
 				"FROM app_fleet  "+
 				"WHERE (command_order = 3 or command_order = 4 ) AND ticks_remaining = 0  " +
 				" GROUP BY x, y, command_order, owner_id "+	
-			" ) AS mgd ";
+			" ) AS mgd "+
+			" WHERE EXISTS (" +
+			
+		" SELECT x,y " +
+		" FROM app_fleet " +
+		" WHERE command_order = 3 or command_order = 4  " +
+		" GROUP BY x,y HAVING COUNT(*)>1 );" ;
+		
+//Individual.IndividualId IN (SELECT someID FROM table WHERE blahblahblah
 			
 		statement.execute(mergeUpdateQuery);	
 		statement.execute("DELETE FROM app_fleet WHERE (command_order = 3 or command_order = 4) AND ticks_remaining = 0 ;");	
-		*/
 		
 		//purge old news
 		String deletePersonalNews = "DELETE FROM app_news WHERE is_personal_news = false AND " + tick_nr + "  - tick_number > " + news_delete_ticks + " ;"; 
