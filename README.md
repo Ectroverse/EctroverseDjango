@@ -8,7 +8,6 @@ left to do:
 - battle sequence 
 - operations- just scouting for now
 - news - add built stuff to news in process tick 
-- give portal on home planet
 - news notifications in the header
 - MAP!!!!!
 
