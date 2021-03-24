@@ -103,6 +103,10 @@ def headquarters(request):
     for n in fresh_news:
         n.is_read = True
     News.objects.bulk_update(fresh_news, ['is_read'])
+    status.construction_flag = 0
+    status.economy_flag = 0
+    status.military_flag = 0
+    status.save()
     context = {"status": status,
                "page_title": "Headquarters",
                "week": week,
@@ -110,6 +114,38 @@ def headquarters(request):
                "fresh_news": fresh_news,
                "old_news": old_news}
     return render(request, "headquarters.html", context)
+
+@login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
+def btn(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    # mail
+    btn1 = "i09.jpg"
+    if status.mail_flag == 1: #blue
+        btn1 = "i09a.jpg"
+    # building
+    btn2 = "i10.jpg"
+    if status.construction_flag == 1: #yellow
+        btn2 = "i10a.jpg"
+    # market
+    btn3 = "i11.jpg"
+    if status.economy_flag == 1: #green
+        btn3 = "i11a.jpg"
+    # fleets
+    btn4 = "i12.jpg"
+    if status.military_flag == 1: #red
+        btn4 = "i12a.jpg"
+    if status.military_flag == 2: #green
+        btn4 = "i12b.jpg"
+    if status.military_flag == 3: #yellow
+        btn4 = "i12c.jpg"
+    context = {"status": status,
+                "btn1": btn1,
+                "btn2": btn2,
+                "btn3": btn3,
+                "btn4": btn4
+                }
+    return render(request, "btn.html", context)
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -1603,6 +1639,8 @@ def famgetaid(request):
 def messages(request):
     status = get_object_or_404(UserStatus, user=request.user)
     messages_from = Messages.objects.filter(user2=status.id, user2_deleted=False).order_by('-date_and_time')
+    status.mail_flag = 0
+    status.save()
     context = {"status": status,
                "page_title": "Inbox",
                "messages_from": messages_from,
@@ -1662,6 +1700,8 @@ def compose_message(request, user_id):
                                     is_empire_news=False,
                                     tick_number = RoundStatus.objects.get().tick_number
                                     )
+                status2.mail_flag = 1
+                status2.save()
             else:
                 msg_on_top = 'You cannot send an empty message!'
 

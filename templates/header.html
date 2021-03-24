@@ -16,6 +16,10 @@
 	window.onload = function() {
 		formatResources({{status.energy}}, {{status.minerals}}, {{status.crystals}}, {{status.ectrolium}}, {{status.networth}}, {{status.population}});
 		startTime();
+		$('#btn1').load("/btn #btn1 > *");
+		$('#btn2').load("/btn #btn2 > *");
+		$('#btn3').load("/btn #btn3 > *");
+		$('#btn4').load("/btn #btn4 > *");
 	};
 
 	function numberFormatter(num) {
@@ -43,6 +47,15 @@
 		document.getElementById('networth').innerHTML = numberFormatter(networth);
 		document.getElementById('population').innerHTML = numberFormatter(population);
 	}
+	
+	setInterval(function(){
+	   $('#btn1').load("/btn #btn1 > *");
+	   $('#btn2').load("/btn #btn2 > *");
+	   $('#btn3').load("/btn #btn3 > *");
+	   $('#btn4').load("/btn #btn4 > *");
+	   
+	   //alert('test!');
+	}, 2000) /* time in milliseconds (ie 2 seconds)*/
 
 
 
@@ -115,41 +128,38 @@
 	height: 42px;
 	left: 35px;
 	top: 21px;
-    content:url({% static 'i09.jpg' %});
+	href: 
 }
 
 .menu_container_btn2{
 	position: absolute;
-	width: 41px;
+	width: 40px;
 	height: 42px;
 	left: 76px;
 	top: 21px;
-    content:url({% static 'i10.jpg' %});
 }
 
 .menu_container_btn3{
 	position: absolute;
-	width: 41px;
+	width: 39px;
 	height: 42px;
-	left: 117px;
+	left: 116px;
 	top: 21px;
-    content:url({% static 'i11.jpg' %});
 }
 
 .menu_container_btn4{
 	position: absolute;
-	width: 41px;
+	width: 39px;
 	height: 42px;
-	left: 158px;
+	left: 155px;
 	top: 21px;
-    content:url({% static 'i12.jpg' %});
 }
 
 .menu_container_footer_left{
 	position: absolute;
 	width: 18px;
 	height: 42px;
-	left: 199px;
+	left: 194px;
 	top: 21px;
     content:url({% static 'i13.jpg' %});
 }
@@ -166,7 +176,7 @@
 .menu_container_footer_mid{
 	position: absolute;
 	height: 42px;
-	left: 217px;
+	left: 212px;
 	right: 49px;
 	top: 21px;
     background-image:url({% static 'i15.jpg' %});
@@ -286,10 +296,10 @@
 			</div>
 		</div>
 		<div class="menu_container_header_right"></div>
-		<a href="/headquarters"><div class="menu_container_btn1"></div></a>
-		<a href="/headquarters"><div class="menu_container_btn2"></div></a>
-		<a href="/headquarters"><div class="menu_container_btn3"></div></a>
-		<a href="/headquarters"><div class="menu_container_btn4"></div></a>
+		<a href="/messages"><div id="btn1" class="menu_container_btn1"><img src="{% static 'i09.jpg' %}"></div></a>
+		<a href="/headquarters"><div id="btn2" class="menu_container_btn2"><img src="{% static 'i10.jpg' %}"></div></a>
+		<a href="/headquarters"><div id="btn3" class="menu_container_btn3"><img src="{% static 'i11.jpg' %}"></div></a>
+		<a href="/headquarters"><div id="btn4" class="menu_container_btn4"><img src="{% static 'i12.jpg' %}"></div></a>
 		<div class="menu_container_footer_left"></div>
 		<div class="menu_container_footer_mid">
 			<div class = "menu_left_align">

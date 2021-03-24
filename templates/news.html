@@ -30,6 +30,14 @@
 			{{n.user1}} has sent you an aid shipment of {{n.extra_info}}.
 			<br><br>
 		{% endif %}
+		{% if n.news_type == 'BB' %}
+			{{ n.extra_info|linebreaks }}
+			<br><br>
+		{% endif %}
+		{% if n.news_type == 'UB' %}
+			{{ n.extra_info|linebreaks }}
+			<br><br>
+		{% endif %}
 	
 	{% endfor %}
 

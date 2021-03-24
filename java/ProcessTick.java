@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.concurrent.*;
 //import java.util.Arrays.*;
 
-public class Main
+public class ProcessTick
 {
 	//some constants temporarily written here, fetch them from app/constants.py later
 	private static final int news_delete_ticks = 288; //teo days in 10min server
@@ -272,35 +272,18 @@ public class Main
 		//statement.executeQuery("BEGIN; ");
 		//test1 = System.nanoTime();
 		statement.execute("LOCK TABLE \"PLANET\", app_roundstatus, app_userstatus, app_construction IN ACCESS EXCLUSIVE MODE;");
-
-		
-		/*
-		 try (Statement statement = conn.createStatement()) {
-		  statement.execute("BEGIN");
-		  try {
-			// use statement ...
-			statement.execute("COMMIT");
-		  }`
-		  catch (SQLException failure) {
-			statement.execute("ROLLBACK");
-		  }
-		}*/
 		
 		//update tick number
 		ResultSet resultSet = statement.executeQuery("SELECT tick_number FROM app_roundstatus");
 		resultSet.next();
 		int tick_nr = resultSet.getInt("tick_number");
-
-		
+	
 		statement.executeUpdate("UPDATE app_roundstatus SET tick_number = " + (tick_nr + 1) );
 		
 		//update construction jobs	
 		jobsUpdate1 = System.nanoTime();
 		HashMap<Integer, HashMap<String, Integer>> jobs = execute_jobs(con);
 		jobsUpdate2 = System.nanoTime();
-		//update units jobs
-		 
-
 		 
 		//update fleet construction time
 		statement.execute("UPDATE app_unitconstruction SET ticks_remaining = ticks_remaining - 1;");
@@ -326,7 +309,38 @@ public class Main
 		 ArrayList<HashMap<String, Long>> usersLong = new ArrayList<>();
 		 HashMap<Integer, String> usersRace = new HashMap<>();
 		 
+		 String buildingNewsUpdateQuery = "INSERT INTO app_news " +
+			" ( user1_id, empire1_id, news_type, date_and_time, is_personal_news, " + 
+			" is_empire_news, is_read, tick_number, extra_info ) " +
+			" SELECT  ?, ?, 'BB',  ?, true, false, false, ?, ?  ";
+		 PreparedStatement buildingNewsUpdateStatement = con.prepareStatement(buildingNewsUpdateQuery); 
+		 
+		 String fleetsNewsUpdateQuery = "INSERT INTO app_news " +
+			" ( user1_id, empire1_id, news_type, date_and_time, is_personal_news, " + 
+			" is_empire_news, is_read, tick_number, extra_info ) " +
+			" SELECT  ?, ?, 'UB',  ?, true, false, false, ?, ?  ";
+		 PreparedStatement fleetsNewsUpdateStatement = con.prepareStatement(fleetsNewsUpdateQuery); 
 
+
+		 String fleetsBuildUpdateQuery = "UPDATE app_fleet  SET" +	
+		 	" bomber = bomber + ?" + //1
+			" , fighter = fighter + ?" + //2
+			" , transport = transport + ?" + //3
+			" , cruiser = cruiser + ?" + //4
+			" , carrier = carrier + ?" + //5
+			" , soldier = soldier + ?" + //6
+			" , droid = droid + ?" + //7
+			" , goliath = goliath + ?" + //8
+			" , phantom = phantom + ?" + //9
+			" , wizard = wizard + ?" + //10
+			" , agent = agent + ?" + //11
+			" , ghost = ghost + ?" + //12
+			" , exploration = exploration + ?" + //13
+			" WHERE owner_id = ?" + //14
+			" AND main_fleet = true;";
+		PreparedStatement fleetsBuildUpdateStatement = con.prepareStatement(fleetsBuildUpdateQuery); 
+		
+		
 		 String planetStatusUpdateQuery = "UPDATE \"PLANET\"  SET" +
 			//" current_population = ? ,"+ //1
 			//" max_population = ? ," + //2
@@ -437,9 +451,6 @@ public class Main
 			String race = resultSet.getString("race");
 			usersRace.put(id, race);
 			
-			
-
-
 			HashMap<String,Integer> rowInt = new HashMap<>(columns.size());
 			HashMap<String,Long> rowLong = new HashMap<>(columns.size());
 			for(String[] col : columns) {
@@ -478,32 +489,35 @@ public class Main
 			while (resultSet.next()){
 				unitsBuilt.put(resultSet.getString("unit_type"), resultSet.getInt("num_units"));
 			}
+						
+			//update built fleets
+			int total_built_units = 0;
+			for(int i = 1; i <= unit_names.length; i++){
+				fleetsBuildUpdateStatement.setLong(i, unitsBuilt.getOrDefault(unit_names[i-1],0));
+				total_built_units += unitsBuilt.getOrDefault(unit_names[i-1],0);
+			}
+			fleetsBuildUpdateStatement.setInt(14, userID);
+			fleetsBuildUpdateStatement.addBatch();
 			
+			//update built fleets news 
+			if (total_built_units != 0 ){			
+				java.util.Date utilDate = new java.util.Date();
+				java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
+				
+				fleetsNewsUpdateStatement.setInt(1, userID);
+				fleetsNewsUpdateStatement.setInt(2, rowInt.get("empire_id"));
+				fleetsNewsUpdateStatement.setTimestamp(3, sqlTS);
+				fleetsNewsUpdateStatement.setInt(4, tick_nr);
+				
+				String builtFleets = "These units constructions were finished : ";
+				for(int i = 0; i < unit_names.length; i++){
+					builtFleets += "\n " + unit_names[i] + " " +  unitsBuilt.getOrDefault(unit_names[i],0);
+				}
+				
+				fleetsNewsUpdateStatement.setString(5, builtFleets);
+				fleetsNewsUpdateStatement.addBatch();
+			}
 			
-			String fleetUpdateQuery = "UPDATE app_fleet SET" +
-			" bomber = bomber + " + unitsBuilt.getOrDefault("bomber",0)  +
-			" , fighter = fighter + " + unitsBuilt.getOrDefault("fighter",0)  +
-			" , transport = transport + " + unitsBuilt.getOrDefault("transport",0)  +
-			" , cruiser = cruiser + " + unitsBuilt.getOrDefault("cruiser",0)  +
-			" , carrier = carrier + " + unitsBuilt.getOrDefault("carrier",0)  +
-			" , soldier = soldier + " + unitsBuilt.getOrDefault("soldier",0)  +
-			" , droid = droid + " + unitsBuilt.getOrDefault("droid",0)  +
-			" , goliath = goliath + " + unitsBuilt.getOrDefault("goliath",0)  +
-			" , phantom = phantom + " + unitsBuilt.getOrDefault("phantom",0)  +
-			" , wizard = wizard + " + unitsBuilt.getOrDefault("wizard",0)  +
-			" , agent = agent + " + unitsBuilt.getOrDefault("agent",0)  +
-			" , ghost = ghost + " + unitsBuilt.getOrDefault("ghost",0)  +
-			" , exploration = exploration + " + unitsBuilt.getOrDefault("exploration",0)  +
-			" WHERE owner_id = " + userID +
-			" AND main_fleet = true;";
-
-			statement.execute(fleetUpdateQuery);
-			
-			
-
-	
-
-			 //System.out.println(race_info);
 
 			int fr = Math.min(rowInt.get("fleet_readiness")+2, rowInt.get("fleet_readiness_max"));
 			userStatusUpdateStatement.setInt(1, fr);
@@ -523,7 +537,7 @@ public class Main
 			LinkedList<Planet> portals = new LinkedList<>();
 
 			while(portalstSet.next()){
-				Planet planet = new Main().new Planet(portalstSet.getInt("x"), portalstSet.getInt("y"), portalstSet.getInt("i"));
+				Planet planet = new ProcessTick().new Planet(portalstSet.getInt("x"), portalstSet.getInt("y"), portalstSet.getInt("i"));
 				portals.add(planet);
 			}
 			
@@ -571,7 +585,7 @@ public class Main
 				
 				if (ticks_rem == 0){
 					if (resultSet.getInt("command_order") == 5){ //return to main fleet
-						fleetUpdateQuery = "UPDATE app_fleet SET" +
+						String fleetUpdateQuery = "UPDATE app_fleet SET" +
 						" bomber = bomber + " + resultSet.getLong("bomber")  +
 						" , fighter = fighter + " + resultSet.getLong("fighter")  +
 						" , transport = transport + " + resultSet.getLong("transport")  +
@@ -593,14 +607,35 @@ public class Main
 						continue;
 					}
 					else if (resultSet.getInt("command_order") == 10){ //explore a planet
+
 						ResultSet exploredPlanet = statement2.executeQuery("SELECT * FROM \"PLANET\" WHERE x = " + resultSet.getInt("x") 
-						+ " AND y = " + resultSet.getInt("y") + " AND i = " + resultSet.getInt("i") + " AND owner_id IS NULL;");
-						exploredPlanet.next();
-						System.out.println("test1" + exploredPlanet.getInt("y"));
-						if(exploredPlanet != null){
-							System.out.println("test2");
-							statement2.execute("UPDATE \"PLANET\" SET owner_id = " + userID + " WHERE id = "+ exploredPlanet.getInt("id") + ";");
-							statement2.execute("DELETE FROM app_fleet WHERE id = " + resultSet.getInt("id") + ";");
+						+ " AND y = " + resultSet.getInt("y") + " AND i = " + resultSet.getInt("i") + " ;");
+						java.util.Date utilDate = new java.util.Date();
+						java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
+						if(exploredPlanet.next()){
+							int planetID = exploredPlanet.getInt("id");
+							if (exploredPlanet.getInt("owner_id") == 0){
+								statement2.execute("UPDATE \"PLANET\" SET owner_id = " + userID + " WHERE id = "+ planetID + ";");
+								statement2.execute("DELETE FROM app_fleet WHERE id = " + resultSet.getInt("id") + ";");
+								String news = "INSERT INTO app_news ( user1_id, empire1_id, news_type, date_and_time, is_personal_news, " +
+												" is_empire_news, is_read, tick_number, planet_id) " +
+												" SELECT  " + userID +  " , " + rowInt.get("empire_id") + " , 'SE' , '" + sqlTS + 
+												"' , true, true, false, " + tick_nr + " , " + planetID + " ;" ;
+												System.out.println(news);
+								statement2.execute(news);
+							}
+							else{ //planet is allready taken
+								String news = "INSERT INTO app_news (user1_id, empire1_id, news_type, date_and_time, is_personal_news, "+
+								" is_empire_news, is_read, tick_number, planet_id ) " +
+								" SELECT  " + userID +  " , " + rowInt.get("empire_id") + " , 'UE' , '" + sqlTS + 
+								"' , true, true, false, " + tick_nr + " , " + planetID + " ;" ;
+								statement2.execute(news);
+								statement2.execute("UPDATE app_fleet SET ticks_remaining = 0 WHERE id = " + resultSet.getInt("id") +  ";");
+							}
+						}
+						else {
+							//planet doesnt exist for some reason
+							statement2.execute("UPDATE app_fleet SET ticks_remaining = 0 WHERE id = " + resultSet.getInt("id") +  ";");
 						}
 						continue;
 					}
@@ -645,6 +680,17 @@ public class Main
 			int total_defense_sats = 0;
 			int total_shield_networks = 0;
 			int total_portals = portals.size();
+			
+			int total_solar_collectors_built = 0;
+			int total_fission_reactors_built = 0;
+			int total_mineral_plants_built = 0;
+			int total_crystal_labs_built = 0;
+			int total_refinement_stations_built = 0;
+			int total_cities_built = 0;
+			int total_research_centers_built = 0;
+			int total_defense_sats_built = 0;
+			int total_shield_networks_built = 0;
+			int total_portals_built = 0;
 			
 			//test1 = System.nanoTime();
 			resultSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE owner_id = " + userID);
@@ -693,64 +739,6 @@ public class Main
 				}
 
 			}
-
-			/*0 id colTypes[i]: 4
-			1 x colTypes[i]: 4
-			2 y colTypes[i]: 4
-			3 i colTypes[i]: 4
-			4 home_planet colTypes[i]: -7
-			5 pos_in_system colTypes[i]: 4
-			6 size colTypes[i]: 4
-			7 current_population colTypes[i]: 4
-			8 max_population colTypes[i]: 4
-			9 protection colTypes[i]: 4
-			10 overbuilt colTypes[i]: 8
-			11 overbuilt_percent colTypes[i]: 8
-			12 bonus_solar colTypes[i]: 4
-			13 bonus_mineral colTypes[i]: 4
-			14 bonus_crystal colTypes[i]: 4
-			15 bonus_ectrolium colTypes[i]: 4
-			16 bonus_fission colTypes[i]: 4
-			17 solar_collectors colTypes[i]: 4
-			18 fission_reactors colTypes[i]: 4
-			19 mineral_plants colTypes[i]: 4
-			20 crystal_labs colTypes[i]: 4
-			21 refinement_stations colTypes[i]: 4
-			22 cities colTypes[i]: 4
-			23 research_centers colTypes[i]: 4
-			24 defense_sats colTypes[i]: 4
-			25 shield_networks colTypes[i]: 4
-			26 portal colTypes[i]: -7
-			27 portal_under_construction colTypes[i]: -7
-			28 total_buildings colTypes[i]: 4
-			29 buildings_under_construction colTypes[i]: 4
-			30 owner_id colTypes[i]: 4
-			*/
-			
-			/*		 String planetStatusUpdateQuery = "UPDATE \"PLANET\"  SET" +
-			" current_population = ? ,"+ //1
-			" max_population = ? ," + //2
-			" protection = ? ," + //3
-			" overbuilt = ? ," + //4
-			" overbuilt_percent = ? ," + //5
-			" solar_collectors = ? ," + //6
-			" fission_reactors = ? ," + //7
-			" mineral_plants = ? ," + //8
-			" crystal_labs = ? ," + //9
-			" refinement_stations = ? , " + //10
-			" cities = ? ," + //11
-			" research_centers = ? ," + //12
-			" defense_sats = ? ," + //13
-			" shield_networks = ? ," + //14
-			" portal = ? ," + //15
-			" portal_under_construction = ? ," + //16
-			" total_buildings = ? ," + //17
-			" buildings_under_construction = ? " + //18
-			 
-		 	" WHERE id = ?" ; //19*/
-			
-			//update planets using postgres procedure
-
 			
 			//execute stored procedure -- update planets population
 			test1 = System.nanoTime();
@@ -829,7 +817,18 @@ public class Main
 				int shield_networks = (int)rowValues[colLocation[13]] + buildgsBuiltFromJobs.getOrDefault("shield_networks",0);
 				
 				boolean portal = (boolean)rowValues[colLocation[14]] || (buildgsBuiltFromJobs.getOrDefault("portal",0) == 1 ? true : false);
-	
+				
+				total_solar_collectors_built += buildgsBuiltFromJobs.getOrDefault("solar_collectors",0);
+				total_fission_reactors_built += buildgsBuiltFromJobs.getOrDefault("fission_reactors",0);
+				total_mineral_plants_built += buildgsBuiltFromJobs.getOrDefault("mineral_plants",0);
+				total_crystal_labs_built += buildgsBuiltFromJobs.getOrDefault("crystal_labs",0);
+				total_refinement_stations_built += buildgsBuiltFromJobs.getOrDefault("refinement_stations",0);
+				total_cities_built += buildgsBuiltFromJobs.getOrDefault("cities",0);
+				total_research_centers_built += buildgsBuiltFromJobs.getOrDefault("research_centers",0);
+				total_defense_sats_built +=  buildgsBuiltFromJobs.getOrDefault("defense_sats",0);
+				total_shield_networks_built += buildgsBuiltFromJobs.getOrDefault("shield_networks",0);
+				total_portals_built += buildgsBuiltFromJobs.getOrDefault("portal",0);
+		
 				// Add buildings to running total for player
 				total_solar_collectors += solar_collectors;
 				total_fission_reactors += fission_reactors;
@@ -841,6 +840,7 @@ public class Main
 				total_defense_sats += defense_sats;
 				total_shield_networks += shield_networks;
 				total_portals += (portal == true? 1 : 0);
+				
 				
 				int total_buildings = solar_collectors + 
 					fission_reactors + mineral_plants +
@@ -928,6 +928,37 @@ public class Main
 					planetsUpdateStatement.addBatch();
 				}
 			}
+			
+			//add building news if something was actually built
+			int total_buildigns = total_solar_collectors_built + total_fission_reactors_built + total_mineral_plants_built + total_crystal_labs_built
+			+ total_refinement_stations_built + total_cities_built + total_research_centers_built  + total_defense_sats_built
+			+ total_shield_networks_built + total_portals_built;		
+
+			if (total_buildigns != 0 ){
+			
+				java.util.Date utilDate = new java.util.Date();
+				java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
+				
+				buildingNewsUpdateStatement.setInt(1, userID);
+				buildingNewsUpdateStatement.setInt(2, rowInt.get("empire_id"));
+				buildingNewsUpdateStatement.setTimestamp(3, sqlTS);
+				buildingNewsUpdateStatement.setInt(4, tick_nr);
+				
+				String builtBuildigns = "These constructions were finished : " +
+										" \n solar collectors: " + total_solar_collectors_built +
+										" \n fission reactors: " + total_fission_reactors_built +
+										" \n mineral plants: " + total_mineral_plants_built +
+										" \n crystal labs: "+ total_crystal_labs_built +
+										" \n refinement stations: " + total_refinement_stations_built +
+										" \n cities: " + total_cities_built +
+										" \n research centers: " + total_research_centers_built +
+										" \n defense satelites: " + total_defense_sats_built +
+										" \n shield networks: " + total_shield_networks_built +
+										" \n portals: " + total_portals_built;
+				
+				buildingNewsUpdateStatement.setString(5, builtBuildigns);
+				buildingNewsUpdateStatement.addBatch();
+			}
 
 			test2 = System.nanoTime();
 			planet_loop += test2 - test1;
@@ -969,29 +1000,7 @@ public class Main
 				else
 					userStatusUpdateStatement.setInt(24 + i, currPercent);
 			}
-			
-			/*
-			" research_points_military   = ? ," + //15
-			" research_points_construction   = ? ," + //16
-			" research_points_tech   = ? ," + //17
-			" research_points_energy    = ? ," + //18
-			" research_points_population   = ? ," + //19
-			" research_points_culture    = ? ," + //20
-			" research_points_operations   = ? ," + //21
-			" research_points_portals    = ? ," + //22
-			" current_research_funding    = ? ," + //23
-			" research_percent_military   = ? ," + //24
-			" research_percent_construction    = ? ," + //25
-			" research_percent_tech            = ? ," + //26
-			" research_percent_energy          = ? ," + //27
-			" research_percent_population      = ? ," + //28
-			" research_percent_culture         = ? ," + //29
-			" research_percent_operations      = ? ," + //30
-			" research_percent_portals         = ? ," + //31
-			
-			*/
-			
-			
+
 			long current_research_funding  = rowLong.get("current_research_funding") * 9 / 10;
 
 			//update energy income
@@ -1111,8 +1120,6 @@ public class Main
 			userStatusUpdateStatement.setLong(54, networth);	
 			userStatusUpdateStatement.addBatch();
 			
-			
-			
 			//udate merging fleets
 			ResultSet mergingFleets = statement.executeQuery("SELECT * FROM app_fleet WHERE (command_order = 3 OR command_order = 4) AND owner_id = " + userID + ";");
 			
@@ -1176,6 +1183,15 @@ public class Main
 		userStatusUpdateStatement.executeBatch();
 		userUpdate2 = System.nanoTime();
 		
+		//update building news
+		buildingNewsUpdateStatement.executeBatch();
+		
+		//update building fleets
+		fleetsBuildUpdateStatement.executeBatch();
+		
+		//update fleets news
+		fleetsNewsUpdateStatement.executeBatch();
+		
 		//update empire ranks
 		String updateEmpireRanks = 
 		"UPDATE app_empire "+
@@ -1188,46 +1204,7 @@ public class Main
 		"WHERE "+
 			"app_empire.id = GroupedUserTable.empire_id;";
 		
-		
 		statement.execute(updateEmpireRanks);
-		
-		
-		
-		//merge fleets
-		
-		/*
-		statement.execute("UPDATE app_fleet SET command_order = 3 WHERE command_order = 6 ");	
-		String mergeUpdateQuery= 
-		"INSERT INTO app_fleet (main_fleet, bomber, fighter, transport, cruiser, carrier, soldier, droid, goliath, phantom, "+
-		" wizard, agent, ghost, exploration, x , y , command_order, ticks_remaining, current_position_x,  current_position_y, " + 
-		" owner_id) " +
-		"SELECT false , mgd.bomber, mgd.fighter, mgd.transport, mgd.cruiser, mgd.carrier, mgd.soldier, mgd.droid, mgd.goliath, mgd. phantom, " +
-		 "  mgd.wizard, mgd.agent, mgd.ghost, mgd.exploration, mgd.x , mgd.y , 6 , " +
-		 " 0, mgd.x,  mgd.y, mgd.owner_id " + 
-		"FROM ( "+
-				"SELECT "+
-				"SUM(bomber) as bomber, "+
-				"SUM(fighter) as fighter, "+
-				"SUM(transport) as transport, "+
-				"SUM(cruiser) as cruiser, "+
-				"SUM(carrier) as carrier, "+
-				"SUM(soldier) as soldier, "+
-				"SUM(droid) as droid, "+
-				"SUM(goliath) as goliath, "+
-				"SUM(phantom) as phantom, "+
-				"SUM(wizard) as wizard, "+
-				"SUM(agent) as agent, "+
-				"SUM(ghost) as ghost, "+
-				"SUM(exploration) as exploration, "+
-				"x, y, owner_id, command_order "+
-				"FROM app_fleet  "+
-				"WHERE (command_order = 3 or command_order = 4 ) AND ticks_remaining = 0  " +
-				" GROUP BY x, y, command_order, owner_id "+	
-			" ) AS mgd ";
-			
-		statement.execute(mergeUpdateQuery);	
-		statement.execute("DELETE FROM app_fleet WHERE (command_order = 3 or command_order = 4) AND ticks_remaining = 0 ;");	
-		*/
 		
 		//purge old news
 		String deletePersonalNews = "DELETE FROM app_news WHERE is_personal_news = false AND " + tick_nr + "  - tick_number > " + news_delete_ticks + " ;"; 
@@ -1239,7 +1216,6 @@ public class Main
 
 		//delete elapsed fleet construction
 		statement.execute("DELETE FROM app_unitconstruction WHERE ticks_remaining = 0;");
-		
 		
 		con.commit();
 		}
