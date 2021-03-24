@@ -112,11 +112,11 @@ Database log:
 
 the user name and db name are set in the db: -> environment: in the docker-compose.yml
 
-to run the java tick process:
+## To run the java tick process:
 1. `docker exec -it ectroversedjango_python_1 /bin/bash`
 2. `cd java`
-3. `javac Main.java` - if wasnt allready compiled into bytecode
-4. `java -cp postgresql-42.2.19.jar:. Main >> log.txt &`
+3. `javac ProcessTick.java` - if wasnt allready compiled into bytecode
+4. `java -cp postgresql-42.2.19.jar:. ProcessTick >> log.txt &`
 
 to kill it:
 1. `jobs -l` - get the list of currently running jobs
