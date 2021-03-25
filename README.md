@@ -6,7 +6,6 @@ Put your name after an item if you want to reserve it for yourself, not all item
 left to do:
 - battle sequence 
 - operations- just scouting for now
-- news notifications in the header
 - MAP!!!!!
 
 #### v0.2 Remaining Items
