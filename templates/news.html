@@ -31,11 +31,19 @@
 			<br><br>
 		{% endif %}
 		{% if n.news_type == 'BB' %}
-			{{ n.extra_info|linebreaks }}
+			{{ n.extra_info|linebreaksbr }}
 			<br><br>
 		{% endif %}
 		{% if n.news_type == 'UB' %}
-			{{ n.extra_info|linebreaks }}
+			{{ n.extra_info|linebreaksbr }}
+			<br><br>
+		{% endif %}
+		{% if n.news_type == 'FJ' %}
+			{{ n.extra_info|linebreaksbr }}
+			<br><br>
+		{% endif %}
+		{% if n.news_type == 'PD' %}
+			Your {{ n.extra_info|linebreaksbr}}
 			<br><br>
 		{% endif %}
 	

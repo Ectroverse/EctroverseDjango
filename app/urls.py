@@ -51,6 +51,7 @@ urlpatterns = [
     path('famnews', views.famnews, name='famnews'),
     path('specops', views.specops, name='specops'),
     path('btn', views.btn, name='btn'),
+
 ]
 
 if settings.DEBUG:

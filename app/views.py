@@ -1472,12 +1472,28 @@ def specops(request):
     ops = list(set(race_ops) & set(all_operations))
     spells = list(set(race_spells) & set(all_spells))
     inca = list(set(race_inca) & set(all_incantations))
-    print(ops, spells, inca)
+    msg = ""
+    main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True)
+    if request.method == 'POST':
+        if request.POST['spell'] and request.POST['unit_ammount']:
+            if status.psychic_readiness < 0:
+                msg = "You don't have enough psychic readiness to perform this spell!"
+            elif int(request.POST['unit_ammount']) > main_fleet.wizard:
+                msg = "You don't have that many psychics!"
+            else:
+                if 'user_id2' not in request.POST:
+                    user_id2 = 0
+                else:
+                    user_id2 = request.POST['user_id2']
+                msg = perform_spell(request.POST['spell'], int(request.POST['unit_ammount']), status, user_id2)
+
     context = {"status": status,
-               "page_title": "Special Operations",
-               "operations": ops,
+                "page_title": "Special Operations",
+                "operations": ops,
                 "spells": spells,
-                "incantations": inca
+                "incantations": inca,
+                "msg": msg,
+                "main_fleet": main_fleet
                }
     return render(request, "specops.html", context)
 

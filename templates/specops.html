@@ -4,9 +4,10 @@
 
 {% block content %}
 
-{% if message != '' %}
-{{message}}
-<br>
+{% if msg != '' %}
+	{{msg}}
+	<br>
+	<br>
 {% endif %}
 
 <style>
@@ -76,12 +77,16 @@ padding-right: 15%;
 <div  class ="border_agent"  >
 <div class="centered2"><h3>Operations</h3></div>
 	<div class="ops_box">
-		<form>
+	Agents ammount: {{main_fleet.agent}}
+	<br>
+		<form action="/specops" method="POST">
+		{% csrf_token %}
 			{% for o in operations %}
 			<input type="radio" id="{{ o }}" name="operation" value="{{ o }}">
 			<label class="remove-all-styles" for="{{ o }}">{{ o }}</label>
 			{% endfor %}
 			<br>
+			<input type="submit" value="Perform">
 		</form> 
 	</div>
 	<div class="ops_box2">
@@ -93,12 +98,17 @@ padding-right: 15%;
 <div class="border_psyhic" >
 <div class="centered2"><h3>Spells</h3></div>
 	<div class="ops_box">
-		<form>
+	Psychics ammount: {{main_fleet.wizard}}
+	<br>
+		<form action="/specops" method="POST">
+		{% csrf_token %}
 			{% for s in spells %}
 			<input type="radio" id="{{ s }}" name="spell" value="{{ s }}">
 			<label class="remove-all-styles" for="{{ s }}">{{ s }}</label>
 			<br>
 			{% endfor %}
+			<input type="number" min="0" max="{{main_fleet.wizard}}" name="unit_ammount" size="12" />
+			<input type="submit" value="Perform">
 		</form> 
 	</div>
 	<div class="ops_box2">
@@ -110,12 +120,16 @@ padding-right: 15%;
 <div class="border_ghost" >
 <div class="centered2"><h3>Incantations</h3></div>
 	<div class="ops_box">
-		<form>
+	Ghost ships ammount: {{main_fleet.ghost}}
+	<br>
+		<form action="/specops" method="POST">
+		{% csrf_token %}
 			{% for i in incantations %}
-			<input type="radio" id="{{ i }}" name="spell" value="{{ i }}">
+			<input type="radio" id="{{ i }}" name="inca" value="{{ i }}">
 			<label class="remove-all-styles" for="{{ i }}">{{ i }}</label>
 			<br>
 			{% endfor %}
+			<input type="submit" value="Perform">
 		</form> 
 	</div>
 	<div class="ops_box2">

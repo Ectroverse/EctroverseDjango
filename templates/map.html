@@ -2,7 +2,10 @@
 
 {% block content %}
 
-<div id="mapdiv" style="background-color:black"></div>
+
+
+
+<div id="mapdiv" style="background-image:url(/static/background.gif)"></div>
 
 <a href="?heatmap=True">Heatmap Test</a>
 
@@ -16,15 +19,15 @@
       .on("zoom", zoomed);
 
   const svg = d3.select("#mapdiv")
-    .append("div") 
-    .append("svg") 
+    .append("div")
+    .append("svg")
     .style("height", '80vh')
     .style("width", '100%')
     .attr("preserveAspectRatio", "xMidYMin meet") // see here for a nice graphic https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/preserveAspectRatio
     .attr("viewBox", [-1, -1, width+1, height+1]) // default view
     .on("click", reset); // zooms out when you click on not the background
 
-  const g = svg.append("g");                   
+  const g = svg.append("g");
 
   // Heatmap overlay
   {% if show_heatmap %}
@@ -36,8 +39,17 @@
       .attr('xlink:href','/static/heatmap.png')
       .style("opacity", 0.5)
   {% endif %}
-  
+
 {% for planet in planets %}
+  g.append("image")
+    .attr("xlink:href", "/static/map/p11.gif")
+    .attr("x", (({{planet.x}} + 0.3*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.05))
+    .attr("y", (({{planet.y}} + 0.3*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.05))
+    .attr("width", .1) // changes in zoom
+    .attr("height", .1) // changes in zoom
+    .append("title") // hover-over text
+    .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
+
   g.append("a")
     .attr("xlink:href", "planet{{planet.id}}")
     .append("circle")
@@ -45,12 +57,12 @@
     .attr("cx", {{planet.x}} + 0.3*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
     .attr("cy", {{planet.y}} + 0.3*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
     .attr("r", circle_radius * {{planet.size}}/400)
-    .style("fill", "grey")
+    .style("fill", "transparent")
     .style("visibility", "hidden") // changes in zoom
     //.on("click", clicked)
     .append("title") // hover-over text
     .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
-      
+
   g.append("text")
     .attr("x", {{planet.x}} + 0.3*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
     .attr("y", {{planet.y}} + 0.3*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
@@ -65,26 +77,26 @@
 {% endfor %}
 
 {% for system in systems %}
-  g.append("ellipse") // i couldnt figure out how to distinguish between planets and suns when i did the zoom stuff so this was my solution
-    .attr("cx", {{system.0}})
-    .attr("cy", {{system.1}})
-    .attr("rx", circle_radius*4) // changes in zoom
-    .attr("ry", circle_radius*4) // changes in zoom
-    .style("fill", "yellow")
+  g.append("image")
+    .attr("xlink:href", "/static/map/sun.gif")
+    .attr("x", ({{system.0}}-.1))
+    .attr("y", ({{system.1}}-.1))
+    .attr("width", .2) // changes in zoom
+    .attr("height", .2) // changes in zoom
     .append("title") // hover-over text
-    .text("{{system.0}},{{system.1}}");    
-      
+    .text("{{system.0}},{{system.1}}");
+
   g.append("text")
     .attr("x", {{system.0}})
-    .attr("y", {{system.1}})
+    .attr("y", ({{system.1}}+.15))
     .attr("font-family", "sans-serif")
     .attr("font-size", "0.1px")
-    .attr("fill", "black")
+    .attr("fill", "red")
     .attr("text-anchor", "middle") // horizontal centering
-    .attr("dominant-baseline", "central") // vertical centering
+    .attr("allignment-baseline", "after-edge") // vertical centering
     .style("pointer-events", "none")
     .style("visibility", "hidden") // changes in zoom
-    .text("{{system.0}},{{system.1}}"); 
+    .text("{{system.0}},{{system.1}}");
 {% endfor %}
 
 /* Add coordinate numbers to top/bottom/sides */
@@ -94,7 +106,7 @@ for (let i = 0; i < width; i=i+5) {
         .attr("y", 0)
         .attr("font-family", "sans-serif")
         .attr("font-size", "1")
-        .attr("fill", "white")
+        .attr("fill", "yellow")
         .attr("text-anchor", "middle") // horizontal centering
         .attr("dominant-baseline", "central") // vertical centering
         .style("pointer-events", "none")
@@ -105,7 +117,7 @@ for (let i = 0; i < width; i=i+5) {
         .attr("y", height)
         .attr("font-family", "sans-serif")
         .attr("font-size", "1")
-        .attr("fill", "white")
+        .attr("fill", "yellow")
         .attr("text-anchor", "middle") // horizontal centering
         .attr("dominant-baseline", "central") // vertical centering
         .style("pointer-events", "none")
@@ -118,7 +130,7 @@ for (let i = 0; i < height; i=i+5) {
         .attr("y", i)
         .attr("font-family", "sans-serif")
         .attr("font-size", "1")
-        .attr("fill", "white")
+        .attr("fill", "yellow")
         .attr("text-anchor", "middle") // horizontal centering
         .attr("dominant-baseline", "central") // vertical centering
         .style("pointer-events", "none")
@@ -129,16 +141,16 @@ for (let i = 0; i < height; i=i+5) {
         .attr("y", i)
         .attr("font-family", "sans-serif")
         .attr("font-size", "1")
-        .attr("fill", "white")
+        .attr("fill", "yellow")
         .attr("text-anchor", "middle") // horizontal centering
         .attr("dominant-baseline", "central") // vertical centering
         .style("pointer-events", "none")
         .style("visibility", "hidden") // changes in zoom
         .text(i.toString())
 }
-  
-  
-  svg.call(zoom);
+
+
+ svg.call(zoom);
 
   function reset() {
     svg.transition().duration(750).call(
@@ -148,7 +160,7 @@ for (let i = 0; i < height; i=i+5) {
     );
   }
 
-/*
+
   function clicked(d,i) {
     //const [[x0, y0], [x1, y1]] = path.bounds(d);
     console.log(d); // coming back as undefined for circles
@@ -158,12 +170,12 @@ for (let i = 0; i < height; i=i+5) {
       zoom.transform,
       d3.zoomIdentity
         .translate(width / 2, height / 2)
-        .scale(Math.min(8, 0.9 / Math.max(circle_radius / width, circle_radius / height)))
-        .translate(-circle_radius, -circle_radius),
+        .scale(Math.min(32, 0.9 / Math.max(width / width, height / height)))
+        .translate(-width, -height),
       d3.mouse(svg.node())
     );
   }
-*/
+
 
   function zoomed() {
     const {transform} = d3.event;
@@ -191,7 +203,6 @@ for (let i = 0; i < height; i=i+5) {
 
 
 </script>
-  
+
 
 {% endblock %}
-
