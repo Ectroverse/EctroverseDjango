@@ -73,7 +73,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
                                             size=size)) # create is the same as new() and add()
 
 
-            # Now add N planets in a small area around the home planet
+            # Now add N systems in a small area around the home system
             N = 6
             d_from_home = 3
             history = []
