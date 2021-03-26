@@ -20,11 +20,11 @@
   <div class="divTable">
     <div class="divTableBody"
     <div class="divRow">
-      <div class="divColumn" style="width: 15%;"></div>
-      <div class="divColumn" style="width: 10%;"></div>
-      <div class="divColumn" style="width: 20%;"></div>
-      <div class="divColumn" style="width: 25%;"></div>
-      <div class="divColumn" style="width: 28%;"></div>
+      <div class="divColumn" style="width: 14%;"></div>
+      <div class="divColumn" style="width: 9%;"></div>
+      <div class="divColumn" style="width: 19%;"></div>
+      <div class="divColumn" style="width: 24%;"></div>
+      <div class="divColumn" style="width: 27%;"></div>
       <div class="divColumn" style="width: 2%;"><input type="submit" value="Mass Build" align="right"></div>
     </div>
     </div>
@@ -32,8 +32,8 @@
   <div class="divTable">
     <div class="divTableBody"
     <div class="divRow">
-      <div class="divColumn" style="width: 15%;"><a href="?order_by=planet">Planet</a></div>
-      <div class="divColumn" style="width: 10%;"><a href="?order_by=-size">Size</a> -
+      <div class="divColumn" style="width: 14%;"><a href="?order_by=planet">Planet</a></div>
+      <div class="divColumn" style="width: 9%;"><a href="?order_by=-size">Size</a> -
         <div class="dropdown"><button class="dropbtn" disabled>Bonus</button>
         <div class="dropdown-content">
       <a href="?order_by=-bonus_solar">Solar</a>
@@ -44,16 +44,16 @@
       <a href="?order_by=ancient">Ancient</a>
       <a href="?order_by=bonus_all">All</a>
       <a href="?order_by=bonus_none">None</a></div></div></div>
-      <div class="divColumn" style="width: 20%"><a href="?order_by=total_buildings">Buildings</a> - <a href="?order_by=overbuilt">Overbuilding</a></div>
-      <div class="divColumn" style="width: 25%;"><a href="?order_by=current_population">Population</a></div>
-      <div class="divColumn" style="width: 28%;">Build - <a href="?order_by=protection">Protection</a></div>
+      <div class="divColumn" style="width: 19%"><a href="?order_by=total_buildings">Buildings</a> - <a href="?order_by=overbuilt">Overbuilding</a></div>
+      <div class="divColumn" style="width: 24%;"><a href="?order_by=current_population">Population</a></div>
+      <div class="divColumn" style="width: 27%;">Build - <a href="?order_by=protection">Protection</a></div>
       <div class="divColumn href" style="width: 2%;" onclick="toggleForm('massbuild');"><font size="1">Toggle</font></div>
     </div>
 
     <div class="divRow">{% for planet in planets %}
-      <div class="divColumn" style="width: 15%;><a href="/planet{{planet.id}}">{{planet.x}},{{planet.y}}:{{planet.i}}</div>
-      <div class="divColumn" style="width: 10%;">{{planet.size}}</div>
-      <div class="divColumn" style="width: 20%;">{{planet.total_buildings}}
+      <div class="divColumn" style="width: 14%;><a href="/planet{{planet.id}}">{{planet.x}},{{planet.y}}:{{planet.i}}</div>
+      <div class="divColumn" style="width: 9%;">{{planet.size}}</div>
+      <div class="divColumn" style="width: 19%;">{{planet.total_buildings}}
 
       {% if planet.buildings_under_construction > 0 %}
       ({{planet.buildings_under_construction}})
@@ -66,8 +66,8 @@
       {% endif %}
       </div>
 
-      <div class="divColumn" style="width: 25%;"><font color="#FFFF66">{{planet.current_population}} / {{planet.max_population}}</font></div>
-      <div class="divColumn" style="width: 28%;"><a href="/build{{planet.id}}">Build</a>
+      <div class="divColumn" style="width: 24%;"><font color="#FFFF66">{{planet.current_population}} / {{planet.max_population}}</font></div>
+      <div class="divColumn" style="width: 27%;"><a href="/build{{planet.id}}">Build</a>
       {% if planet.portal %}
       &nbsp;&nbsp;<img src="{% static '/buildings/Portal.png' %}" width="20" height="20" alt="Portal" title="Portal"><font color="#00FF00">&nbsp;-&nbsp;100%</font>
       {% else %}
