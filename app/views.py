@@ -22,6 +22,7 @@ from django.contrib.auth.decorators import user_passes_test
 from app.map_settings import *
 from app.helper_functions import *
 from app.specops import *
+from app.battle import *
 
 import json
 import numpy as np
@@ -146,6 +147,42 @@ def btn(request):
                 "btn4": btn4
                 }
     return render(request, "btn.html", context)
+
+@login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
+def battle(request, fleet_id):
+    status = get_object_or_404(UserStatus, user=request.user)
+    fleet = get_object_or_404(Fleet, pk=fleet_id)
+    print("fleet owner",fleet.owner, status.user, fleet.owner.id, status.id)
+    if fleet.owner != status.user:
+        return fleets(request)
+    if fleet.ticks_remaining != 0:
+        return fleets(request)
+    msg = attack_planet(fleet)
+    context = {"status": status,
+               "page_title": "Battle",
+               "fleet":fleet,
+               "msg": msg
+               }
+    return render(request, "battle.html", context)
+
+@login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
+def map_settings(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    msg= ""
+    if request.method == 'POST':
+        print(request.POST)
+        if 'new_setting' in request.POST:
+            MapSettings.objects.create(user=request.user)
+            msg = "New setting created!"
+    map_settings = MapSettings.objects.filter(user=request.user)
+    context = {"status": status,
+               "page_title": "Map Settings",
+               "map_settings": map_settings,
+               "msg" : msg,
+               }
+    return render(request, "map_settings.html", context)
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -1476,6 +1513,7 @@ def specops(request):
     main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True)
     if request.method == 'POST':
         if request.POST['spell'] and request.POST['unit_ammount']:
+            print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", request.POST['spell'])
             if status.psychic_readiness < 0:
                 msg = "You don't have enough psychic readiness to perform this spell!"
             elif int(request.POST['unit_ammount']) > main_fleet.wizard:

@@ -193,7 +193,42 @@
 				</div>
 			</div>
 		{% endif %}
-
+		{% if n.news_type == 'PD' %}
+			<div class="news_parent_container">
+				{% if n.user1 == n.user2 %} 
+				<div class="left_news"><img src="{% static '/news/outgoing_operation.gif' %}"></div>
+				{% else %}
+				<div class="left_news"><img src="{% static '/news/incoming_operation.png' %}"></div>
+				{% endif %}
+				
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{% if n.user1 == n.user2 %} 
+					{{n.user1}} has performed a {{ n.fleet1 }} spell on himself!
+				{% else %}
+					{{n.user1}} was a target of {{ n.fleet1 }} spell
+					{% if n.user1 == 0 %}
+						performed by unknown faction!
+					{% else %}
+						performed by {{n.user2}}!
+					{% endif %}
+				{% endif %}
+				<br>
+				The results: {{n.extra_info}}
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'PA' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/outgoing_operation.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{{n.user1}}'s psychics have casted a {{ n.fleet1 }} spell on {{n.user2}}!
+				<br>
+				The results: {{n.extra_info}}
+				</div>
+			</div>
+		{% endif %}
 	
 	{% endfor %}
 

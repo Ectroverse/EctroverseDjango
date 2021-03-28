@@ -43,7 +43,21 @@
 			<br><br>
 		{% endif %}
 		{% if n.news_type == 'PD' %}
-			Your {{ n.extra_info|linebreaksbr}}
+			{% if n.user1 == n.user2 %}
+				You have perfomed {{n.fleet1}} with the following results:{{ n.extra_info|linebreaksbr}}
+			{% else %}
+				You were a target of {{ n.fleet1 }} spell 
+					{% if n.user1 == 0 %}
+						performed by unknown faction! 
+					{% else %}
+						performed by {{n.user2}}! 
+					{% endif %}
+					With the following results: {{ n.extra_info|linebreaksbr}}
+			{% endif %}
+			<br><br>
+		{% endif %}
+		{% if n.news_type == 'PA' %}
+			Your psychics have casted a {{n.fleet1}} spell on {{n.user2}} with the following results: {{ n.extra_info|linebreaksbr}}
 			<br><br>
 		{% endif %}
 	

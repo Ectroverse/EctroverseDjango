@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+{% if msg %}
+	msg
+{% endif %}
+
+<style>
+.wrap{
+	text-align:center;
+	overflow:hidden;
+	width: 100%;
+	margin-bottom: 8px;
+}
+
+.left{
+ float: left;
+ margin: 0 auto;
+ width: 33%;
+ text-align: center;
+}
+
+.right1{
+ float: right;
+ margin: 0 auto;
+ width: 27%;
+ text-align: center;
+}
+
+.right2{
+ float: right;
+ margin: 0 auto;
+ width: 6%;
+ text-align: center;
+}
+
+.center{
+margin: 0 auto;
+width: 33%;
+}
+</style>
+
+{% if not map_settings %}
+You don't have any setting currently. Consider creating one.
+{% else %}
+
+<form action="/map_settings" method="POST">
+{% csrf_token %}
+
+<div class="wrap">
+	<div class="left">
+		Planets list:
+	</div>
+	<div class="right2">
+		Delete:
+	</div>
+	<div class="right1">
+		Colour:
+	</div>
+	<div class="center">
+		Details: 
+	</div>
+</div>
+
+{% for setting in map_settings %}
+<input type="hidden" name="setting_number" value="{{setting.id}}">
+
+<div class="wrap">
+	<div class="left">
+	{{ forloop.counter0 }}.
+		<select name="map_settings">
+		<option value="U" {% if setting.map_setting == 'U' %}selected{% endif %}>
+		Unused</option>
+		<option value="YP" {% if setting.map_setting == 'YP' %}selected{% endif %}>
+		Your planets</option>
+		<option value="YR" {% if setting.map_setting == 'YR' %}selected{% endif %}>
+		Your portals</option>
+		<option value="YE" {% if setting.map_setting == 'YE' %}selected{% endif %}>
+		Your empire</option>
+		<option value="PF" {% if setting.map_setting == 'PF' %}selected{% endif %}>
+		Planets of faction :</option>
+		<option value="PE" {% if setting.map_setting == 'PE' %}selected{% endif %}>
+		Planets of empire :</option>
+		<option value="UE" {% if setting.map_setting == 'UE' %}selected{% endif %}>
+		Unexplored planets</option>
+		</select>
+	</div>
+	
+	<div class="right2">
+		<input type="checkbox" name="delete_setting" value="0" />
+	</div>
+	
+	<div class="right1">
+		<select name="color">
+		<option value="G" {% if setting.map_setting == 'G' %}selected{% endif %}>
+		Green</option>
+		<option value="B" {% if setting.map_setting == 'B' %}selected{% endif %}>
+		Blue</option>
+		<option value="R" {% if setting.map_setting == 'R' %}selected{% endif %}>
+		Red</option>
+		<option value="Y" {% if setting.map_setting == 'Y' %}selected{% endif %}>
+		Yellow</option>
+		<option value="O" {% if setting.map_setting == 'O' %}selected{% endif %}>
+		Orange</option>
+		<option value="I" {% if setting.map_setting == 'I' %}selected{% endif %}>
+		Indigo</option>
+		<option value="V" {% if setting.map_setting == 'V' %}selected{% endif %}>
+		Violet</option>
+		</select>
+	</div>
+	
+
+	
+	<div class="center">
+		<input type="text"name="f0" size="6" >
+	</div>
+</div>
+{% endfor %}
+<input type="submit" value="Change">
+<form>
+
+{% endif %}
+
+<br><br>
+
+<form action="/map_settings" method="POST">
+{% csrf_token %}
+<input type="hidden" name="new_setting">
+<input type="submit" value="Create a new setting">
+<form>
+
+{% endblock %}

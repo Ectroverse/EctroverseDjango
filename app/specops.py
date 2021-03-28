@@ -2,45 +2,141 @@ import numpy as np
 from app.constants import *
 from app.models import *
 from datetime import datetime
+from django.db.models import Sum
 
 all_operations = ["Observe Planet"]
-all_spells = ["Irradiate Ectrolium", "Incandescence"]
+all_spells = ["Irradiate Ectrolium",
+"Dark Web",
+"Incandescence",
+"Black Mist",
+"War Illusions",
+"Psychic Assault",
+"Phantoms",
+"Enlightenment",
+"Grow Planet's Size"]
 all_incantations = ["Survey System"]
 
-psychicop_difficulty = {"Incandescence": 1, }
-psychicop_requirement = {"Incandescence": 0, }
-psychicop_self= {"Incandescence": 0, }
-psychicop_cost= {"Incandescence": 30, }
+# tech, readiness, difficulty, self-spell
+psychicop_specs = {
+    "Irradiate Ectrolium" : [0, 12, 1.5, False],
+    "Dark Web": [10, 18,  2.4, True],
+    "Incandescence": [0, 30, 2.5, True],
+    "Black Mist": [50, 24, 3.0, False],
+    "War Illusions": [70, 30, 4.0, True],
+    "Psychic Assault": [90, 35, 1.7, False],
+    "Phantoms": [110, 40, 5.0, True],
+    "Enlightenment": [120, 35, 1.0, True],
+    "Grow Planet's Size": [110, 20, 2.5, True]
+    }
 
 def specopPsychicsReadiness(spell, user1, *args):
-    if spell in psychicop_self:
-        return psychicop_cost[spell]
-#     finishthis function rewrite
+    if args:
+        user2 = args[0]
+
+    if psychicop_specs[spell][3] is False and not user2:
+        return -1
+
+    penalty = get_op_penalty(user1.research_percent_culture, psychicop_specs[spell][0])
+    if penalty == -1:
+        return -1
+    elif psychicop_specs[spell][3]:
+        return int((1.0 + 0.01 * penalty) * psychicop_specs[spell][1])
+
+    empire1 = Empire.objects.get(id=user1.empire)
+    empire2 = Empire.objects.get(id=user2.empire)
+
+    fa = (1 + user1.num_planets) / (1 + user2.num_planets)
+    fb = (1 + empire1.planets) / (1 + empire2.planets)
+    fa = pow(fa, 1.8)
+    fb = pow(fb, 1.2)
+    fa = 0.5 * (fa + fb)
+
+    if fa < 0.75:
+        fa = 0.75
+
+    fa = (1.0 + 0.01 * penalty) * psychicop_specs[spell][1] * fa
+
+    relations_from_empire = Relations.objects.filter(empire1=empire1)
+    relations_to_empire = Relations.objects.filter(empire2=empire2)
+
+    war = False
+    ally = False
+    nap = False
+
+    for rel in relations_from_empire:
+        if rel.relation_type == 'W' and rel.empire2 == empire2:
+            war = True
+        if rel.relation_type == 'A' and rel.empire2 == empire2:
+            ally = True
+        if rel.relation_type == 'NC' or rel.relation_type == 'PC' or rel.relation_type == 'N' and rel.empire2 == empire2:
+            nap = True
+
+    for rel in relations_to_empire:
+        if rel.relation_type == 'W' and rel.empire2 == empire1:
+            war = True
+        if rel.relation_type == 'A' and rel.empire2 == empire1:
+            ally = True
+        if rel.relation_type == 'NC' or rel.relation_type == 'PC' or rel.relation_type == 'N' and rel.empire2 == empire1:
+            nap = True
+
+
+    if empire1.id == empire2.id or ally or war:
+        fa /= 3
+
+    if nap:
+        fa = max(50, fa)
+
+    if fa > 300:
+        fa = 300
+
+    return fa
 
 
 def get_op_penalty(research, requirement):
     a = requirement - research
     if a <= 0:
         return 0
-    da = pow(a, 1.20 )
+    da = pow(a, 1.20)
     if da >= 150.0:
         return -1
     return da
 
 
-def perform_spell(spell, psychics, status, user2ID):
-    if spell not in psychicop_difficulty or spell not in psychicop_requirement or spell not in all_spells:
+def perform_spell(spell, psychics, status, *args):
+    if spell not in psychicop_specs:
         return "This spell is broken/doesnt exist!"
 
     fa = 0.4 + (1.2 / 255.0) * (np.random.randint(0, 2147483647) & 255)
 
     attack = fa * race_info_list[status.get_race_display()].get("psychics_coeff", 1.0) * \
-              psychics * (1.0 + 0.005 * status.research_percent_culture / psychicop_difficulty[spell] )
+              psychics * (1.0 + 0.005 * status.research_percent_culture /  psychicop_specs[spell][2]  )
 
-    penalty = get_op_penalty(status.research_percent_culture, psychicop_requirement[spell])
+    penalty = get_op_penalty(status.research_percent_culture,  psychicop_specs[spell][0] )
+
+    if penalty == -1:
+        return
+
+    if penalty > 0:
+        attack /=  1.0 + 0.01 * penalty
+
+    fleet1 = Fleet.objects.get(owner=status.id,main_fleet=True)
+
+    if args[0]:
+        user2 = UserStatus.objects.get(id=args[0])
+        empire2 = user2.empire
+        fleet2 = Fleet.objects.get(owner=user2.id, main_fleet=True)
+        psychics2 = Fleet.objects.filter(owner=user2.id).aggregate(Sum('wizard'))
+        psychics2 = psychics2['wizard__sum']
+        print(psychics2)
+        defence = race_info_list[user2.get_race_display()].get("psychics_coeff", 1.0) * psychics2 * \
+                  (1.0 + 0.005 * user2.research_percent_culture )
+        success = attack / (defence + 1)
 
     if penalty > 0:
         attack = attack / (1.0 + 0.01 * penalty)
+
+    news_message = ""
+    message = ""
 
     if spell == "Incandescence":
         status.crystals
@@ -52,13 +148,76 @@ def perform_spell(spell, psychics, status, user2ID):
 
         energy = int(cry_converted * 24.0 * (1.0 + 0.01 * status.research_percent_culture))
         status.energy += energy
-        status.psychic_readiness -= specopPsychicsReadiness(spell, status)
+        status.psychic_readiness -= specopPsychicsReadiness(spell, status, user2)
         status.save()
         news_message = str(cry_converted) + " crystals were converted into " + str(energy) + " energy!"
         message = "Your " + str(cry_converted) + " crystals were converted into " + str(energy) + " energy!"
 
+    if spell == "Irradiate Ectrolium":
+        destroyed_ectro = 0
+        if success > 1:
+            frac_destroyed = 0.2
+        else:
+            frac_destroyed = (20.0/0.6) * (success - 0.4) * 0.01
+
+        if frac_destroyed > 0:
+            destroyed_ectro = int(frac_destroyed * user2.ectrolium)
+            user2.ectrolium -= destroyed_ectro
+            user2.military_flag = 1
+            user2.save()
+
+        news_message = str(destroyed_ectro) + " ectrolium was destroyed!"
+        message = "You have irradiated " + str(destroyed_ectro) + " ectrolium!"
+
+    if spell == "Psychic Assault":
+        refdef = pow(attack / (attack + defence), 1.1 )
+        refatt = pow(defence / (attack + defence), 1.1 )
+        tlosses = 0.2
+
+        psychics_loss1 = min(int(refatt * tlosses * psychics), psychics)
+        fleet1.wizard -= psychics_loss1
+        fleet1.save()
+
+        psychics_loss2 = min(int(refdef * tlosses * psychics2), psychics2)
+        fleet2.wizard -= psychics_loss2
+        fleet2.save()
+
+        news_message = str(psychics_loss1) + " psychics were lost by " + status.user_name + \
+                       " and " + str(psychics_loss2) + " were lost by " + user2.user_name + "!"
+        message = "You have assaulted " + str(psychics_loss2) + " enemy psychics of " + user2.user_name + \
+            " however " + str(psychics_loss1) + " of your psychics have also suffered critical brain damages!"
+
+    if  psychicop_specs[spell][3] == True:
         News.objects.create(user1=User.objects.get(id=status.id),
+                        user2=User.objects.get(id=status.id),
+                        empire1=status.empire,
+                        fleet1=spell,
+                        news_type='PD',
+                        date_and_time=datetime.now(),
+                        is_personal_news=True,
+                        is_empire_news=True,
+                        extra_info=news_message,
+                        tick_number=RoundStatus.objects.get().tick_number
+                        )
+    else:
+        News.objects.create(user1=User.objects.get(id=status.id),
+                            user2=User.objects.get(id=user2.id),
                             empire1=status.empire,
+                            empire2=empire2,
+                            fleet1=spell,
+                            news_type='PA',
+                            date_and_time=datetime.now(),
+                            is_personal_news=True,
+                            is_empire_news=True,
+                            extra_info=news_message,
+                            tick_number=RoundStatus.objects.get().tick_number
+                            )
+
+        News.objects.create(user1=User.objects.get(id=user2.id),
+                            user2=User.objects.get(id=status.id),
+                            empire1=empire2,
+                            empire2=status.empire,
+                            fleet1=spell,
                             news_type='PD',
                             date_and_time=datetime.now(),
                             is_personal_news=True,
@@ -66,6 +225,99 @@ def perform_spell(spell, psychics, status, user2ID):
                             extra_info=news_message,
                             tick_number=RoundStatus.objects.get().tick_number
                             )
-        return message
+    return message
+
+    # if news_message2_empire1:
+    #
+    #
+    #
+    # if news_message2_empire2:
 
 
+
+'''
+char *cmdAgentopName[CMD_AGENTOP_NUMUSED] =
+{
+"Spy Target",
+"Observe Planet",
+"Network Virus",
+"Infiltration",
+"Bio Infection",
+"Energy Transfer",
+"Military Sabotage",
+"Nuke Planet",
+"High Infiltration",
+"Planetary Beacon",
+"Diplomatic Espionage",
+"Steal Resources"
+};
+
+char *cmdPsychicopName[CMD_PSYCHICOP_NUMUSED] =
+{
+"Irradiate Ectrolium",
+"Dark Web",
+"Incandescence",
+"Black Mist",
+"War Illusions",
+"Psychic Assault",
+"Phantoms",
+"Enlightenment",
+"Grow Planet's Size"
+};
+
+char *cmdGhostopName[CMD_GHOSTOP_NUMUSED] =
+{
+"Sense Artefact",
+"Survey System",
+"Planetary Shielding",
+"Portal Force Field",
+"Vortex Portal",
+"Mind Control",
+"Energy Surge",
+"Call to Arms"
+};
+
+
+int cmdAgentopTech[CMD_AGENTOP_NUMUSED] =
+{
+0, 0, 25, 40, 60, 80, 100, 120, 160, 100, 40, 80
+};
+
+
+
+int cmdGhostopTech[CMD_GHOSTOP_NUMUSED] =
+{
+20, 40, 60, 80, 100, 120, 140, 110
+};
+
+
+float cmdAgentopReadiness[CMD_AGENTOP_NUMUSED] =
+{
+12.0, 5.0, 22.0, 18.0, 25.0, 22.0, 30.0, 20.0, 40.0, 7.0, 15.0, 22.0
+};
+
+
+
+int cmdGhostopReadiness[CMD_GHOSTOP_NUMUSED] =
+{
+50, 20, 40, 30, 60, 40, 70, 20
+};
+
+
+float cmdAgentopDifficulty[CMD_AGENTOP_NUMUSED] =
+{
+1.0, 1.0, 3.5, 2.5, 3.0, 2.5, 3.5, 5.0, 6.0, 1.0, 1.5, 2.5
+};
+
+
+
+float cmdGhostopDifficulty[CMD_GHOSTOP_NUMUSED] =
+{
+1.0, 1.0, 2.0, 1.5, 1.0, 5.0, 6.0, 2.0
+};
+
+int cmdAgentopStealth[CMD_AGENTOP_NUMUSED] =
+{
+1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0
+};
+'''

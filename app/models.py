@@ -414,3 +414,27 @@ class NewsFeed(models.Model):
     message = models.TextField()
 
 
+class MapSettings(models.Model):
+    user = models.ForeignKey(User, related_name='user1', on_delete=models.CASCADE)
+    faction = models.ForeignKey(User, related_name='faction', on_delete=models.CASCADE, blank=True, null=True, default=None)
+    empire = models.ForeignKey(Empire, on_delete=models.CASCADE, blank=True, null=True, default=None)
+    class MapSetting(models.TextChoices):
+        UE = 'UE', _('Unexplored planets')
+        PE = 'PE', _('Planets of empire')
+        PF = 'PF', _('Planets of faction ')
+        YE = 'YE', _('Your empire')
+        YR = 'YR', _('Your portals')
+        YP = 'YP', _('Your planets')
+        U = 'U', _('Unused')
+    map_setting = models.CharField(max_length=2, choices=MapSetting.choices, default='U')
+    class ColorSettings(models.TextChoices):
+        R = 'R', _('Red')
+        B = 'B', _('Blue')
+        G = 'G', _('Green')
+        O = 'O', _('Orange')
+        Y = 'Y', _('Yellow')
+        I = 'I', _('Indigo')
+        V = 'V', _('Violet')
+    color_settings = models.CharField(max_length=1, choices=ColorSettings.choices, default='G')
+
+

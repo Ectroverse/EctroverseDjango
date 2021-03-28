@@ -115,7 +115,7 @@
 						{% elif fleet_nr.command_order == 1 %}
 							Fleet stationed at position
 						{% elif fleet_nr.command_order == 0 %}
-							<a href = "/attack" value="{{fleet_nr}}">Attack planet!</a>
+							<a href = "/battle{{fleet_nr.id}}">Attack planet!</a>
 						{% endif %}
 						</td>
 						<td>{{fleet_nr.current_position_x | floatformat}}, {{fleet_nr.current_position_y | floatformat}}</td>

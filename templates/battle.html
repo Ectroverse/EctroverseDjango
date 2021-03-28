@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+{% if error %}
+{{error}}
+{% endif %}
+
+
+{{fleet}}
+{{fleet.command_order}}
+{{fleet.x}}
+{{fleet.y}}
+{{fleet.i}}
+
+{{msg}}
+
+
+{% endblock %}

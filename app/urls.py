@@ -51,7 +51,8 @@ urlpatterns = [
     path('famnews', views.famnews, name='famnews'),
     path('specops', views.specops, name='specops'),
     path('btn', views.btn, name='btn'),
-
+	url(r'^battle(?P<fleet_id>[0-9]+)/$', views.battle, name='battle'),
+    path('map_settings', views.map_settings, name='map_settings'),
 ]
 
 if settings.DEBUG:
