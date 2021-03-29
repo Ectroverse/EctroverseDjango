@@ -170,17 +170,103 @@ def battle(request, fleet_id):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def map_settings(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    msg= ""
+    msg = ""
+    err_msg = ""
     if request.method == 'POST':
         print(request.POST)
         if 'new_setting' in request.POST:
-            MapSettings.objects.create(user=request.user)
-            msg = "New setting created!"
-    map_settings = MapSettings.objects.filter(user=request.user)
+            nr_settings = MapSettings.objects.filter(user=request.user).count()
+            if nr_settings > 19:
+                err_msg = "You can have 20 settings at max!"
+            else:
+                MapSettings.objects.create(user=request.user)
+                msg = "New setting created!"
+        else:
+            settings_id = request.POST.getlist("setting_object")
+            color = request.POST.getlist("color")
+            delete_setting2 = request.POST.getlist("delete_setting")
+            delete_setting = []
+            j = 0
+            while j < len(delete_setting2):
+                if j < len(delete_setting2) - 1 and delete_setting2[j] == "0":
+                    if delete_setting2[j+1] == "1":
+                        delete_setting.append(1)
+                        j += 2
+                    else:
+                        delete_setting.append(0)
+                        j += 1
+                else:
+                    delete_setting.append(0)
+                    j += 1
+            print("delete_setting", delete_setting)
+
+            map_settings = request.POST.getlist("map_settings")
+            details = request.POST.getlist("details")
+            for i in range(0, len(settings_id)):
+                try:
+                    details[i] = int(details[i])
+                except ValueError:
+                    details[i] = str(details[i])
+
+                if map_settings[i] == 'PF':
+                    if not details[i]:
+                        err_msg = "You have to specify faction id or name for setting # " + str(i) +" !"
+                        break
+                    if isinstance(details[i], int):
+                        if UserStatus.objects.filter(id=details[i]).first() is None:
+                            err_msg = "The faction id " + str(details[i]) + " doesn't exist for setting # " + str(i) +"!"
+                            break
+                        else:
+                            faction_setting = UserStatus.objects.filter(id=details[i]).first()
+                    else:
+                        if UserStatus.objects.filter(user_name=details[i]).first() is None:
+                            err_msg = "The faction name " + str(details[i]) + " doesn't exist for setting # " + str(i) +"!"
+                            break
+                        else:
+                            faction_setting = UserStatus.objects.filter(user_name=details[i]).first()
+
+                elif map_settings[i] == 'PE':
+                    if not details[i]:
+                        err_msg = "You have to specify empire id or name for setting # " + str(i) +"!"
+                        break
+                    if isinstance(details[i], int):
+                        if Empire.objects.filter(number=details[i]).first() is None:
+                            err_msg = "The empire id " + str(details[i]) + " doesn't exist for setting # " + str(i) +"!"
+                            break
+                        else:
+                            empire_setting = Empire.objects.filter(number=details[i]).first()
+                    else:
+                        if Empire.objects.filter(name=details[i]).first() is None:
+                            err_msg = "The empire name " + str(details[i]) + " doesn't exist for setting # " + str(i) +"!"
+                            break
+                        else:
+                            empire_setting = Empire.objects.filter(name=details[i]).first()
+                setting = MapSettings.objects.get(id=settings_id[i])
+                if delete_setting[i] == 1:
+                    setting.delete()
+                    msg = "Settings updated!"
+                else:
+                    setting.color_settings = color[i]
+                    setting.map_setting = map_settings[i]
+
+                    if map_settings[i] == 'PF':
+                        setting.faction = faction_setting
+                        setting.empire = None
+                    elif map_settings[i] == 'PE' and details[i]:
+                        setting.empire = empire_setting
+                        setting.faction = None
+                    else:
+                        setting.empire = None
+                        setting.faction = None
+                    setting.save()
+                    msg = "Settings updated!"
+
+    map_gen_settings = MapSettings.objects.filter(user=request.user).order_by('id')
     context = {"status": status,
                "page_title": "Map Settings",
-               "map_settings": map_settings,
-               "msg" : msg,
+               "map_settings": map_gen_settings,
+               "msg": msg,
+               "err_msg": err_msg
                }
     return render(request, "map_settings.html", context)
 

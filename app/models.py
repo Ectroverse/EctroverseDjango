@@ -416,7 +416,7 @@ class NewsFeed(models.Model):
 
 class MapSettings(models.Model):
     user = models.ForeignKey(User, related_name='user1', on_delete=models.CASCADE)
-    faction = models.ForeignKey(User, related_name='faction', on_delete=models.CASCADE, blank=True, null=True, default=None)
+    faction = models.ForeignKey(UserStatus, related_name='faction', on_delete=models.CASCADE, blank=True, null=True, default=None)
     empire = models.ForeignKey(Empire, on_delete=models.CASCADE, blank=True, null=True, default=None)
     class MapSetting(models.TextChoices):
         UE = 'UE', _('Unexplored planets')
