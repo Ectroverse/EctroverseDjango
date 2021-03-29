@@ -5,7 +5,11 @@
 {% block content %}
 
 {% if msg %}
-	{{msg}}
+	<span style="color:green">{{msg}}</span>
+	<br>
+{% endif %}
+{% if err_msg %}
+	<span style="color:red">{{err_msg}}</span>
 {% endif %}
 
 <style>
@@ -61,7 +65,7 @@ You don't have any setting currently. Consider creating one.
 		Colour:
 	</div>
 	<div class="center">
-		Details (faction/empire number): 
+		Details (faction/empire name or id-number): 
 	</div>
 </div>
 
@@ -94,8 +98,7 @@ You don't have any setting currently. Consider creating one.
 		<input type='hidden' value='0' name='delete_setting'>
 		<input type='checkbox' value='1' name='delete_setting'>
 	</div>
-	
-	
+
 	
 	<div class="right1">
 		<select name="color">
@@ -115,16 +118,15 @@ You don't have any setting currently. Consider creating one.
 		Violet</option>
 		</select>
 	</div>
-	
 
-	
 	<div class="center">
-		<input type="number" name="details" size="6" value="
-		{% if setting.map_setting == PF %}
-		{{setting.faction.id}}
-		{% elif setting.map_setting == PE %}
-		{{setting.empire.number}}
-		{% endif %}">
+	{% if setting.map_setting == "PF" %}
+		<input type="text" name="details" size="6" value="{{setting.faction.id}}">
+	{% elif setting.map_setting == "PE" %}
+		<input type="text" name="details" size="6" value="{{setting.empire.number}}">
+	{% else %}
+		<input type="text" name="details" size="6" value="">
+	{% endif %}
 	</div>
 </div>
 {% endfor %}
