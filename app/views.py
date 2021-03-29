@@ -353,6 +353,7 @@ def map(request):
     systems = Planet.objects.filter(i=0).values_list('x', 'y')  # result is a list of 2-tuples
     context = {"status": status,
                "planets": Planet.objects.all(),
+               "settings": MapSettings.objects.filter(user = status.id),
                "systems": systems, "page_title": "Map", "show_heatmap": show_heatmap}
     return render(request, "map.html", context)
 
