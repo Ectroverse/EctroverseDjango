@@ -97,6 +97,9 @@ unit_stats = [[0, 64, 24,110, 4,  4], # bombers
               [0,  0,  0,  0, 3, 30]] # explors
 
 unit_labels = ["Bombers","Fighters","Transports","Cruisers","Carriers","Soldiers","Droids","Goliaths","Phantoms","Psychics","Agents","Ghost Ships","Exploration Ships"]
+unit_race_bonus_labels = ["bombers_coeff","fighters_coeff","transports_coeff","cruisers_coeff","carriers_coeff",\
+                          "soldiers_coeff","droids_coeff","goliaths_coeff","phantoms_coeff","psychics_coeff",\
+                          "agents_coeff","ghost_ships_coeff","exploration_ships_coeff",]
 
 # Build dictionary that will store all our unit info
 unit_info = {}
@@ -259,3 +262,10 @@ race_info_list = {
 ###################
 war_declaration_timer = 144
 min_relation_time = 26
+
+###################
+#    Battle       #
+###################
+shield_absorb = 1300
+sats_attack = 110
+sats_defence = 450

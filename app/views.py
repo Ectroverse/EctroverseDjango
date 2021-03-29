@@ -170,103 +170,48 @@ def battle(request, fleet_id):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def map_settings(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    msg = ""
-    err_msg = ""
+    msg= ""
     if request.method == 'POST':
         print(request.POST)
         if 'new_setting' in request.POST:
-            nr_settings = MapSettings.objects.filter(user=request.user).count()
-            if nr_settings > 19:
-                err_msg = "You can have 20 settings at max!"
-            else:
-                MapSettings.objects.create(user=request.user)
-                msg = "New setting created!"
+            MapSettings.objects.create(user=request.user)
+            msg = "New setting created!"
         else:
             settings_id = request.POST.getlist("setting_object")
             color = request.POST.getlist("color")
-            delete_setting2 = request.POST.getlist("delete_setting")
-            delete_setting = []
-            j = 0
-            while j < len(delete_setting2):
-                if j < len(delete_setting2) - 1 and delete_setting2[j] == "0":
-                    if delete_setting2[j+1] == "1":
-                        delete_setting.append(1)
-                        j += 2
-                    else:
-                        delete_setting.append(0)
-                        j += 1
-                else:
-                    delete_setting.append(0)
-                    j += 1
-            print("delete_setting", delete_setting)
-
+            delete_setting = request.POST.getlist("delete_setting")
             map_settings = request.POST.getlist("map_settings")
             details = request.POST.getlist("details")
-            for i in range(0, len(settings_id)):
-                try:
-                    details[i] = int(details[i])
-                except ValueError:
-                    details[i] = str(details[i])
+            print(settings_id, "======", len(settings_id)-1)
+            for i in range(0, len(settings_id)-1):
 
-                if map_settings[i] == 'PF':
-                    if not details[i]:
-                        err_msg = "You have to specify faction id or name for setting # " + str(i) +" !"
-                        break
-                    if isinstance(details[i], int):
-                        if UserStatus.objects.filter(id=details[i]).first() is None:
-                            err_msg = "The faction id " + str(details[i]) + " doesn't exist for setting # " + str(i) +"!"
-                            break
-                        else:
-                            faction_setting = UserStatus.objects.filter(id=details[i]).first()
-                    else:
-                        if UserStatus.objects.filter(user_name=details[i]).first() is None:
-                            err_msg = "The faction name " + str(details[i]) + " doesn't exist for setting # " + str(i) +"!"
-                            break
-                        else:
-                            faction_setting = UserStatus.objects.filter(user_name=details[i]).first()
-
-                elif map_settings[i] == 'PE':
-                    if not details[i]:
-                        err_msg = "You have to specify empire id or name for setting # " + str(i) +"!"
-                        break
-                    if isinstance(details[i], int):
-                        if Empire.objects.filter(number=details[i]).first() is None:
-                            err_msg = "The empire id " + str(details[i]) + " doesn't exist for setting # " + str(i) +"!"
-                            break
-                        else:
-                            empire_setting = Empire.objects.filter(number=details[i]).first()
-                    else:
-                        if Empire.objects.filter(name=details[i]).first() is None:
-                            err_msg = "The empire name " + str(details[i]) + " doesn't exist for setting # " + str(i) +"!"
-                            break
-                        else:
-                            empire_setting = Empire.objects.filter(name=details[i]).first()
                 setting = MapSettings.objects.get(id=settings_id[i])
+                print("setting", setting.id)
                 if delete_setting[i] == 1:
-                    setting.delete()
-                    msg = "Settings updated!"
+                    MapSettings.objects.delete(id=settings_id[i])
                 else:
+                    print("setting1", setting.id, setting.color_settings, color[i], map_settings[i], details[i])
                     setting.color_settings = color[i]
                     setting.map_setting = map_settings[i]
 
-                    if map_settings[i] == 'PF':
-                        setting.faction = faction_setting
+                    if map_settings[i] == 'PF' and details[i]:
+                        setting.faction = User.objects.get(id=details[i])
                         setting.empire = None
                     elif map_settings[i] == 'PE' and details[i]:
-                        setting.empire = empire_setting
+                        setting.empire = Empire.objects.get(number=details[i])
                         setting.faction = None
                     else:
                         setting.empire = None
                         setting.faction = None
+                    print("setting2", setting.id, setting.color_settings)
                     setting.save()
-                    msg = "Settings updated!"
+            msg = "Setings updated!"
 
-    map_gen_settings = MapSettings.objects.filter(user=request.user).order_by('id')
+    map_gen_settings = MapSettings.objects.filter(user=request.user)
     context = {"status": status,
                "page_title": "Map Settings",
                "map_settings": map_gen_settings,
                "msg": msg,
-               "err_msg": err_msg
                }
     return render(request, "map_settings.html", context)
 
@@ -288,38 +233,32 @@ def famnews(request):
 def choose_empire_race(request):
     status = get_object_or_404(UserStatus, user=request.user)
     error = None
-    if request.POST and 'faction' in request.POST and 'chose_race' in request.POST and 'chose_emp' in request.POST:
-        if request.POST['faction'] == "":
-            error = "Faction name is required!"
-        elif UserStatus.objects.filter(user_name=request.POST['faction']).count() > 0:
-            error = "This faction name is allready taken!"
+    if request.POST and 'chose_race' in request.POST and 'chose_emp' in request.POST:
+        if request.POST['chose_emp'] == 'Random':
+            empires = Empire.objects.filter(numplayers__lt=players_per_empire)
+            emp_choice = np.random.randint(0, empires.count())
+            # empire1 = Empire.objects.get(number=emp_choice)
+            empire1 = empires[emp_choice]
         else:
-            if request.POST['chose_emp'] == 'Random':
-                empires = Empire.objects.filter(numplayers__lt=players_per_empire)
-                emp_choice = np.random.randint(0, empires.count())
-                # empire1 = Empire.objects.get(number=emp_choice)
-                empire1 = empires[emp_choice]
-            else:
-                empire1 = Empire.objects.get(number=int(request.POST['chose_emp']))
-                if empire1.password or not ('fampass' in request.POST and empire1.password == request.POST['fampass']):
-                    if empire1.password != request.POST['fampass']:
-                        error = "Wrong pass enterted!"
-                    empire1 = None
+            empire1 = Empire.objects.get(number=int(request.POST['chose_emp']))
+            if empire1.password or not ('fampass' in request.POST and empire1.password == request.POST['fampass']):
+                if empire1.password != request.POST['fampass']:
+                    error = "Wrong pass enterted!"
+                empire1 = None
 
-            if empire1 is not None:
-                empire1.numplayers += 1
-                empire1.save()
-                status.user_name = request.POST['faction']
-                status.race = request.POST['chose_race']
-                status.empire = empire1
-                status.networth = 1
-                status.save()
-                for p in Planet.objects.filter(x=empire1.x, y=empire1.y):
-                    if p.owner is None:
-                        give_first_planet(request.user, status, p)
-                        give_first_fleet(Fleet.objects.get(owner=request.user,main_fleet=True))
-                        break
-                return render(request, "headquarters.html")
+        if empire1 is not None:
+            empire1.numplayers += 1
+            empire1.save()
+            status.race = request.POST['chose_race']
+            status.empire = empire1
+            status.networth = 1
+            status.save()
+            for p in Planet.objects.filter(x=empire1.x, y=empire1.y):
+                if p.owner is None:
+                    give_first_planet(request.user, status, p)
+                    give_first_fleet(Fleet.objects.get(owner=request.user,main_fleet=True))
+                    break
+            return render(request, "headquarters.html")
 
     races = status.Races.choices
     empires = Empire.objects.filter(numplayers__lt=players_per_empire)
@@ -448,8 +387,10 @@ def planet(request, planet_id):
 
     if planet.owner:  # if planet is owned by someone, grab that owner's status, in order to get faction and other info of owner
         planet_owner_status = UserStatus.objects.get(user=planet.owner)
+        attack_cost = battleReadinessLoss(status, planet_owner_status)
     else:
         planet_owner_status = None
+        attack_cost = None
 
     exploration_cost = calc_exploration_cost(status)
 
@@ -457,7 +398,8 @@ def planet(request, planet_id):
                "planet": planet,
                "planet_owner_status": planet_owner_status,
                "page_title": "Planet " + str(planet.x) + ',' + str(planet.y) + ':' + str(planet.i),
-               "exploration_cost": exploration_cost}
+               "exploration_cost": exploration_cost,
+               "attack_cost": attack_cost}
     return render(request, "planet.html", context)
 
 
@@ -983,17 +925,31 @@ def fleets(request):
         error = request.session['error']
         request.session['error'] = ''
 
-    planet_to_template = None
+    planet_to_template_explore = None
     if request.method == 'POST' and 'explore_planet' in request.POST:
         try:
             pl_id = request.POST.get('explore_planet')
-            planet_to_template = Planet.objects.get(id=pl_id)
+            planet_to_template_explore = Planet.objects.get(id=pl_id)
         except Planet.DoesNotExist:
-            planet_to_template = None
+            planet_to_template_explore = None
+
+    planet_to_template_attack = None
+    if request.method == 'POST' and 'attack_planet' in request.POST:
+        try:
+            pl_id = request.POST.get('attack_planet')
+            planet_to_template_attack = Planet.objects.get(id=pl_id)
+        except Planet.DoesNotExist:
+            planet_to_template_attack = None
 
     exploration_cost = None
-    if planet_to_template:
+    if planet_to_template_explore:
         exploration_cost = calc_exploration_cost(status)
+
+    attack_cost = None
+    status2 = None
+    if planet_to_template_attack:
+        status2 = UserStatus.objects.get(id=planet_to_template_attack.owner.id)
+        attack_cost = battleReadinessLoss(status, status2)
 
     # If user changed order after attack or percentages
     if request.method == 'POST' and 'attack' in request.POST:
@@ -1040,8 +996,11 @@ def fleets(request):
                "display_fleet_exploration": display_fleet_exploration,
                "explo_ships": explo_ships,
                "error":error,
-               "planet_to_template": planet_to_template,
-               "exploration_cost": exploration_cost}
+               "planet_to_template_explore": planet_to_template_explore,
+               "planet_to_template_attack": planet_to_template_attack,
+               "exploration_cost": exploration_cost,
+               "owner_of_attacked_pl" : status2,
+               "attack_cost" : attack_cost}
     return render(request, "fleets.html", context)
 
 @login_required

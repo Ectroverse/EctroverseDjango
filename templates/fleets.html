@@ -8,12 +8,23 @@
 {{error}}
 {% endif %}
 
-{% if planet_to_template %}
+{% if planet_to_template_explore %}
 	<script>
 		$(document).ready(function () {
 			// Handler for .ready() called.
 			$('html, body').animate({
 				scrollTop: $('#exploration_send').offset().top
+			}, 'slow');
+		});
+	</script>
+{% endif %}
+
+{% if planet_to_template_attack %}
+	<script>
+		$(document).ready(function () {
+			// Handler for .ready() called.
+			$('html, body').animate({
+				scrollTop: $('#attack_send').offset().top
 			}, 'slow');
 		});
 	</script>
@@ -146,9 +157,12 @@
 			</p>
 	</div>
 
-	<div class="center_box">
+	<div  id="attack_send" class="center_box">
 		<div class="center_box_inside">
 			<b class="spaceUnder">Dispatch a new fleet</b><br>
+			{% if attack_cost %}
+			It will cost {{attack_cost}}% to attack the planet, owned by {{owner_of_attacked_pl.user_name}}!<br>
+			{% endif %}
 			<form action="fleetsend" method="POST">
 			{% csrf_token %}
 			<select name="order" class="spaceUnder">
@@ -165,9 +179,9 @@
 			</tr>
 			{% endfor %}
 			</table>
-			X:<input class="spaceUnder" pattern="[0-9]+" type="text" name="X" size="4">
-			Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4">
-			Planet:<input class="spaceUnder" pattern="[0-9]+" type="text" name="I" size="4">
+			X:<input class="spaceUnder" pattern="[0-9]+" type="text" name="X" size="4" value ="{{planet_to_template_attack.x}}">
+			Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4" value ="{{planet_to_template_attack.y}}">
+			Planet:<input class="spaceUnder" pattern="[0-9]+" type="text" name="I" size="4" value ="{{planet_to_template_attack.i}}">
 			<br>
 			<input type="submit" value="Send">
 			</form>
@@ -263,9 +277,9 @@
 			<option value="11">Move to system
 			</select>
 			<br>
-			X:<input class="spaceUnder" pattern="[0-9]+" type="text" name="X" size="4" value ="{{planet_to_template.x}}">
-			Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4" value ="{{planet_to_template.y}}">
-			Planet:<input class="spaceUnder" pattern="[0-9]+" type="text" name="I" size="4" value ="{{planet_to_template.i}}">
+			X:<input class="spaceUnder" pattern="[0-9]+" type="text" name="X" size="4" value ="{{planet_to_template_explore.x}}">
+			Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4" value ="{{planet_to_template_explore.y}}">
+			Planet:<input class="spaceUnder" pattern="[0-9]+" type="text" name="I" size="4" value ="{{planet_to_template_explore.i}}">
 			<input type="hidden" name="exploration" value='1'>
 			<br>
 			<input type="submit" value="Send">
