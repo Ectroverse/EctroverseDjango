@@ -44,7 +44,9 @@ function showEmpirePass() {
 			<form method="post" name="empire_race_choice" action="{% url 'choose_empire_race' %}" style =" margin: 0 5px;">
 			  {% csrf_token %}
 			  
-
+				Choose your faction(in-game) name:<br>
+				<input type="text" name="faction" id="faction">
+				<br><br>
 
 				Choose your race:<br>
 				<select name="chose_race">
