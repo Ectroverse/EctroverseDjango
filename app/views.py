@@ -288,32 +288,38 @@ def famnews(request):
 def choose_empire_race(request):
     status = get_object_or_404(UserStatus, user=request.user)
     error = None
-    if request.POST and 'chose_race' in request.POST and 'chose_emp' in request.POST:
-        if request.POST['chose_emp'] == 'Random':
-            empires = Empire.objects.filter(numplayers__lt=players_per_empire)
-            emp_choice = np.random.randint(0, empires.count())
-            # empire1 = Empire.objects.get(number=emp_choice)
-            empire1 = empires[emp_choice]
+    if request.POST and 'faction' in request.POST and 'chose_race' in request.POST and 'chose_emp' in request.POST:
+        if request.POST['faction'] == "":
+            error = "Faction name is required!"
+        elif UserStatus.objects.filter(user_name=request.POST['faction']).count() > 0:
+            error = "This faction name is allready taken!"
         else:
-            empire1 = Empire.objects.get(number=int(request.POST['chose_emp']))
-            if empire1.password or not ('fampass' in request.POST and empire1.password == request.POST['fampass']):
-                if empire1.password != request.POST['fampass']:
-                    error = "Wrong pass enterted!"
-                empire1 = None
+            if request.POST['chose_emp'] == 'Random':
+                empires = Empire.objects.filter(numplayers__lt=players_per_empire)
+                emp_choice = np.random.randint(0, empires.count())
+                # empire1 = Empire.objects.get(number=emp_choice)
+                empire1 = empires[emp_choice]
+            else:
+                empire1 = Empire.objects.get(number=int(request.POST['chose_emp']))
+                if empire1.password or not ('fampass' in request.POST and empire1.password == request.POST['fampass']):
+                    if empire1.password != request.POST['fampass']:
+                        error = "Wrong pass enterted!"
+                    empire1 = None
 
-        if empire1 is not None:
-            empire1.numplayers += 1
-            empire1.save()
-            status.race = request.POST['chose_race']
-            status.empire = empire1
-            status.networth = 1
-            status.save()
-            for p in Planet.objects.filter(x=empire1.x, y=empire1.y):
-                if p.owner is None:
-                    give_first_planet(request.user, status, p)
-                    give_first_fleet(Fleet.objects.get(owner=request.user,main_fleet=True))
-                    break
-            return render(request, "headquarters.html")
+            if empire1 is not None:
+                empire1.numplayers += 1
+                empire1.save()
+                status.user_name = request.POST['faction']
+                status.race = request.POST['chose_race']
+                status.empire = empire1
+                status.networth = 1
+                status.save()
+                for p in Planet.objects.filter(x=empire1.x, y=empire1.y):
+                    if p.owner is None:
+                        give_first_planet(request.user, status, p)
+                        give_first_fleet(Fleet.objects.get(owner=request.user,main_fleet=True))
+                        break
+                return render(request, "headquarters.html")
 
     races = status.Races.choices
     empires = Empire.objects.filter(numplayers__lt=players_per_empire)
@@ -408,6 +414,7 @@ def map(request):
     systems = Planet.objects.filter(i=0).values_list('x', 'y')  # result is a list of 2-tuples
     context = {"status": status,
                "planets": Planet.objects.all(),
+               "settings": MapSettings.objects.filter(user=status.id),
                "systems": systems, "page_title": "Map", "show_heatmap": show_heatmap}
     return render(request, "map.html", context)
 
