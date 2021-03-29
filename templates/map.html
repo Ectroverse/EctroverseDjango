@@ -42,6 +42,75 @@
 
 {% for planet in planets %}
 
+{% for setting in settings %}
+/* unexplored */
+{% if setting.map_setting == "UE" and planet.owner == None %}
+
+
+  g.append("circle")
+  .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+  .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+  .attr("r", circle_radius * 1)
+  .style("fill", "{{ setting.get_color_settings_display }}")
+  .style("opacity", 0.5)
+/* your planets */
+  {% elif setting.map_setting == "YP" and planet.owner.id == status.user.id %}
+
+      g.append("circle")
+      .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("r", circle_radius * 1)
+      .style("fill", "{{ setting.get_color_settings_display }}")
+      .style("opacity", 0.5)
+
+/* target empire
+{% elif setting.map_setting == "PE" and planet.owner.empire_num == setting.empire_num %}
+
+    g.append("circle")
+    .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("r", circle_radius * 1)
+    .style("fill", "{{ setting.get_color_settings_display }}")
+    .style("opacity", 0.5) */
+
+/* target faction */
+    {% elif setting.map_setting == "PF" and planet.owner.id == setting.faction.id %}
+
+        g.append("circle")
+        .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("r", circle_radius * 1)
+        .style("fill", "{{ setting.get_color_settings_display }}")
+        .style("opacity", 0.5)
+
+/* your empire
+        {% elif setting.map_setting == "YE" and planet.owner.userstatus.empirenum == status.user.empirenum %}
+
+            g.append("circle")
+            .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("r", circle_radius * 1)
+            .style("fill", "{{ setting.get_color_settings_display }}")
+            .style("opacity", 0.5) */
+
+
+/* your portals
+            {% elif setting.map_setting == "YR" and Planet.objects.buildingtype.portal == True  %}
+
+                g.append("circle")
+                .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                .attr("r", circle_radius * 1)
+                .style("fill", "{{ setting.get_color_settings_display }}")
+                .style("opacity", 0.5)
+
+                 */
+        {% endif %}
+
+        {% endfor %}
+
+
+
 {% if planet.id|mod:10 == 1 %}
 
 g.append("a")
