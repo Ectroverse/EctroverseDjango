@@ -5,10 +5,11 @@
 
 {% block content %}
 
+<div class= "center">
 <table width="100%">
 <tr>
 <td width="15%"><a href="?order_by=planet">Planet</a></td>
-<td width="10%"><a href="?order_by=-size">Size</a> - 
+<td width="10%"><a href="?order_by=-size">Size</a> -
 <style>
 .dropbtn {  background-color: #4CAF50;  color: white;  font-size: 12px;  border: none;  padding: 0px;}
 .dropdown {  position: relative;  display: inline-block;}
@@ -39,7 +40,7 @@
 <td><a href="/planet{{planet.id}}">{{planet.x}},{{planet.y}}:{{planet.i}}
 </a></td>
 <td>{{planet.size}}</td>
-<td>{{planet.total_buildings}} 
+<td>{{planet.total_buildings}}
 
 {% if planet.buildings_under_construction > 0 %}
 ({{planet.buildings_under_construction}})
@@ -52,16 +53,16 @@
 {% endif %}
 
 <td><font color="#FFFF66">{{planet.current_population}} / {{planet.max_population}}</font></td>
-<td><a href="/build{{planet.id}}">Build</a>   
+<td><a href="/build{{planet.id}}">Build</a>
 {% if planet.portal %}
-&nbsp;&nbsp;Contains Portal
+&nbsp;&nbsp;<img src="/static/buildings/portal.png" width=16px height=16px>&nbsp;<font color="#00FF00">{{planet.protection}}%</font>
 {% else %}
     {% if planet.protection >= 70 %}
-    &nbsp;&nbsp;<font color="#00FF00">{{planet.protection}}%</font> 
+    &nbsp;&nbsp;<font color="#00FF00">{{planet.protection}}%</font>
     {% elif planet.protection >= 40 %}
-    &nbsp;&nbsp;<font color="#FFFF00">{{planet.protection}}%</font> 
+    &nbsp;&nbsp;<font color="#FFFF00">{{planet.protection}}%</font>
     {% else %}
-    &nbsp;&nbsp;<font color="#FF0000">{{planet.protection}}%</font> 
+    &nbsp;&nbsp;<font color="#FF0000">{{planet.protection}}%</font>
     {% endif %}
 {% endif %}
 
@@ -95,6 +96,6 @@
 </td></tr>
 </table>
 </form>
+</div>
 
 {% endblock %}
-

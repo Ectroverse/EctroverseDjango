@@ -14,7 +14,7 @@
   const circle_radius = 0.2;
 
   const zoom = d3.zoom()
-      .scaleExtent([20, 50]) // max zoom out, max zoom in
+      .scaleExtent([30, 60]) // max zoom out, max zoom in
       .on("zoom", zoomed);
 
   const svg = d3.select("#mapdiv")
@@ -23,7 +23,7 @@
     .style("height", '80vh')
     .style("width", '100%')
     .attr("preserveAspectRatio", "xMidYMin") // see here for a nice graphic https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/preserveAspectRatio
-    .attr("viewBox", [-10, -10, width+10, height+10]) // default view
+    .attr("viewBox", [-1, -1, width+1, height+1]) // default view
     .on("click", reset); // zooms out when you click on not the background
 
   const g = svg.append("g");
@@ -46,22 +46,28 @@
 /* unexplored */
 {% if setting.map_setting == "UE" and planet.owner == None %}
 
+{% if planet.home_planet %}
+
+{% else %}
 
   g.append("circle")
   .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
   .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-  .attr("r", circle_radius * 1)
+  .attr("r", circle_radius * 4)
   .style("fill", "{{ setting.get_color_settings_display }}")
-  .style("opacity", 0.5)
+  .style("opacity", 0.2)
+
+{% endif %}
+
 /* your planets */
   {% elif setting.map_setting == "YP" and planet.owner.id == status.user.id %}
 
       g.append("circle")
       .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
       .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-      .attr("r", circle_radius * 1)
+      .attr("r", circle_radius * 4)
       .style("fill", "{{ setting.get_color_settings_display }}")
-      .style("opacity", 0.5)
+      .style("opacity", 0.2)
 
 /* target empire
 {% elif setting.map_setting == "PE" and planet.owner.empire_num == setting.empire_num %}
@@ -69,9 +75,9 @@
     g.append("circle")
     .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
     .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-    .attr("r", circle_radius * 1)
+    .attr("r", circle_radius * 4)
     .style("fill", "{{ setting.get_color_settings_display }}")
-    .style("opacity", 0.5) */
+    .style("opacity", 0.2) */
 
 /* target faction */
     {% elif setting.map_setting == "PF" and planet.owner.id == setting.faction.id %}
@@ -79,9 +85,9 @@
         g.append("circle")
         .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
         .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-        .attr("r", circle_radius * 1)
+        .attr("r", circle_radius * 4)
         .style("fill", "{{ setting.get_color_settings_display }}")
-        .style("opacity", 0.5)
+        .style("opacity", 0.2)
 
 /* your empire
         {% elif setting.map_setting == "YE" and planet.owner.userstatus.empirenum == status.user.empirenum %}
@@ -89,9 +95,9 @@
             g.append("circle")
             .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
             .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-            .attr("r", circle_radius * 1)
+            .attr("r", circle_radius * 4)
             .style("fill", "{{ setting.get_color_settings_display }}")
-            .style("opacity", 0.5) */
+            .style("opacity", 0.2) */
 
 
 /* your portals
@@ -100,16 +106,17 @@
                 g.append("circle")
                 .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
                 .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-                .attr("r", circle_radius * 1)
+                .attr("r", circle_radius * 4)
                 .style("fill", "{{ setting.get_color_settings_display }}")
-                .style("opacity", 0.5)
+                .style("opacity", 0.2)
 
                  */
         {% endif %}
 
         {% endfor %}
+{% endfor %}
 
-
+{% for planet in planets %}
 
 {% if planet.id|mod:10 == 1 %}
 
@@ -426,17 +433,17 @@ for (let i = 0; i < height; i=i+5) {
     if (transform.k > 2) {
         g.selectAll("circle")
           .style("visibility", "visible");
-        g.selectAll("ellipse")
-          .attr("rx", circle_radius/1000)
-          .attr("ry", circle_radius/1000)
+        g.selectAll("circle")
+          .attr("rx", circle_radius*1.5)
+          .attr("ry", circle_radius*1.5)
         g.selectAll("text")
           .style("visibility", "visible");
     } else {
         g.selectAll("circle")
           .style("visibility", "visible");
-        g.selectAll("ellipse")
-          .attr("rx", circle_radius/1000)
-          .attr("ry", circle_radius/1000)
+        g.selectAll("circle")
+          .attr("rx", circle_radius*4)
+          .attr("ry", circle_radius*4)
         g.selectAll("text")
           .style("visibility", "visible");
     }
