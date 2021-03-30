@@ -124,40 +124,31 @@ def attack_planet(attacking_fleet):
                 race_info_list[attacker.get_race_display()].get("military_defence", 1.0) / fa
 
     attacker.fleet_readiness -= battleReadinessLoss(attacker, defender)
-
+    attacker.save()
+    
     # defsatsbase = defsats = attacked_planet.defense_sats
     shields = shield_absorb * attacked_planet.shield_networks  #+ specopShieldingCalc(defid, fleetd.destid);
 
-    ####################
-    #      PHASE 1     #
-    ####################
+    attacker_flee, defender_flee, msg = phase1(attacking_fleet, defending_fleets, attstats, defstats, attfactor, \
+           deffactor, attacked_planet, attacker, defender, shields)
+    if attacker_flee:
+        msg +="\n\n Overwhelmed by the defending forces you left the battle!"
+
+
+    # if (flee)
+    #     goto
+    #     battleAttFlee;
+
+
+####################
+#      PHASE 1     #
+####################
+def phase1(attacking_fleet, defending_fleets, attstats, defstats, attfactor,\
+           deffactor, attacked_planet, attacker, defender, shields):
+    msg =""
     attacker_flee = False
+    defender_flee = False
 
-    '''
-    #            air attack, air defence, ground attack, ground defence
-    unit_stats = [[0, 64, 24,110, 4,  4], # bombers
-              [20,120,  0, 60, 4, 3], # fighters
-              [0, 60,  0, 50, 4,  5], # transports
-              [70,600, 70,600, 4,12], # cruisers
-              [0,540,  0,540, 4, 14], # carriers
-              [0, 48,  3, 16, 0,  1], # soldiers
-              [0, 48,  5, 30, 0,  1], # droids
-              [28,140, 10, 90, 0, 4], # goliaths
-              [32,130, 20,130, 10,7], # phantoms
-              [0,  0,  0,  0, 0,  2], # psychics
-              [0,  0,  0,  0, 8,  2], # agents
-              [0,  0,  0,  0, 8,  6], # ghost ships
-              [0,  0,  0,  0, 3, 30]] # explors
-
-    unit_labels = ["Bombers","Fighters","Transports","Cruisers","Carriers","Soldiers",\
-               "Droids","Goliaths","Phantoms","Psychics","Agents","Ghost Ships","Exploration Ships"]
-               
-    defending_fleets1
-    {'bomber__sum': 0, 'fighter__sum': 110, 'transport__sum': 84, 'cruiser__sum': 50, 'carrier__sum': 50,
-     'soldier__sum': 100, 'droid__sum': 0, 'goliath__sum': 0, 'phantom__sum': 0, 'wizard__sum': 38, 'agent__sum': 50,
-     'ghost__sum': 0, 'exploration__sum': 1}
-     
-    '''
     # ========= Calculate damage factors =========#
 
 
@@ -182,9 +173,8 @@ def attack_planet(attacking_fleet):
 
     # damage is too high defender flee
     if (defdam < 1.0) or ((attdam / defdam) * 10.0 >= defender.long_range_attack_percent):
-        # goto battleDefFlee1;
-        # results[3] |= 0x100; What is this?
-        pass
+        defender_flee= True
+        return attacker_flee, defender_flee, msg
     # defender flees, if settings are 100% this means attacker deals 10x more damage than defender
     if (attdam / defdam) * 100.0 >= defender.long_range_attack_percent:
         defdam *= 0.15
@@ -249,15 +239,21 @@ def attack_planet(attacking_fleet):
     attacker_cruiser_loss_1phase = min(attacking_fleet.cruiser, int(damcruiser / attstats["Cruisers"][1]))
     attacker_phantom_loss_1phase = min(attacking_fleet.phantom, int(damphantom / attstats["Phantoms"][1]))
 
+    attacking_fleet.carrier -= attacker_carrier_loss_1phase
+    attacking_fleet.cruiser -= attacker_cruiser_loss_1phase
+    attacking_fleet.phantom -= attacker_phantom_loss_1phase
+
+    attacking_fleet.save()
+
     msg += "\n\n attacker_carrier_loss_1phase" + str(attacker_carrier_loss_1phase)
     msg += "\n\n attacker_cruiser_loss_1phase" + str(attacker_cruiser_loss_1phase)
     msg += "\n\n attacker_phantom_loss_1phase" + str(attacker_phantom_loss_1phase)
 
     # ========= Damage to defending fleets =========#
-    defending_fleets1
-    {'bomber__sum': 0, 'fighter__sum': 110, 'transport__sum': 84, 'cruiser__sum': 50, 'carrier__sum': 50,
-     'soldier__sum': 100, 'droid__sum': 0, 'goliath__sum': 0, 'phantom__sum': 0, 'wizard__sum': 38, 'agent__sum': 50,
-     'ghost__sum': 0, 'exploration__sum': 1}
+    # defending_fleets1
+    # {'bomber__sum': 0, 'fighter__sum': 110, 'transport__sum': 84, 'cruiser__sum': 50, 'carrier__sum': 50,
+    #  'soldier__sum': 100, 'droid__sum': 0, 'goliath__sum': 0, 'phantom__sum': 0, 'wizard__sum': 38, 'agent__sum': 50,
+    #  'ghost__sum': 0, 'exploration__sum': 1}
 
     hpcruiser = defending_fleets["cruiser__sum"] *  defstats["Cruisers"][1]
     hpphantom = defending_fleets["phantom__sum"] *  defstats["Phantoms"][1]
@@ -301,6 +297,15 @@ def attack_planet(attacking_fleet):
     attacked_planet.defense_sats -= defender_defsats_loss_1phase
     attacked_planet.save()
 
+    defending_fleets["cruiser__sum"] -= defender_cruiser_loss_1phase
+    defending_fleets["phantom__sum"] -= defender_phantom_loss_1phase
+
+
+
+    msg += "\n\n attacked planet id: " + str(attacked_planet.id) + "\n def id: " + str(
+        defender.id) + "\n  def fleets:" + str(defending_fleets)
+    return attacker_flee, defender_flee, msg
+
     # battlePhaseUpdate(attunit, & results[4 + 0 * CMD_UNIT_FLEET] );
     # battlePhaseUpdate(defunit, & results[4 + 1 * CMD_UNIT_FLEET] );
 
@@ -309,6 +314,31 @@ def attack_planet(attacking_fleet):
     #     battleAttFlee;
     # battleDefFlee1:
 
+    '''
+    #            air attack, air defence, ground attack, ground defence
+    unit_stats = [[0, 64, 24,110, 4,  4], # bombers
+              [20,120,  0, 60, 4, 3], # fighters
+              [0, 60,  0, 50, 4,  5], # transports
+              [70,600, 70,600, 4,12], # cruisers
+              [0,540,  0,540, 4, 14], # carriers
+              [0, 48,  3, 16, 0,  1], # soldiers
+              [0, 48,  5, 30, 0,  1], # droids
+              [28,140, 10, 90, 0, 4], # goliaths
+              [32,130, 20,130, 10,7], # phantoms
+              [0,  0,  0,  0, 0,  2], # psychics
+              [0,  0,  0,  0, 8,  2], # agents
+              [0,  0,  0,  0, 8,  6], # ghost ships
+              [0,  0,  0,  0, 3, 30]] # explors
+
+    unit_labels = ["Bombers","Fighters","Transports","Cruisers","Carriers","Soldiers",\
+               "Droids","Goliaths","Phantoms","Psychics","Agents","Ghost Ships","Exploration Ships"]
+
+    defending_fleets1
+    {'bomber__sum': 0, 'fighter__sum': 110, 'transport__sum': 84, 'cruiser__sum': 50, 'carrier__sum': 50,
+     'soldier__sum': 100, 'droid__sum': 0, 'goliath__sum': 0, 'phantom__sum': 0, 'wizard__sum': 38, 'agent__sum': 50,
+     'ghost__sum': 0, 'exploration__sum': 1}
+
+'''
     ####################
     #      PHASE 2     #
     ####################
@@ -321,8 +351,7 @@ def attack_planet(attacking_fleet):
     #      PHASE 4     #
     ####################
 
-    attacker.save()
 
-    msg += "\n\n attacked planet id: " + str(attacked_planet.id) + "\n def id: " +str(defender.id) + "\n  def fleets:" + str(defending_fleets)
-    return msg
+
+
 
