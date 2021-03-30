@@ -1,0 +1,455 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% load mathfilters %}
+
+<div id="mapdiv" style="background-image:url(/static/background.gif)"></div>
+
+<a href="?heatmap=True">Heatmap Test</a>
+
+<script>
+  const width = 100;
+  const height = 100;
+  const circle_radius = 1;
+
+  const zoom = d3.zoom()
+      .scaleExtent([0.5, 100]) // max zoom out, max zoom in
+      .on("zoom", zoomed);
+
+  const svg = d3.select("#mapdiv")
+    .append("div")
+    .append("svg")
+    .style("height", '80vh')
+    .style("width", '100%')
+    .attr("preserveAspectRatio", "xMidYMin meet") // see here for a nice graphic https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/preserveAspectRatio
+    .attr("viewBox", [-1, -1, width+1, height+1]) // default view
+    .on("click", reset); // zooms out when you click on not the background
+
+  const g = svg.append("g");
+
+  // Heatmap overlay
+  {% if show_heatmap %}
+    g.append("image")
+      .attr("x", -0.5)
+      .attr("y", -0.5)
+      .attr('width', 100)
+      .attr('height', 100)
+      .attr('xlink:href','/static/heatmap.png')
+      .style("opacity", 0.5)
+  {% endif %}
+
+
+{% for planet in planets %}
+
+{% for setting in settings %}
+/* unexplored */
+{% if setting.map_setting == "UE" and planet.owner == None %}
+
+{% if planet.home_planet %}
+
+{% else %}
+
+  g.append("circle")
+  .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+  .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+  .attr("r", circle_radius * 2)
+  .style("fill", "{{ setting.get_color_settings_display }}")
+  .style("opacity", 0.2)
+
+{% endif %}
+
+/* your planets */
+  {% elif setting.map_setting == "YP" and planet.owner.id == status.user.id %}
+
+      g.append("circle")
+      .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("r", circle_radius * 2)
+      .style("fill", "{{ setting.get_color_settings_display }}")
+      .style("opacity", 0.2)
+
+/* target empire
+{% elif setting.map_setting == "PE" and planet.owner.empire_num == setting.empire_num %}
+
+    g.append("circle")
+    .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("r", circle_radius * 2)
+    .style("fill", "{{ setting.get_color_settings_display }}")
+    .style("opacity", 0.2) */
+
+/* target faction */
+    {% elif setting.map_setting == "PF" and planet.owner.id == setting.faction.id %}
+
+        g.append("circle")
+        .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("r", circle_radius * 2)
+        .style("fill", "{{ setting.get_color_settings_display }}")
+        .style("opacity", 0.2)
+
+/* your empire
+        {% elif setting.map_setting == "YE" and planet.owner.userstatus.empirenum == status.user.empirenum %}
+
+            g.append("circle")
+            .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("r", circle_radius * 2)
+            .style("fill", "{{ setting.get_color_settings_display }}")
+            .style("opacity", 0.2) */
+
+
+/* your portals
+            {% elif setting.map_setting == "YR" and Planet.objects.buildingtype.portal == True  %}
+
+                g.append("circle")
+                .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                .attr("r", circle_radius * 2)
+                .style("fill", "{{ setting.get_color_settings_display }}")
+                .style("opacity", 0.2)
+
+                 */
+        {% endif %}
+
+        {% endfor %}
+{% endfor %}
+
+{% for planet in planets %}
+
+{% if planet.id|mod:10 == 1 %}
+
+g.append("a")
+  .attr("xlink:href", "planet{{planet.id}}")
+  .append("image")
+    .attr("xlink:href", "/static/map/p00.png")
+    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.04))
+    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.04))
+    .attr("width", .08) // changes in zoom
+    .attr("height", .08) // changes in zoom
+    .append("title") // hover-over text
+    .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
+
+
+{% elif planet.id|mod:10 == 2 %}
+
+g.append("a")
+  .attr("xlink:href", "planet{{planet.id}}")
+  .append("image")
+    .attr("xlink:href", "/static/map/p11.png")
+    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.0375))
+    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.0375))
+    .attr("width", .075) // changes in zoom
+    .attr("height", .075) // changes in zoom
+    .append("title") // hover-over text
+    .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
+
+{% elif planet.id|mod:10 == 3 %}
+
+g.append("a")
+  .attr("xlink:href", "planet{{planet.id}}")
+  .append("image")
+    .attr("xlink:href", "/static/map/p01.png")
+    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.06))
+    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.06))
+    .attr("width", .12) // changes in zoom
+    .attr("height", .12) // changes in zoom
+    .append("title") // hover-over text
+    .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
+
+{% elif planet.id|mod:10 == 4 %}
+
+g.append("a")
+  .attr("xlink:href", "planet{{planet.id}}")
+  .append("image")
+    .attr("xlink:href", "/static/map/p10.png")
+    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.05))
+    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.05))
+    .attr("width", .1) // changes in zoom
+    .attr("height", .1) // changes in zoom
+    .append("title") // hover-over text
+    .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
+
+{% elif planet.id|mod:10 == 5 %}
+
+g.append("a")
+  .attr("xlink:href", "planet{{planet.id}}")
+  .append("image")
+    .attr("xlink:href", "/static/map/p03.png")
+    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.03))
+    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.03))
+    .attr("width", .06) // changes in zoom
+    .attr("height", .06) // changes in zoom
+    .append("title") // hover-over text
+    .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
+
+{% elif planet.id|mod:10 == 6 %}
+
+g.append("a")
+  .attr("xlink:href", "planet{{planet.id}}")
+  .append("image")
+    .attr("xlink:href", "/static/map/p04.png")
+    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.04))
+    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.04))
+    .attr("width", .08) // changes in zoom
+    .attr("height", .08) // changes in zoom
+    .append("title") // hover-over text
+    .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
+
+{% elif planet.id|mod:10 == 7 %}
+
+g.append("a")
+  .attr("xlink:href", "planet{{planet.id}}")
+  .append("image")
+    .attr("xlink:href", "/static/map/p05.png")
+    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.045))
+    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.045))
+    .attr("width", .09) // changes in zoom
+    .attr("height", .09) // changes in zoom
+    .append("title") // hover-over text
+    .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
+
+{% elif planet.id|mod:10 == 8 %}
+
+g.append("a")
+  .attr("xlink:href", "planet{{planet.id}}")
+  .append("image")
+    .attr("xlink:href", "/static/map/p06.png")
+    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.02))
+    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.02))
+    .attr("width", .04) // changes in zoom
+    .attr("height", .04) // changes in zoom
+    .append("title") // hover-over text
+    .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
+
+{% elif planet.id|mod:10 == 9 %}
+
+g.append("a")
+  .attr("xlink:href", "planet{{planet.id}}")
+  .append("image")
+    .attr("xlink:href", "/static/map/p07.png")
+    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.035))
+    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.035))
+    .attr("width", .07) // changes in zoom
+    .attr("height", .07) // changes in zoom
+    .append("title") // hover-over text
+    .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
+
+{% else %}
+
+g.append("a")
+  .attr("xlink:href", "planet{{planet.id}}")
+  .append("image")
+    .attr("xlink:href", "/static/map/p08.png")
+    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.06))
+    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.06))
+    .attr("width", .12) // changes in zoom
+    .attr("height", .12) // changes in zoom
+    .append("title") // hover-over text
+    .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
+
+{% endif %}
+
+{% if planet.owner.id == status.user.id %}
+
+    g.append("text")
+      .attr("x", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.08))
+      .attr("font-family", "sans-serif")
+      .attr("font-size", "0.05px")
+      .attr("fill", "white")
+      .attr("text-anchor", "middle") // horizontal centering
+      .attr("allignment-baseline", "after-edge") // vertical centering
+      .style("pointer-events", "none")
+      .style("visibility", "hidden") // changes in zoom
+      .text("This planet is yours");
+
+{% elif planet.home_planet %}
+    g.append("text")
+      .attr("x", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.08))
+      .attr("font-family", "sans-serif")
+      .attr("font-size", "0.05px")
+      .attr("fill", "white")
+      .attr("text-anchor", "middle") // horizontal centering
+      .attr("allignment-baseline", "after-edge") // vertical centering
+      .style("pointer-events", "none")
+      .style("visibility", "hidden") // changes in zoom
+      .text("Unavailable for Exploration");
+
+  {% elif planet.owner == None %}
+      g.append("text")
+        .attr("x", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.08))
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "0.05px")
+        .attr("fill", "white")
+        .attr("text-anchor", "middle") // horizontal centering
+        .attr("allignment-baseline", "after-edge") // vertical centering
+        .style("pointer-events", "none")
+        .style("visibility", "hidden") // changes in zoom
+        .text("Unexplored");
+
+      {% elif planet.owner.id != status.user.id %}
+          g.append("text")
+            .attr("x", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.08))
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "0.05px")
+            .attr("fill", "white")
+            .attr("text-anchor", "middle") // horizontal centering
+            .attr("allignment-baseline", "after-edge") // vertical centering
+            .style("pointer-events", "none")
+            .style("visibility", "hidden") // changes in zoom
+            .text("{{planet.owner.userstatus.user_name}}");
+
+
+      {% endif %}
+
+
+  g.append("text")
+    .attr("x", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("y", {{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "0.05px")
+    .attr("fill", "white")
+    .attr("text-anchor", "middle") // horizontal centering
+    .attr("dominant-baseline", "central") // vertical centering
+    .style("pointer-events", "none")
+    .style("visibility", "hidden") // changes in zoom
+    .text("{{planet.i}}");
+
+
+{% endfor %}
+
+
+{% for system in systems %}
+
+  g.append("image")
+    .attr("xlink:href", "/static/map/sun.png")
+    .attr("x", ({{system.0}}-.07))
+    .attr("y", ({{system.1}}-.07))
+    .attr("width", .14)
+    .attr("height", .14)
+    .append("title") // hover-over text
+    .text("{{system.0}},{{system.1}}");
+
+  g.append("text")
+    .attr("x", {{system.0}})
+    .attr("y", ({{system.1}})+.12)
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "0.05px")
+    .attr("fill", "white")
+    .attr("text-anchor", "middle") // horizontal centering
+    .attr("allignment-baseline", "after-edge") // vertical centering
+    .style("pointer-events", "none")
+    .style("visibility", "hidden") // changes in zoom
+    .text("{{system.0}},{{system.1}}");
+{% endfor %}
+
+/* Add coordinate numbers to top/bottom/sides */
+for (let i = 0; i < width; i=i+5) {
+    g.append("text")
+        .attr("x", i)
+        .attr("y", 0)
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "1")
+        .attr("fill", "yellow")
+        .attr("text-anchor", "middle") // horizontal centering
+        .attr("dominant-baseline", "central") // vertical centering
+        .style("pointer-events", "none")
+        .style("visibility", "hidden") // changes in zoom
+        .text(i.toString())
+    g.append("text")
+        .attr("x", i)
+        .attr("y", height)
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "1")
+        .attr("fill", "yellow")
+        .attr("text-anchor", "middle") // horizontal centering
+        .attr("dominant-baseline", "central") // vertical centering
+        .style("pointer-events", "none")
+        .style("visibility", "hidden") // changes in zoom
+        .text(i.toString())
+}
+for (let i = 0; i < height; i=i+5) {
+    g.append("text")
+        .attr("x", 0)
+        .attr("y", i)
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "1")
+        .attr("fill", "yellow")
+        .attr("text-anchor", "middle") // horizontal centering
+        .attr("dominant-baseline", "central") // vertical centering
+        .style("pointer-events", "none")
+        .style("visibility", "hidden") // changes in zoom
+        .text(i.toString())
+    g.append("text")
+        .attr("x", width)
+        .attr("y", i)
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "1")
+        .attr("fill", "yellow")
+        .attr("text-anchor", "middle") // horizontal centering
+        .attr("dominant-baseline", "central") // vertical centering
+        .style("pointer-events", "none")
+        .style("visibility", "hidden") // changes in zoom
+        .text(i.toString())
+}
+
+
+ svg.call(zoom);
+
+  function reset() {
+    svg.transition().duration(750).call(
+      zoom.transform,
+      d3.zoomIdentity,
+      d3.zoomTransform(svg.node()).invert([width / 2, height / 2])
+    );
+  }
+
+
+  function clicked(d,i) {
+    //const [[x0, y0], [x1, y1]] = path.bounds(d);
+    console.log(d); // coming back as undefined for circles
+    console.log(i); // come back as 0 for every circle
+    d3.event.stopPropagation();
+    svg.transition().duration(750).call(
+      zoom.transform,
+      d3.zoomIdentity
+        .translate(width / 2, height / 2)
+        .scale(Math.min(8, 0.9 / Math.max(circle_radius / width, circle_radius / height)))
+        .translate(-width, -height),
+      d3.mouse(svg.node())
+    );
+  }
+
+
+  function zoomed() {
+    const {transform} = d3.event;
+    g.attr("transform", transform);
+    g.attr("stroke-width", 1 / transform.k);
+    if (transform.k > 2) {
+         g.selectAll("circle")
+           .attr("rx", circle_radius*0.3)
+           .attr("ry", circle_radius*0.3)
+           .attr("r", circle_radius*0.3)
+         g.selectAll("text")
+           .style("visibility", "visible");
+     } else {
+         g.selectAll("circle")
+           .attr("rx", circle_radius*2)
+           .attr("ry", circle_radius*2)
+           .attr("r", circle_radius*2)
+         g.selectAll("text")
+           .style("visibility", "hidden");
+    }
+  }
+
+
+
+</script>
+
+
+{% endblock %}
