@@ -560,12 +560,12 @@ g.append("a")
               .attr("allignment-baseline", "after-edge") // vertical centering
               .style("pointer-events", "none")
               .style("visibility", "hidden") // changes in zoom
-              {% if planet.owner.id != status.user.id %}
-              .text("{{planet.owner.userstatus.user_name}}");
-              {% elif planet.owner == None %}
+              {% if planet.owner == None %}
               .text("Unavailable for Exploration");
+              {% else %}
+              .text("{{planet.owner.userstatus.user_name}}");
               {% endif %}
-              
+
   {% elif planet.owner == None %}
       g.append("text")
       {% if planet.id|mod:10 == 1 %}
