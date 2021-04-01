@@ -12,7 +12,7 @@
   const circle_radius = 1;
 
   const zoom = d3.zoom()
-      .scaleExtent([40, 300]) // max zoom out, max zoom in
+      .scaleExtent([.5, 100]) // max zoom out, max zoom in
       .on("zoom", zoomed);
 
   const svg = d3.select("#mapdiv")
@@ -801,7 +801,11 @@ for (let i = 0; i < height; i=i+5) {
     g.attr("stroke-width", 1 / transform.k);
     if (transform.k > 50) {
          g.selectAll("circle")
-           .attr("r", circle_radius*0.1)
+             {% if planet.portal and planet.owner.id == status.user.id %}
+           .attr("r", circle_radius*(.1+{{research_percent_portals}}/100))
+           {% else %}
+           .attr("r", circle_radius*.1)
+           {% endif %}
          g.selectAll("text")
            .style("visibility", "visible");
      } else {

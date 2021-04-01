@@ -5,7 +5,6 @@
 {% load mathfilters %}
 
 {% block content %}
-
 <div class= "center">
 <table width="100%">
 <tr>
@@ -57,7 +56,7 @@
 <td><font color="#FFFF66">{{planet.current_population}} / {{planet.max_population}}</font></td>
 <td><a href="/build{{planet.id}}">Build</a>
 {% if planet.portal %}
-&nbsp;&nbsp;<img src="/static/buildings/Portal.png" width=16px height=16px>&nbsp;<font color="#00FF00">{{planet.protection}}%</font>
+&nbsp;&nbsp;<img src="/static/buildings/portal.png" width=16px height=16px>&nbsp;<font color="#00FF00">{{planet.protection}}%</font>
 {% else %}
     {% if planet.protection >= 70 %}
     &nbsp;&nbsp;<font color="#00FF00">{{planet.protection}}%</font>
@@ -92,11 +91,7 @@
 <td></td>
 <td></td>
 <td></td>
-<div class= "content-mobile">
-<td colspan="2"></div>
-<div class= "content-desktop">
-<td></td>
-<td></div>
+<td colspan="2" align="right">
 <input type="submit" value="Mass Build">
 </td></tr>
 </table>
