@@ -5,8 +5,9 @@
 {% block content %}
 
 {% if error %}
-{{error}}
+<span style="color:red"><b>{{error}}</b></span>
 {% endif %}
+
 
 {% if planet_to_template_explore %}
 	<script>

@@ -5,6 +5,8 @@ import miniball
 from collections import defaultdict
 from .map_settings import *
 from datetime import datetime
+from datetime import timedelta
+from django.template import RequestContext
 
 def give_first_planet(user, status, planet):
     planet.solar_collectors = staring_solars
@@ -60,7 +62,7 @@ def generate_fleet_order(fleet, target_x, target_y, speed, order_type, *args):
     fleet.y = target_y
     if args:
         fleet.i = args[0]
-    print(fleet.current_position_x,fleet.current_position_y)
+    # print(fleet.current_position_x,fleet.current_position_y)
     min_dist = np.sqrt((fleet.current_position_x - float(target_x)) ** 2 +
                        (fleet.current_position_y - float(target_y)) ** 2)
     fleet.ticks_remaining = int(np.ceil((min_dist / speed) - 0.001))  # due to rounding and
@@ -69,6 +71,7 @@ def generate_fleet_order(fleet, target_x, target_y, speed, order_type, *args):
     fleet.save()
     
 def merge_fleets(fleets):
+    fleet1 = None
     d = defaultdict(list)
     for fl in fleets:
         coords = 'x' + str(fl.x) + 'y' + str(fl.y)
@@ -80,6 +83,63 @@ def merge_fleets(fleets):
                 setattr(fleet1, unit, getattr(fleet1, unit) + getattr(fleet[i], unit))
             fleets[i].delete()
         fleet1.save()
+    return fleet1
+
+def station_fleets(request, fleets, status):
+    stationed_fleets = Fleet.objects.filter(owner=status.id,command_order=1,ticks_remaining=0)
+    sf_dict = {}
+    for f in stationed_fleets:
+        if f.on_planet is not None:
+            sf_dict[f.on_planet.id] = f
+
+    for f in fleets:
+        planet = Planet.objects.filter(x=f.x, y=f.y, i=f.i).first()
+        msg = ""
+        fleet_units = ""
+        for u in unit_info["unit_list"]:
+            if getattr(f, u) > 0:
+                fleet_units += str(unit_info[u]['label']) + ": " + str(getattr(f, u)) + " "
+
+        if planet is None:
+            f.command_order = 2
+            f.save()
+            msg = "could not station because it doesn't exist!"
+            request.session['error'] = "Could not station because the planet doesnt exist!"
+            news_type = 'FU'
+        elif planet.owner.id != status.id:
+            f.command_order = 2
+            f.save()
+            msg = "could not station because you do not own it!"
+            request.session['error'] = "Could not station because you do not own the planet!"
+            news_type = 'FU'
+        elif planet.id in sf_dict:
+            stationed_fleet = sf_dict[planet.id]
+            for unit in unit_info["unit_list"]:
+                setattr(stationed_fleet, unit, getattr(stationed_fleet, unit) + getattr(f, unit))
+            f.delete()
+            stationed_fleet.save()
+            news_type = 'FS'
+            msg = "successfully merged with the other fleet allready stationed on it!"
+        else:
+            f.on_planet = planet
+            f.save()
+            sf_dict[planet.id] = f
+            news_type = 'FS'
+            msg = "successfully stationed on it!"
+
+        News.objects.create(user1=User.objects.get(id=status.id),
+                            empire1=status.empire,
+                            fleet1=fleet_units,
+                            planet=planet,
+                            news_type=news_type,
+                            date_and_time=datetime.now() + timedelta(seconds=1),
+                            is_read=False,
+                            is_personal_news=True,
+                            is_empire_news=False,
+                            tick_number=RoundStatus.objects.get().tick_number,
+                            extra_info=msg
+                            )
+
 
 
 def join_main_fleet(main_fleet, fleets):

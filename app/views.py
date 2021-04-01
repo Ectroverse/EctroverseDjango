@@ -15,6 +15,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash, logout, authenticate, login
 from .forms import RegisterForm
 from django.contrib import messages
+from django.contrib.messages import get_messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.template import RequestContext
 from django.db.models import Q
@@ -153,7 +154,14 @@ def btn(request):
 def battle(request, fleet_id):
     status = get_object_or_404(UserStatus, user=request.user)
     fleet = get_object_or_404(Fleet, pk=fleet_id)
-    print("fleet owner",fleet.owner, status.user, fleet.owner.id, status.id)
+    attacked_planet = Planet.objects.get(x=fleet.x, y=fleet.y, i=fleet.i)
+    if attacked_planet.home_planet:
+        request.session['error'] = "You cannot attack a home planet!"
+        return fleets(request)
+    if attacked_planet.owner == request.user:
+        request.session['error'] = "Why would you want to attack yourself?"
+        messages.error(request, 'Document deleted.')
+        return fleets(request)
     if fleet.owner != status.user:
         return fleets(request)
     if fleet.ticks_remaining != 0:
@@ -922,6 +930,9 @@ def fleets_orders_process(request):
     if order == 0 or order == 1:
         for f in fleets_id2:
             generate_fleet_order(f, x, y, speed, order, i)
+        # do instant merge of stationed fleets if allready present on that planet
+        fleets_id3 = Fleet.objects.filter(id__in=fleets_id, ticks_remaining=0, command_order=1)
+        station_fleets(request, fleets_id3, status)
     if order == 2 or order == 3:
         for f in fleets_id2:
             generate_fleet_order(f, x, y, speed, order)
@@ -976,7 +987,6 @@ def fleets(request):
     status = get_object_or_404(UserStatus, user=request.user)
     other_fleets = Fleet.objects.filter(owner=status.user.id, main_fleet=False)
     display_fleet_exploration = Fleet.objects.filter(owner=status.user.id, main_fleet=False, exploration=1)
-
 
     # show errors from fleetsend such as not having enough transports for droids, etc
     error = None
@@ -1210,15 +1220,20 @@ def fleetsend(request):
     main_fleet.save()
     # If instant travel then immediately do the cmdFleetAction stuff
 
-    if order == 10:
+    fleets_tmp = []
+    if fleet_time == 0:
+        fleets_tmp.append(fleet)
+
+    if order == 10 :
         fr_cost = calc_exploration_cost(status)
         status.fleet_readiness -= fr_cost
         status.save()
         # instant explore
         if fleet_time == 0:
-            fleets_tmp = []
-            fleets_tmp.append(fleet)
             explore_planets(fleets_tmp)
+
+    if order == 1 and fleet_time == 0:
+        station_fleets(request,fleets_tmp,status)
 
     if fleet_time == 0:
         # TODO
@@ -1800,7 +1815,7 @@ def famgetaid(request):
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
-def messages(request):
+def game_messages(request):
     status = get_object_or_404(UserStatus, user=request.user)
     messages_from = Messages.objects.filter(user2=status.id, user2_deleted=False).order_by('-date_and_time')
     status.mail_flag = 0

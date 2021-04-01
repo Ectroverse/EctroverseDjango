@@ -138,6 +138,8 @@ class News(models.Model): # a single type of building under construction
         RAP = 'RAP', _('Relation Alliance Proposed')
         RAD = 'RAD', _('Relation Alliance Declared')
         RAE = 'RAE', _('Relation Alliance Ended')
+        FS = 'FS', _('Fleet Stationed')
+        FU = 'FU', _('Fleet Station Unsuccessful')
         FM = 'FM', _('Fleet Merged')
         FJ = 'FJ', _('Fleet Joined Main')
         E = 'E', _('Something Extra')

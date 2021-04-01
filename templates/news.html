@@ -80,6 +80,16 @@
 				to {{n.user2.userstatus.user_name}} from {{n.empire2.name_with_id}}!
 			<br><br>
 		{% endif %}
+		{% if n.news_type == 'FS' %}
+			Your fleet consitsting of: {{n.fleet1}} 
+			has reached its destination planet - {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}} and {{n.extra_info}}
+			<br><br>
+		{% endif %}
+		{% if n.news_type == 'FU' %}
+			Your fleet consitsting of: {{n.fleet1}} 
+			has reached its destination planet - {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}} and {{n.extra_info}}
+			<br><br>
+		{% endif %}
 	
 	{% endfor %}
 
