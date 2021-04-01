@@ -449,7 +449,7 @@ public class ProcessTick
 		 //loop over users to get their stats
 		while(resultSet.next()){
 
-			if(resultSet.getInt("networth") == 0){
+			if(resultSet.getLong("networth") == 0){
 				//System.out.println("networth was null");
 				continue;
 			}
