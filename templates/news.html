@@ -60,6 +60,26 @@
 			Your psychics have casted a {{n.fleet1}} spell on {{n.user2}} with the following results: {{ n.extra_info|linebreaksbr}}
 			<br><br>
 		{% endif %}
+		{% if n.news_type == 'SA' %}
+			You have attacked and took control of the planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}} 
+				previously owned by {{n.user2.userstatus.user_name}} from {{n.empire2.name_with_id}}!
+			<br><br>
+		{% endif %}
+		{% if n.news_type == 'UA' %}
+			You have attacked and failed to capture the planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}} 
+				owned by {{n.user2.userstatus.user_name}} from {{n.empire2.name_with_id}}!
+			<br><br>
+		{% endif %}
+		{% if n.news_type == 'SD' %}
+			The planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}, was unsuccessfully attacked by
+				 {{n.user2.userstatus.user_name}} from {{n.empire2.name_with_id}}!
+			<br><br>
+		{% endif %}
+		{% if n.news_type == 'UD' %}
+			You have lost the planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}} 
+				to {{n.user2.userstatus.user_name}} from {{n.empire2.name_with_id}}!
+			<br><br>
+		{% endif %}
 	
 	{% endfor %}
 

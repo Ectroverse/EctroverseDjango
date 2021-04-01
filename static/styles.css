@@ -627,3 +627,54 @@ tr.spaceUnder>td {
 .spaceUnder{
 margin-bottom: 10px;
 }
+
+/*map settings*/
+
+.wrap_box{
+	text-align:center;
+	overflow:hidden;
+	width: 100%;
+	margin-bottom: 8px;
+}
+
+.left_map_box{
+ float: left;
+ margin: 0 auto;
+ width: 33%;
+ text-align: center;
+}
+
+.right1_map_box{
+ float: right;
+ margin: 0 auto;
+ width: 27%;
+ text-align: center;
+}
+
+.right2_map_box{
+ float: right;
+ margin: 0 auto;
+ width: 6%;
+ text-align: center;
+}
+
+.center_map_box{
+margin: 0 auto;
+width: 33%;
+}
+
+/*battle*/
+
+.left_battle_box{
+ float: left;
+ margin: 0 auto;
+ width: 49%;
+ text-align: center;
+}
+
+.right_battle_box{
+ float: right;
+ margin: 0 auto;
+ width: 49%;
+ text-align: center;
+}

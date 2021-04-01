@@ -158,11 +158,11 @@ def battle(request, fleet_id):
         return fleets(request)
     if fleet.ticks_remaining != 0:
         return fleets(request)
-    msg = attack_planet(fleet)
+    battle_report = attack_planet(fleet)
     context = {"status": status,
                "page_title": "Battle",
-               "fleet":fleet,
-               "msg": msg
+               "fleet": fleet,
+               "battle_report": battle_report
                }
     return render(request, "battle.html", context)
 

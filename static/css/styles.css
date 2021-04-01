@@ -825,3 +825,70 @@ margin-bottom: 10px;
 	top: 10px;
 	/*font-size: max(2vw, 6px);*/
 }
+
+/*map settings*/
+
+.wrap_box{
+	text-align:center;
+	overflow:hidden;
+	width: 100%;
+	margin-bottom: 8px;
+}
+
+.left_map_box{
+ float: left;
+ margin: 0 auto;
+ width: 33%;
+ text-align: center;
+}
+
+.right1_map_box{
+ float: right;
+ margin: 0 auto;
+ width: 27%;
+ text-align: center;
+}
+
+.right2_map_box{
+ float: right;
+ margin: 0 auto;
+ width: 6%;
+ text-align: center;
+}
+
+.center_map_box{
+margin: 0 auto;
+width: 33%;
+}
+
+/*battle*/
+
+.left_box_battle{
+ float: left;
+ margin: 0 auto;
+ width: 49%;
+ text-align: center;
+}
+
+.right_box_battle{
+ float: left;
+ margin: 0 auto;
+ width: 49%;
+ text-align: center;
+}
+
+.left_news_battle{
+ float: left;
+ margin: 0 auto;
+ width: 30%;
+ text-align: left;
+ margin-right: 15px;
+}
+
+.right_news_battle{
+ float: left;
+ margin: 0 auto;
+ width: 49%;
+ text-align: left;
+}
+

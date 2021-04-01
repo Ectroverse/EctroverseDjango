@@ -8,14 +8,150 @@
 {{error}}
 {% endif %}
 
+{%  if battle_report.fleet_readiness < -100 %}
+	<b>Your forces require time to recover and prepare before engaging a new battle.<br>
+	Forcing them to attack would have more than disastrous consequences. </b>
+{%  elif battle_report.fleet_readiness < -60 %}
+	<b>Your forces are completely unprepared for another battle!<br>
+	Their effectiveness will be greatly reduced, you can also expect desertions.</b>
+{%  elif battle_report.fleet_readiness < -40 %}
+	<b>Your forces are exhausted, their effectiveness in battle will be very low.</b>
+{%  elif battle_report.fleet_readiness < -20 %}
+	<b>Your forces are very tired and certainly won't fight well.</b>
+{%  elif battle_report.fleet_readiness < 0 %}
+	"<b>Your forces seem to require rest, they won't be fighting as well
+	 as they could in different circumstances.</b>
+{% endif %}
 
-{{fleet}}
-{{fleet.command_order}}
-{{fleet.x}}
-{{fleet.y}}
-{{fleet.i}}
+{% if battle_report.p1.phase == True %}
+<div class = "wrap_box">
+	<br><b>Phase 1 - Defending cruisers engage approaching cruisers and carriers, carrying all other vessels, at long range.</b><br><br>
+	{% if battle_report.p1.def_flee == True %}
+		Your fleet didn't encounter much resistance, it seems enemy forces preferred not to directly engage us<br>
+	{% else %}
+		<div class = "left_box_battle">
+			Attacker losses:<br>
+			{% for unit, loss in  battle_report.p1.att_loss.items %}
+				{% if loss > 0 %}
+				{{unit}}: {{loss}}<br>
+				{% endif %}
+			{% endfor %}
+		</div>
+		<div class = "right_box_battle">
+			Defender losses:<br>
+			{% for unit, loss in  battle_report.p1.def_loss.items %}
+				{% if loss > 0 %}
+				{{unit}}: {{loss}}<br>
+				{% endif %}
+			{% endfor %}
+		</div>
+		<br>
+		{% if battle_report.p1.att_flee == True %}
+			Overwhelmed by defending enemy forces, your fleet hastidly retreated to minimize losses<br>
+		{% endif %}
+	{% endif %}
+</div>
+{% endif %}
 
-{{ msg|linebreaksbr }}
+{% if battle_report.p2.phase == True %}
+<div class = "wrap_box">
+	<br><b>Phase 2 - Defending fighters and cruisers intercepts enemy vessels, attempting to destroy transports before they land.</b><br><br>
+	{% if battle_report.p2.def_flee == True %}
+		Your fleet didn't encounter much resistance, it seems enemy forces preferred not to directly engage us!<br>
+	{% else %}
+		<div class = "left_box_battle">
+			Attacker losses:<br>
+			{% for unit, loss in  battle_report.p2.att_loss.items %}
+				{% if loss > 0 %}
+				{{unit}}: {{loss}}<br>
+				{% endif %}
+			{% endfor %}
+		</div>
+		<div class = "right_box_battle">
+			Defender losses:<br>
+			{% for unit, loss in  battle_report.p2.def_loss.items %}
+				{% if loss > 0 %}
+				{{unit}}: {{loss}}<br>
+				{% endif %}
+			{% endfor %}
+		</div>
+		<br>
+		{% if battle_report.p2.att_flee == True %}
+			Overwhelmed by defending enemy forces, your fleet hastidly retreated to minimize losses!<br>
+		{% endif %}
+	{% endif %}
+</div>
+{% endif %}
+
+{% if battle_report.p3.phase == True %}
+<div class = "wrap_box">
+	<br><b>Phase 3 - Ground units guarding the planet with anti-air capabilities fire at the landing transports, protected by bombers and cruisers.</b><br><br>
+	{% if battle_report.p3.def_flee == True %}
+		Your fleet didn't encounter much resistance, it seems enemy forces preferred not to directly engage us!<br>
+	{% else %}
+		<div class = "left_box_battle">
+			Attacker losses:<br>
+			{% for unit, loss in  battle_report.p3.att_loss.items %}
+				{% if loss > 0 %}
+				{{unit}}: {{loss}}<br>
+				{% endif %}
+			{% endfor %}
+		</div>
+		<div class = "right_box_battle">
+			Defender losses:<br>
+			{% for unit, loss in  battle_report.p3.def_loss.items %}
+				{% if loss > 0 %}
+				{{unit}}: {{loss}}<br>
+				{% endif %}
+			{% endfor %}
+		</div>
+		<br>
+		{% if battle_report.p3.att_flee == True %}
+			Overwhelmed by defending enemy forces, your fleet hastidly retreated to minimize losses!<br>
+		{% endif %}
+	{% endif %}
+</div>
+{% endif %}
+
+{% if battle_report.p4.phase == True %}
+<div class = "wrap_box">
+	<br><b>Phase 4 - Attacking ground forces, with support from bombers and cruisers, attempting to take control of the planet.</b><br><br>
+	{% if battle_report.p4.def_flee == True %}
+		Your fleet didn't encounter much resistance, it seems enemy forces preferred not to directly engage us!<br>
+	{% else %}
+		<div class = "left_box_battle">
+			Attacker losses:<br>
+			{% for unit, loss in  battle_report.p4.att_loss.items %}
+				{% if loss > 0 %}
+				{{unit}}: {{loss}}<br>
+				{% endif %}
+			{% endfor %}
+		</div>
+		<div class = "right_box_battle">
+			Defender losses:<br>
+			{% for unit, loss in  battle_report.p4.def_loss.items %}
+				{% if loss > 0 %}
+				{{unit}}: {{loss}}<br>
+				{% endif %}
+			{% endfor %}
+		</div>
+		<br>
+		{% if battle_report.p4.att_flee == True %}
+			Overwhelmed by defending enemy forces, your fleet hastidly retreated to minimize losses!<br>
+		{% endif %}
+	{% endif %}
+</div>
+{% endif %}
+
+
+{% if battle_report.won == "A" %}
+	<span style="color:green"><b>You won, the planet is yours!</b></span>
+{% elif battle_report.won == "D" %}
+	<span style="color:red"><b>Defender wins!</b></span>
+{% elif battle_report.won == "C" %}
+	<span style="color:red"><b>Attack cancelled!</b></span>
+{% endif %}
+
 
 
 {% endblock %}

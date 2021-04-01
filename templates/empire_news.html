@@ -229,6 +229,82 @@
 				</div>
 			</div>
 		{% endif %}
+		{% if n.news_type == 'SA' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/successfull_attack.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{{n.user1.userstatus.user_name}} attacked and took control of the n.planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}} 
+				previously owned by {{n.user2.userstatus.user_name}} from {{n.empire2.name_with_id}}!
+				<br>
+					<div class = "wrap_box">
+						<div class = "left_news_battle">
+						<u>Attacker losses:</u><br> {{n.fleet1|linebreaksbr}}
+						</div>
+						<div class = "right_news_battle">
+						<u>Defender losses:</u><br>  {{n.fleet2|linebreaksbr}}
+						</div>
+					</div>
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'UA' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/uncessessfull_attack.png' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{{n.user1.userstatus.user_name}} attacked and failed to capture the n.planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}} 
+				owned by {{n.user2.userstatus.user_name}} from {{n.empire2.name_with_id}}!
+				<br>
+					<div class = "wrap_box">
+						<div class = "left_news_battle">
+						<u>Attacker losses:</u><br> {{n.fleet1|linebreaksbr}}
+						</div>
+						<div class = "right_news_battle">
+						<u>Defender losses:</u><br>  {{n.fleet2|linebreaksbr}}
+						</div>
+					</div>
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'SD' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/successfull_defence.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				The planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}, owned by {{n.user1.userstatus.user_name}}, was unsuccessfully attacked by
+				owned by {{n.user2.userstatus.user_name}} from {{n.empire2.name_with_id}}!
+				<br>
+					<div class = "wrap_box">
+						<div class = "left_news_battle">
+						<u>Attacker losses:</u><br> {{n.fleet2|linebreaksbr}}
+						</div>
+						<div class = "right_news_battle">
+						<u>Defender losses:</u><br>  {{n.fleet1|linebreaksbr}}
+						</div>
+					</div>
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'UD' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/uncessessfull_defence.png' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				The planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}, owned by {{n.user1.userstatus.user_name}}, was lost
+				to {{n.user2.userstatus.user_name}} from {{n.empire2.name_with_id}}!
+				<br>
+					<div class = "wrap_box">
+						<div class = "left_news_battle">
+						<u>Attacker losses:</u><br> {{n.fleet2|linebreaksbr}}
+						</div>
+						<div class = "right_news_battle">
+						<u>Defender losses:</u><br>  {{n.fleet1|linebreaksbr}}
+						</div>
+					</div>
+				</div>
+			</div>
+		{% endif %}
 	
 	{% endfor %}
 

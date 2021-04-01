@@ -12,59 +12,26 @@
 	<span style="color:red">{{err_msg}}</span>
 {% endif %}
 
-<style>
-.wrap{
-	text-align:center;
-	overflow:hidden;
-	width: 100%;
-	margin-bottom: 8px;
-}
-
-.left{
- float: left;
- margin: 0 auto;
- width: 33%;
- text-align: center;
-}
-
-.right1{
- float: right;
- margin: 0 auto;
- width: 27%;
- text-align: center;
-}
-
-.right2{
- float: right;
- margin: 0 auto;
- width: 6%;
- text-align: center;
-}
-
-.center{
-margin: 0 auto;
-width: 33%;
-}
-</style>
 
 {% if not map_settings %}
 You don't have any setting currently. Consider creating one.
 {% else %}
 
+
 <form action="/map_settings" method="POST">
 {% csrf_token %}
 
-<div class="wrap">
-	<div class="left">
+<div class="wrap_box">
+	<div class="left_map_box">
 		Planets list:
 	</div>
-	<div class="right2">
+	<div class="right2_map_box">
 		Delete:
 	</div>
-	<div class="right1">
+	<div class="right1_map_box">
 		Colour:
 	</div>
-	<div class="center">
+	<div class="center_map_box">
 		Details (faction/empire name or id-number): 
 	</div>
 </div>
@@ -73,8 +40,8 @@ You don't have any setting currently. Consider creating one.
 <input type="hidden" name="setting_object" value="{{setting.id}}"> 
 
 
-<div class="wrap">
-	<div class="left">
+<div class="wrap_box">
+	<div class="left_map_box">
 	{{ forloop.counter0 }}.
 		<select name="map_settings">
 		<option value="U" {% if setting.map_setting == 'U' %}selected{% endif %}>
@@ -94,13 +61,13 @@ You don't have any setting currently. Consider creating one.
 		</select>
 	</div>
 	
-	<div class="right2">
+	<div class="right2_map_box">
 		<input type='hidden' value='0' name='delete_setting'>
 		<input type='checkbox' value='1' name='delete_setting'>
 	</div>
 
 	
-	<div class="right1">
+	<div class="right1_map_box">
 		<select name="color">
 		<option value="G" {% if setting.color_settings == 'G' %}selected{% endif %}>
 		Green</option>
@@ -119,7 +86,7 @@ You don't have any setting currently. Consider creating one.
 		</select>
 	</div>
 
-	<div class="center">
+	<div class="center_map_box">
 	{% if setting.map_setting == "PF" %}
 		<input type="text" name="details" size="6" value="{{setting.faction.id}}">
 	{% elif setting.map_setting == "PE" %}
