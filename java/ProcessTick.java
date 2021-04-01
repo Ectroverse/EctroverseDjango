@@ -445,6 +445,43 @@ public class ProcessTick
 			" current_population = ? "+	 //1		 
 			" WHERE id = ?"  ; //2
 			
+		
+		String fleetMergeQuery = "UPDATE app_fleet SET" +
+						" bomber = ?" + //1
+						" , fighter = ? "+ //2
+						" , transport = ? "+ //3
+						" , cruiser = ? " + //4
+						" , carrier = ? " + //5
+						" , soldier = ? " + //6
+						" , droid = ? " + //7
+						" , goliath = ? "+ //8
+						" , phantom = ? " + //9
+						" , wizard = ? " + //10
+						" , agent = ? " + //11
+						" , ghost = ? "+ //12
+						" , exploration = ? "+ //13
+						" WHERE id = ?"; //14
+
+		PreparedStatement fleetMergeUpdateStatement = con.prepareStatement(fleetMergeQuery); 
+		
+		String fleetStationQuery = "UPDATE app_fleet SET" +
+						" bomber = ?" + //1
+						" , fighter = ? "+ //2
+						" , transport = ? "+ //3
+						" , cruiser = ? " + //4
+						" , carrier = ? " + //5
+						" , soldier = ? " + //6
+						" , droid = ? " + //7
+						" , goliath = ? "+ //8
+						" , phantom = ? " + //9
+						" , wizard = ? " + //10
+						" , agent = ? " + //11
+						" , ghost = ? "+ //12
+						" , exploration = ? "+ //13
+						" , on_planet_id = ? "+ //14
+						" WHERE id = ?"; //15
+
+		PreparedStatement fleetStationUpdateStatement = con.prepareStatement(fleetStationQuery); 
 			
 		 //loop over users to get their stats
 		while(resultSet.next()){
@@ -1163,7 +1200,8 @@ public class ProcessTick
 			userStatusUpdateStatement.addBatch();
 			
 			//udate merging fleets
-			ResultSet mergingFleets = statement.executeQuery("SELECT * FROM app_fleet WHERE (command_order = 3 OR command_order = 4) AND owner_id = " + userID + ";");
+			ResultSet mergingFleets = statement.executeQuery("SELECT * FROM app_fleet WHERE (command_order = 3 OR command_order = 4) AND owner_id = " + userID + 
+			" AND ticks_remaining = 0;");
 			
 			HashMap<String, LinkedList<Integer>> fleetMarge = new HashMap<>();
 			
@@ -1173,24 +1211,6 @@ public class ProcessTick
 					fleetMarge.put(p, new LinkedList<Integer>());
 				fleetMarge.get(p).add(mergingFleets.getInt("id"));
 			}
-			
-			String fleetMergeQuery = "UPDATE app_fleet SET" +
-						" bomber = ?" + //1
-						" , fighter = ? "+ //2
-						" , transport = ? "+ //3
-						" , cruiser = ? " + //4
-						" , carrier = ? " + //5
-						" , soldier = ? " + //6
-						" , droid = ? " + //7
-						" , goliath = ? "+ //8
-						" , phantom = ? " + //9
-						" , wizard = ? " + //10
-						" , agent = ? " + //11
-						" , ghost = ? "+ //12
-						" , exploration = ? "+ //13
-						" WHERE id = ?"; //14
-
-			PreparedStatement fleetMergeUpdateStatement = con.prepareStatement(fleetMergeQuery); 
 			
 			for(LinkedList<Integer> idList : fleetMarge.values()){
 				if (idList.size() > 1){
@@ -1213,7 +1233,51 @@ public class ProcessTick
 					fleetMergeUpdateStatement.addBatch();
 				}
 			}
-			fleetMergeUpdateStatement.executeBatch();
+			
+			//udate stationed fleets
+			ResultSet stationingFleets = statement.executeQuery("SELECT * FROM app_fleet WHERE command_order = 1 AND owner_id = " + userID + 
+			" AND ticks_remaining = 0;");
+			
+			HashMap<Integer, LinkedList<Integer>> fleetStation = new HashMap<>();
+			
+			while(stationingFleets.next()){
+				ResultSet planet = statement2.executeQuery("SELECT id FROM \"PLANET\" WHERE x = " + 
+					    stationingFleets.getInt("x") +
+				" AND y = " + stationingFleets.getInt("y") +
+				" AND i = " + stationingFleets.getInt("i") );
+				planet.next();
+				int p = planet.getInt("id");
+				if (!fleetStation.containsKey(p))
+					fleetStation.put(p, new LinkedList<Integer>());
+				fleetStation.get(p).add(stationingFleets.getInt("id"));
+			}
+			//Map.Entry<String, Object> entry : map.entrySet()
+			for(Map.Entry<Integer, LinkedList<Integer>> entry : fleetStation.entrySet()){
+				LinkedList<Integer> idList = entry.getValue();
+				int pID = entry.getKey();
+
+				if (idList.size() > 1){
+					long [] unit = new long[unit_names.length];
+					int firstId = idList.getFirst();
+					for (Integer id : idList) {
+						ResultSet fleet = statement.executeQuery("SELECT * FROM app_fleet WHERE id = " + id + ";");
+						fleet.next();
+						for(int i =0; i < unit_names.length; i++){
+							unit[i] += fleet.getLong(unit_names[i]);
+						}
+						if (id != firstId)
+							statement.execute("DELETE FROM app_fleet WHERE id = " + id + ";");
+					}
+					for(int i =0; i < unit_names.length; i++){
+						fleetStationUpdateStatement .setLong(i+1, unit[i]);
+					}
+					
+					fleetStationUpdateStatement .setInt(unit_names.length+1 , pID); //set planet id
+					fleetStationUpdateStatement .setInt(unit_names.length+2 , firstId); //set fleet id
+					fleetStationUpdateStatement .addBatch();
+				}
+			}
+			
 		}
 		main_loop2 = System.nanoTime();
 	
@@ -1253,6 +1317,12 @@ public class ProcessTick
 			"app_empire.id = GroupedUserTable.empire_id;";
 		
 		statement.execute(updateEmpireRanks);
+		
+		//update merged fleets
+		fleetMergeUpdateStatement.executeBatch();
+		
+		//update stationed fleets
+		fleetStationUpdateStatement.executeBatch();
 
 		//purge old news
 		String deletePersonalNews = "DELETE FROM app_news WHERE is_personal_news = false AND " + tick_nr + "  - tick_number > " + news_delete_ticks + " ;"; 
