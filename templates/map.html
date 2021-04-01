@@ -6,15 +6,13 @@
 
 <div id="mapdiv" style="background-image:url(/static/background.gif)"></div>
 
-<a href="?heatmap=True">Heatmap Test</a>
-
 <script>
   const width = 100;
   const height = 100;
   const circle_radius = 1;
 
   const zoom = d3.zoom()
-      .scaleExtent([0.5, 100]) // max zoom out, max zoom in
+      .scaleExtent([40, 300]) // max zoom out, max zoom in
       .on("zoom", zoomed);
 
   const svg = d3.select("#mapdiv")
@@ -51,9 +49,47 @@
 {% else %}
 
   g.append("circle")
-  .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-  .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-  .attr("r", circle_radius * 2)
+  {% if planet.id|mod:10 == 1 %}
+    .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+    {% endif %}
+  {% if planet.id|mod:10 == 2 %}
+    .attr("cx", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+    {% endif %}
+  {% if planet.id|mod:10 == 3 %}
+      .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("cy", {{planet.y}} + (0.55*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+      {% endif %}
+    {% if planet.id|mod:10 == 4 %}
+      .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+      {% endif %}
+    {% if planet.id|mod:10 == 5 %}
+        .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+        {% endif %}
+      {% if planet.id|mod:10 == 6 %}
+        .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+        {% endif %}
+      {% if planet.id|mod:10 == 7 %}
+          .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+          {% endif %}
+        {% if planet.id|mod:10 == 8 %}
+          .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+          {% endif %}
+        {% if planet.id|mod:10 == 9 %}
+            .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+            {% endif %}
+          {% if planet.id|mod:10 == 0 %}
+      .attr("cx", {{planet.x}} + 0.65*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("cy", {{planet.y}} + (0.65*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+  {% endif %}
+  .attr("r", circle_radius * 1)
   .style("fill", "{{ setting.get_color_settings_display }}")
   .style("opacity", 0.2)
 
@@ -63,71 +99,259 @@
   {% elif setting.map_setting == "YP" and planet.owner.id == status.user.id %}
 
       g.append("circle")
-      .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-      .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-      .attr("r", circle_radius * 2)
+      {% if planet.id|mod:10 == 1 %}
+        .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+        {% endif %}
+      {% if planet.id|mod:10 == 2 %}
+        .attr("cx", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+        {% endif %}
+      {% if planet.id|mod:10 == 3 %}
+          .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("cy", {{planet.y}} + (0.55*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+          {% endif %}
+        {% if planet.id|mod:10 == 4 %}
+          .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+          {% endif %}
+        {% if planet.id|mod:10 == 5 %}
+            .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+            {% endif %}
+          {% if planet.id|mod:10 == 6 %}
+            .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+            {% endif %}
+          {% if planet.id|mod:10 == 7 %}
+              .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+              .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+              {% endif %}
+            {% if planet.id|mod:10 == 8 %}
+              .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+              .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+              {% endif %}
+            {% if planet.id|mod:10 == 9 %}
+                .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                {% endif %}
+              {% if planet.id|mod:10 == 0 %}
+          .attr("cx", {{planet.x}} + 0.65*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("cy", {{planet.y}} + (0.65*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+      {% endif %}
+      .attr("r", circle_radius * 1)
       .style("fill", "{{ setting.get_color_settings_display }}")
       .style("opacity", 0.2)
 
-/* target empire
-{% elif setting.map_setting == "PE" and planet.owner.empire_num == setting.empire_num %}
-
+/*target empire*/
+{% elif setting.map_setting == "PE" and planet.owner.userstatus.empire.id == setting.empire.id %}
     g.append("circle")
-    .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-    .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-    .attr("r", circle_radius * 2)
+    {% if planet.id|mod:10 == 1 %}
+      .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+      {% endif %}
+    {% if planet.id|mod:10 == 2 %}
+      .attr("cx", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+      {% endif %}
+    {% if planet.id|mod:10 == 3 %}
+        .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("cy", {{planet.y}} + (0.55*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+        {% endif %}
+      {% if planet.id|mod:10 == 4 %}
+        .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+        {% endif %}
+      {% if planet.id|mod:10 == 5 %}
+          .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+          {% endif %}
+        {% if planet.id|mod:10 == 6 %}
+          .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+          {% endif %}
+        {% if planet.id|mod:10 == 7 %}
+            .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+            {% endif %}
+          {% if planet.id|mod:10 == 8 %}
+            .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+            {% endif %}
+          {% if planet.id|mod:10 == 9 %}
+              .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+              .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+              {% endif %}
+            {% if planet.id|mod:10 == 0 %}
+        .attr("cx", {{planet.x}} + 0.65*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("cy", {{planet.y}} + (0.65*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+    {% endif %}
+    .attr("r", circle_radius * 1)
     .style("fill", "{{ setting.get_color_settings_display }}")
-    .style("opacity", 0.2) */
+    .style("opacity", 0.2)
 
 /* target faction */
     {% elif setting.map_setting == "PF" and planet.owner.id == setting.faction.id %}
 
         g.append("circle")
-        .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-        .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-        .attr("r", circle_radius * 2)
+        {% if planet.id|mod:10 == 1 %}
+          .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+          {% endif %}
+        {% if planet.id|mod:10 == 2 %}
+          .attr("cx", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+          {% endif %}
+        {% if planet.id|mod:10 == 3 %}
+            .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("cy", {{planet.y}} + (0.55*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+            {% endif %}
+          {% if planet.id|mod:10 == 4 %}
+            .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+            {% endif %}
+          {% if planet.id|mod:10 == 5 %}
+              .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+              .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+              {% endif %}
+            {% if planet.id|mod:10 == 6 %}
+              .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+              .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+              {% endif %}
+            {% if planet.id|mod:10 == 7 %}
+                .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                {% endif %}
+              {% if planet.id|mod:10 == 8 %}
+                .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                {% endif %}
+              {% if planet.id|mod:10 == 9 %}
+                  .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                  .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                  {% endif %}
+                {% if planet.id|mod:10 == 0 %}
+            .attr("cx", {{planet.x}} + 0.65*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("cy", {{planet.y}} + (0.65*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+        {% endif %}
+        .attr("r", circle_radius * 1)
         .style("fill", "{{ setting.get_color_settings_display }}")
         .style("opacity", 0.2)
 
-/* your empire
-        {% elif setting.map_setting == "YE" and planet.owner.userstatus.empirenum == status.user.empirenum %}
+/* your empire */
+        {% elif setting.map_setting == "YE" and planet.owner.userstatus.empire.id == status.empire.id %}
 
             g.append("circle")
-            .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-            .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-            .attr("r", circle_radius * 2)
+            {% if planet.id|mod:10 == 1 %}
+              .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+              .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+              {% endif %}
+            {% if planet.id|mod:10 == 2 %}
+              .attr("cx", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+              .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+              {% endif %}
+            {% if planet.id|mod:10 == 3 %}
+                .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                .attr("cy", {{planet.y}} + (0.55*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                {% endif %}
+              {% if planet.id|mod:10 == 4 %}
+                .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                {% endif %}
+              {% if planet.id|mod:10 == 5 %}
+                  .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                  .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                  {% endif %}
+                {% if planet.id|mod:10 == 6 %}
+                  .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                  .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                  {% endif %}
+                {% if planet.id|mod:10 == 7 %}
+                    .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                    .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                    {% endif %}
+                  {% if planet.id|mod:10 == 8 %}
+                    .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                    .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                    {% endif %}
+                  {% if planet.id|mod:10 == 9 %}
+                      .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                      .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                      {% endif %}
+                    {% if planet.id|mod:10 == 0 %}
+                .attr("cx", {{planet.x}} + 0.65*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                .attr("cy", {{planet.y}} + (0.65*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+            {% endif %}
+            .attr("r", circle_radius * 1)
             .style("fill", "{{ setting.get_color_settings_display }}")
-            .style("opacity", 0.2) */
+            .style("opacity", 0.2)
 
 
-/* your portals
-            {% elif setting.map_setting == "YR" and Planet.objects.buildingtype.portal == True  %}
 
+/* your portals */
+            {% elif setting.map_setting == "YR" and planet.portal %}
+              {% if planet.owner.id == status.user.id %}
                 g.append("circle")
-                .attr("cx", {{planet.x}} + 0.4*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-                .attr("cy", {{planet.y}} + 0.4*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-                .attr("r", circle_radius * 2)
+                {% if planet.id|mod:10 == 1 %}
+                  .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                  .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                  {% endif %}
+                {% if planet.id|mod:10 == 2 %}
+                  .attr("cx", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                  .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                  {% endif %}
+                {% if planet.id|mod:10 == 3 %}
+                    .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                    .attr("cy", {{planet.y}} + (0.55*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                    {% endif %}
+                  {% if planet.id|mod:10 == 4 %}
+                    .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                    .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                    {% endif %}
+                  {% if planet.id|mod:10 == 5 %}
+                      .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                      .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                      {% endif %}
+                    {% if planet.id|mod:10 == 6 %}
+                      .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                      .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                      {% endif %}
+                    {% if planet.id|mod:10 == 7 %}
+                        .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                        .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                        {% endif %}
+                      {% if planet.id|mod:10 == 8 %}
+                        .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                        .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                        {% endif %}
+                      {% if planet.id|mod:10 == 9 %}
+                          .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                          .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                          {% endif %}
+                        {% if planet.id|mod:10 == 0 %}
+                    .attr("cx", {{planet.x}} + 0.65*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                    .attr("cy", {{planet.y}} + (0.65*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                {% endif %}
+                .attr("r", circle_radius * 1)
                 .style("fill", "{{ setting.get_color_settings_display }}")
                 .style("opacity", 0.2)
-
-                 */
-        {% endif %}
-
-        {% endfor %}
+            {% endif %}
+          {% endif %}
+ {% endfor %}
 {% endfor %}
 
-{% for planet in planets %}
+         {% for planet in planets %}
 
-{% if planet.id|mod:10 == 1 %}
+         {% if planet.id|mod:10 == 1 %}
 
 g.append("a")
   .attr("xlink:href", "planet{{planet.id}}")
   .append("image")
     .attr("xlink:href", "/static/map/p00.png")
-    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.04))
-    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.04))
-    .attr("width", .08) // changes in zoom
-    .attr("height", .08) // changes in zoom
+    .attr("x", (({{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.01))
+    .attr("y", (({{planet.y}} + 0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.01))
+    .attr("width", .02) // changes in zoom
+    .attr("height", .02) // changes in zoom
     .append("title") // hover-over text
     .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
 
@@ -138,10 +362,10 @@ g.append("a")
   .attr("xlink:href", "planet{{planet.id}}")
   .append("image")
     .attr("xlink:href", "/static/map/p11.png")
-    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.0375))
-    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.0375))
-    .attr("width", .075) // changes in zoom
-    .attr("height", .075) // changes in zoom
+    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.0175))
+    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.0175))
+    .attr("width", .035) // changes in zoom
+    .attr("height", .035) // changes in zoom
     .append("title") // hover-over text
     .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
 
@@ -151,10 +375,10 @@ g.append("a")
   .attr("xlink:href", "planet{{planet.id}}")
   .append("image")
     .attr("xlink:href", "/static/map/p01.png")
-    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.06))
-    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.06))
-    .attr("width", .12) // changes in zoom
-    .attr("height", .12) // changes in zoom
+    .attr("x", (({{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.008))
+    .attr("y", (({{planet.y}} + 0.55*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.008))
+    .attr("width", .016) // changes in zoom
+    .attr("height", .016) // changes in zoom
     .append("title") // hover-over text
     .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
 
@@ -164,10 +388,10 @@ g.append("a")
   .attr("xlink:href", "planet{{planet.id}}")
   .append("image")
     .attr("xlink:href", "/static/map/p10.png")
-    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.05))
-    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.05))
-    .attr("width", .1) // changes in zoom
-    .attr("height", .1) // changes in zoom
+    .attr("x", (({{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.012))
+    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.012))
+    .attr("width", .024) // changes in zoom
+    .attr("height", .024) // changes in zoom
     .append("title") // hover-over text
     .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
 
@@ -177,10 +401,10 @@ g.append("a")
   .attr("xlink:href", "planet{{planet.id}}")
   .append("image")
     .attr("xlink:href", "/static/map/p03.png")
-    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.03))
-    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.03))
-    .attr("width", .06) // changes in zoom
-    .attr("height", .06) // changes in zoom
+    .attr("x", (({{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.009))
+    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.009))
+    .attr("width", .018) // changes in zoom
+    .attr("height", .018) // changes in zoom
     .append("title") // hover-over text
     .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
 
@@ -190,10 +414,10 @@ g.append("a")
   .attr("xlink:href", "planet{{planet.id}}")
   .append("image")
     .attr("xlink:href", "/static/map/p04.png")
-    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.04))
-    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.04))
-    .attr("width", .08) // changes in zoom
-    .attr("height", .08) // changes in zoom
+    .attr("x", (({{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.011))
+    .attr("y", (({{planet.y}} + 0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.011))
+    .attr("width", .022) // changes in zoom
+    .attr("height", .022) // changes in zoom
     .append("title") // hover-over text
     .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
 
@@ -203,10 +427,10 @@ g.append("a")
   .attr("xlink:href", "planet{{planet.id}}")
   .append("image")
     .attr("xlink:href", "/static/map/p05.png")
-    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.045))
-    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.045))
-    .attr("width", .09) // changes in zoom
-    .attr("height", .09) // changes in zoom
+    .attr("x", (({{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.018))
+    .attr("y", (({{planet.y}} + 0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.018))
+    .attr("width", .036) // changes in zoom
+    .attr("height", .036) // changes in zoom
     .append("title") // hover-over text
     .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
 
@@ -216,10 +440,10 @@ g.append("a")
   .attr("xlink:href", "planet{{planet.id}}")
   .append("image")
     .attr("xlink:href", "/static/map/p06.png")
-    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.02))
-    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.02))
-    .attr("width", .04) // changes in zoom
-    .attr("height", .04) // changes in zoom
+    .attr("x", (({{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.009))
+    .attr("y", (({{planet.y}} + 0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.009))
+    .attr("width", .018) // changes in zoom
+    .attr("height", .018) // changes in zoom
     .append("title") // hover-over text
     .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
 
@@ -229,23 +453,23 @@ g.append("a")
   .attr("xlink:href", "planet{{planet.id}}")
   .append("image")
     .attr("xlink:href", "/static/map/p07.png")
-    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.035))
-    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.035))
-    .attr("width", .07) // changes in zoom
-    .attr("height", .07) // changes in zoom
+    .attr("x", (({{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.012))
+    .attr("y", (({{planet.y}} + 0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.012))
+    .attr("width", .024) // changes in zoom
+    .attr("height", .024) // changes in zoom
     .append("title") // hover-over text
     .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
 
-{% else %}
+{% elif planet.id|mod:10 == 0 %}
 
 g.append("a")
   .attr("xlink:href", "planet{{planet.id}}")
   .append("image")
     .attr("xlink:href", "/static/map/p08.png")
-    .attr("x", (({{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.06))
-    .attr("y", (({{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.06))
-    .attr("width", .12) // changes in zoom
-    .attr("height", .12) // changes in zoom
+    .attr("x", (({{planet.x}} + 0.65*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.015))
+    .attr("y", (({{planet.y}} + 0.65*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))-.015))
+    .attr("width", .03) // changes in zoom
+    .attr("height", .03) // changes in zoom
     .append("title") // hover-over text
     .text("{{planet.x}},{{planet.y}}:{{planet.i}}");
 
@@ -254,10 +478,39 @@ g.append("a")
 {% if planet.owner.id == status.user.id %}
 
     g.append("text")
+    {% if planet.id|mod:10 == 1 %}
+      .attr("x", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+    {% elif planet.id|mod:10 == 2 %}
       .attr("x", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-      .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.08))
+      .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+      {% elif planet.id|mod:10 == 3 %}
+        .attr("x", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("y", {{planet.y}} + (0.55*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+      {% elif planet.id|mod:10 == 4 %}
+        .attr("x", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+        {% elif planet.id|mod:10 == 5 %}
+          .attr("x", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+        {% elif planet.id|mod:10 == 6 %}
+          .attr("x", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+          {% elif planet.id|mod:10 == 7 %}
+            .attr("x", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+          {% elif planet.id|mod:10 == 8 %}
+            .attr("x", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("y", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+            {% elif planet.id|mod:10 == 9 %}
+              .attr("x", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+              .attr("y", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+      {% else %}
+        .attr("x", {{planet.x}} + 0.65*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("y", {{planet.y}} + (0.65*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+    {% endif %}
       .attr("font-family", "sans-serif")
-      .attr("font-size", "0.05px")
+      .attr("font-size", "0.01px")
       .attr("fill", "white")
       .attr("text-anchor", "middle") // horizontal centering
       .attr("allignment-baseline", "after-edge") // vertical centering
@@ -267,10 +520,39 @@ g.append("a")
 
 {% elif planet.home_planet %}
     g.append("text")
+    {% if planet.id|mod:10 == 1 %}
+      .attr("x", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+    {% elif planet.id|mod:10 == 2 %}
       .attr("x", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-      .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.08))
+      .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+      {% elif planet.id|mod:10 == 3 %}
+        .attr("x", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("y", {{planet.y}} + (0.55*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+      {% elif planet.id|mod:10 == 4 %}
+        .attr("x", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+        {% elif planet.id|mod:10 == 5 %}
+          .attr("x", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+        {% elif planet.id|mod:10 == 6 %}
+          .attr("x", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+          {% elif planet.id|mod:10 == 7 %}
+            .attr("x", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+          {% elif planet.id|mod:10 == 8 %}
+            .attr("x", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("y", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+            {% elif planet.id|mod:10 == 9 %}
+              .attr("x", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+              .attr("y", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+      {% else %}
+        .attr("x", {{planet.x}} + 0.65*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("y", {{planet.y}} + (0.65*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+      {% endif %}
       .attr("font-family", "sans-serif")
-      .attr("font-size", "0.05px")
+      .attr("font-size", "0.01px")
       .attr("fill", "white")
       .attr("text-anchor", "middle") // horizontal centering
       .attr("allignment-baseline", "after-edge") // vertical centering
@@ -280,10 +562,39 @@ g.append("a")
 
   {% elif planet.owner == None %}
       g.append("text")
+      {% if planet.id|mod:10 == 1 %}
+        .attr("x", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+      {% elif planet.id|mod:10 == 2 %}
         .attr("x", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-        .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.08))
+        .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+        {% elif planet.id|mod:10 == 3 %}
+          .attr("x", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("y", {{planet.y}} + (0.55*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+        {% elif planet.id|mod:10 == 4 %}
+          .attr("x", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+          {% elif planet.id|mod:10 == 5 %}
+            .attr("x", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+          {% elif planet.id|mod:10 == 6 %}
+            .attr("x", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+            {% elif planet.id|mod:10 == 7 %}
+              .attr("x", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+              .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+            {% elif planet.id|mod:10 == 8 %}
+              .attr("x", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+              .attr("y", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+              {% elif planet.id|mod:10 == 9 %}
+                .attr("x", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                .attr("y", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+        {% else %}
+          .attr("x", {{planet.x}} + 0.65*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("y", {{planet.y}} + (0.65*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+                {% endif %}
         .attr("font-family", "sans-serif")
-        .attr("font-size", "0.05px")
+        .attr("font-size", "0.01px")
         .attr("fill", "white")
         .attr("text-anchor", "middle") // horizontal centering
         .attr("allignment-baseline", "after-edge") // vertical centering
@@ -293,10 +604,39 @@ g.append("a")
 
       {% elif planet.owner.id != status.user.id %}
           g.append("text")
-            .attr("x", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-            .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.08))
+      {% if planet.id|mod:10 == 1 %}
+        .attr("x", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+      {% elif planet.id|mod:10 == 2 %}
+        .attr("x", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+        {% elif planet.id|mod:10 == 3 %}
+          .attr("x", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("y", {{planet.y}} + (0.55*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+        {% elif planet.id|mod:10 == 4 %}
+          .attr("x", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+          {% elif planet.id|mod:10 == 5 %}
+            .attr("x", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+          {% elif planet.id|mod:10 == 6 %}
+            .attr("x", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+            {% elif planet.id|mod:10 == 7 %}
+              .attr("x", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+              .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+            {% elif planet.id|mod:10 == 8 %}
+              .attr("x", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+              .attr("y", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+              {% elif planet.id|mod:10 == 9 %}
+                .attr("x", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                .attr("y", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+        {% else %}
+          .attr("x", {{planet.x}} + 0.65*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("y", {{planet.y}} + (0.65*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})+.02))
+                {% endif %}
             .attr("font-family", "sans-serif")
-            .attr("font-size", "0.05px")
+            .attr("font-size", "0.015px")
             .attr("fill", "white")
             .attr("text-anchor", "middle") // horizontal centering
             .attr("allignment-baseline", "after-edge") // vertical centering
@@ -309,10 +649,39 @@ g.append("a")
 
 
   g.append("text")
+  {% if planet.id|mod:10 == 1 %}
+    .attr("x", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+  {% elif planet.id|mod:10 == 2 %}
     .attr("x", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
-    .attr("y", {{planet.y}} + 0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+    .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+    {% elif planet.id|mod:10 == 3 %}
+      .attr("x", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("y", {{planet.y}} + (0.55*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+    {% elif planet.id|mod:10 == 4 %}
+      .attr("x", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+      {% elif planet.id|mod:10 == 5 %}
+        .attr("x", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("y", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+      {% elif planet.id|mod:10 == 6 %}
+        .attr("x", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+        .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+        {% elif planet.id|mod:10 == 7 %}
+          .attr("x", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("y", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+        {% elif planet.id|mod:10 == 8 %}
+          .attr("x", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+          .attr("y", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+          {% elif planet.id|mod:10 == 9 %}
+            .attr("x", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+            .attr("y", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+    {% else %}
+      .attr("x", {{planet.x}} + 0.65*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+      .attr("y", {{planet.y}} + (0.65*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+            {% endif %}
     .attr("font-family", "sans-serif")
-    .attr("font-size", "0.05px")
+    .attr("font-size", "0.015px")
     .attr("fill", "white")
     .attr("text-anchor", "middle") // horizontal centering
     .attr("dominant-baseline", "central") // vertical centering
@@ -328,18 +697,18 @@ g.append("a")
 
   g.append("image")
     .attr("xlink:href", "/static/map/sun.png")
-    .attr("x", ({{system.0}}-.07))
-    .attr("y", ({{system.1}}-.07))
-    .attr("width", .14)
-    .attr("height", .14)
+    .attr("x", ({{system.0}}-.02))
+    .attr("y", ({{system.1}}-.02))
+    .attr("width", .04)
+    .attr("height", .04)
     .append("title") // hover-over text
     .text("{{system.0}},{{system.1}}");
 
   g.append("text")
     .attr("x", {{system.0}})
-    .attr("y", ({{system.1}})+.12)
+    .attr("y", ({{system.1}})+.025)
     .attr("font-family", "sans-serif")
-    .attr("font-size", "0.05px")
+    .attr("font-size", "0.01px")
     .attr("fill", "white")
     .attr("text-anchor", "middle") // horizontal centering
     .attr("allignment-baseline", "after-edge") // vertical centering
@@ -430,18 +799,16 @@ for (let i = 0; i < height; i=i+5) {
     const {transform} = d3.event;
     g.attr("transform", transform);
     g.attr("stroke-width", 1 / transform.k);
-    if (transform.k > 3) {
+    if (transform.k > 50) {
          g.selectAll("circle")
-           .attr("rx", circle_radius*0.3)
-           .attr("ry", circle_radius*0.3)
-           .attr("r", circle_radius*0.3)
+           .attr("r", circle_radius*0.1)
          g.selectAll("text")
            .style("visibility", "visible");
      } else {
          g.selectAll("circle")
-           .attr("rx", circle_radius*2)
-           .attr("ry", circle_radius*2)
-           .attr("r", circle_radius*2)
+           .attr("rx", circle_radius*1)
+           .attr("ry", circle_radius*1)
+           .attr("r", circle_radius*1)
          g.selectAll("text")
            .style("visibility", "hidden");
     }

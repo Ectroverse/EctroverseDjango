@@ -7,6 +7,8 @@ left to do:
 - battle sequence 
 - operations- just scouting for now
 - MAP!!!!!
+- update networth when fleet changes
+- units upkeep?
 
 #### v0.2 Remaining Items
 
