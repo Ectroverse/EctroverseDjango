@@ -200,30 +200,32 @@ def generate_news(battle_report, attacker, defender, attacked_planet):
         for unit, losses in battle_report["p1"]["att_loss"].items():
             if losses > 0:
                 attack_fleet_msg += str(unit) + ": " + str(losses) + " "
+        if battle_report["p1"]["att_flee"]:
+            attack_fleet_msg += "Attackers fleet was overwhelmed in stage 1."
 
     if battle_report["p2"]["phase"]:
         attack_fleet_msg += "\nPhase 2 losses: "
         for unit, losses in battle_report["p2"]["att_loss"].items():
             if losses > 0:
                 attack_fleet_msg += str(unit) + ": " + str(losses) + " "
-    else:
-        attack_fleet_msg += "Attackers fleet was overwhelmed in stage 2."
+        if battle_report["p2"]["att_flee"]:
+            attack_fleet_msg += "Attackers fleet was overwhelmed in stage 2."
 
     if battle_report["p3"]["phase"]:
         attack_fleet_msg += "\nPhase 3 losses: "
         for unit, losses in battle_report["p3"]["att_loss"].items():
             if losses > 0:
                 attack_fleet_msg += str(unit) + ": " + str(losses) + " "
-    else:
-        attack_fleet_msg += "Attackers fleet was overwhelmed in stage 3."
+        if battle_report["p3"]["att_flee"]:
+            attack_fleet_msg += "Attackers fleet was overwhelmed in stage 3."
 
     if battle_report["p4"]["phase"]:
         attack_fleet_msg += "\nPhase 4 losses: "
         for unit, losses in battle_report["p4"]["att_loss"].items():
             if losses > 0:
                 attack_fleet_msg += str(unit) + ": " + str(losses) + " "
-    else:
-        attack_fleet_msg += "Attackers fleet was overwhelmed in stage 4."
+        if battle_report["p4"]["att_flee"]:
+            attack_fleet_msg += "Attackers fleet was overwhelmed in stage 4."
 
     defender_fleet_msg = ""
 
@@ -232,32 +234,32 @@ def generate_news(battle_report, attacker, defender, attacked_planet):
         for unit, losses in battle_report["p1"]["def_loss"].items():
             if losses > 0:
                 defender_fleet_msg += str(unit) + ": " + str(losses) + " "
-    if battle_report["p1"]["def_flee"]:
-        defender_fleet_msg += "Defending forces preferred not to directly engage in stage 1!"
+        if battle_report["p1"]["def_flee"]:
+            defender_fleet_msg += "Defending forces preferred not to directly engage in stage 1!"
 
     if battle_report["p2"]["phase"]:
         defender_fleet_msg += "\nPhase 2 losses: "
         for unit, losses in battle_report["p2"]["def_loss"].items():
             if losses > 0:
                 defender_fleet_msg += str(unit) + ": " + str(losses) + " "
-    if battle_report["p2"]["def_flee"]:
-         defender_fleet_msg += "Defending forces preferred not to directly engage in stage 2!"
+        if battle_report["p2"]["def_flee"]:
+            defender_fleet_msg += "Defending forces preferred not to directly engage in stage 2!"
 
     if battle_report["p3"]["phase"]:
         defender_fleet_msg += "\nPhase 3 losses: "
         for unit, losses in battle_report["p3"]["def_loss"].items():
             if losses > 0:
                 defender_fleet_msg += str(unit) + ": " + str(losses) + " "
-    if battle_report["p3"]["def_flee"]:
-         defender_fleet_msg += "Defending forces preferred not to directly engage in stage 3!"
+        if battle_report["p3"]["def_flee"]:
+            defender_fleet_msg += "Defending forces preferred not to directly engage in stage 3!"
 
     if battle_report["p4"]["phase"]:
         defender_fleet_msg += "\nPhase 4 losses: "
         for unit, losses in battle_report["p4"]["def_loss"].items():
             if losses > 0:
                 defender_fleet_msg += str(unit) + ": " + str(losses) + " "
-    if battle_report["p4"]["def_flee"]:
-         defender_fleet_msg += "Defending forces preferred not to directly engage in stage 4!"
+        if battle_report["p4"]["def_flee"]:
+            defender_fleet_msg += "Defending forces preferred not to directly engage in stage 4!"
 
     News.objects.create(user1=User.objects.get(id=attacker.id),
                         user2=User.objects.get(id=defender.id),
@@ -447,7 +449,7 @@ def attack_planet(attacking_fleet):
         # give the planet to the attacker
         # attacked_planet.owner = attacker.id
         # destroy some buildings
-        attacked_planet.owner = attacker
+        attacked_planet.owner = User.objects.get(id=attacker.id)
         attacked_planet.save()
 
     generate_news(battle_report, attacker, defender, attacked_planet)
@@ -501,6 +503,8 @@ def phase1(attacking_fleet,
     if (attdam >= 1.0) and ((defdam / attdam) * 100.0 >= defender.long_range_attack_percent):
         defdam *= 0.20
         attdam *= 0.10
+        attacker_flee = True
+    if attdam == 0:
         attacker_flee = True
 
     # ========= Damage to attacking fleets =========#
@@ -635,7 +639,7 @@ def phase2(attacking_fleet,
     # damage is too high defender flee
     if (defdam < 1.0) or (attdam / defdam) * 10.0 >= defender.air_vs_air_percent:
         defender_flee = True
-        return attacker_flee, defender_flee, 0, 0
+        return attacker_flee, defender_flee, {}, {}
     # defender flees, if settings are 100% this means attacker deals 10x more damage than defender
     if (attdam / defdam) * 100.0 >= defender.air_vs_air_percent:
         defdam *= 0.15
@@ -644,6 +648,8 @@ def phase2(attacking_fleet,
     if (attdam >= 1.0) and (defdam / attdam) * 100.0 >= defender.air_vs_air_percent:
         defdam *= 0.50
         attdam *= 0.25
+        attacker_flee = True
+    if attdam == 0:
         attacker_flee = True
 
     # ========= Damage to attacking fleets =========#
@@ -820,7 +826,7 @@ def phase3(attacking_fleet,
     # damage is too high defender flee
     if (defdam < 1.0) or (attdam / defdam) * 10.0 >= defender.ground_vs_air_percent:
         defender_flee = True
-        return attacker_flee, defender_flee,0 ,0
+        return attacker_flee, defender_flee, {}, {}
     # defender flees, if settings are 100% this means attacker deals 10x more damage than defender
     if (attdam / defdam) * 100.0 >= defender.ground_vs_air_percent:
         defdam *= 0.15
@@ -830,6 +836,9 @@ def phase3(attacking_fleet,
         defdam *= 0.30
         attdam *= 0.15
         attacker_flee = True
+    if attdam == 0:
+        attacker_flee = True
+
 
     # ========= Damage to attacking fleets =========#
     hptransport = attacking_fleet.transport * attstats["Transports"][3]
@@ -973,7 +982,7 @@ def phase4(attacking_fleet,
     # damage is too high defender flee
     if (defdam < 1.0) or (attdam / defdam) * 10.0 >= defender.ground_vs_ground_percent:
         defender_flee = True
-        return attacker_flee, defender_flee, 0, 0
+        return attacker_flee, defender_flee, {}, {}
     # defender flees, if settings are 100% this means attacker deals 10x more damage than defender
     if (attdam / defdam) * 100.0 >= defender.ground_vs_ground_percent:
         defdam *= 0.15
@@ -983,6 +992,7 @@ def phase4(attacking_fleet,
         defdam *= 0.10
         attdam *= 0.20
         attacker_flee = True
+
 
     # ========= Damage to attacking fleets =========#
     hpsoldier  = attacking_fleet.soldier * attstats["Soldiers"][3]

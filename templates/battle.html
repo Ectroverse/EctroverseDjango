@@ -46,11 +46,11 @@
 			{% endfor %}
 		</div>
 		<br>
-		{% if battle_report.p1.att_flee == True %}
-			Overwhelmed by defending enemy forces, your fleet hastidly retreated to minimize losses<br>
-		{% endif %}
 	{% endif %}
 </div>
+{% if battle_report.p1.att_flee == True %}
+	Overwhelmed by defending enemy forces, your fleet hastidly retreated to minimize losses<br>
+{% endif %}
 {% endif %}
 
 {% if battle_report.p2.phase == True %}
@@ -76,11 +76,11 @@
 			{% endfor %}
 		</div>
 		<br>
-		{% if battle_report.p2.att_flee == True %}
-			Overwhelmed by defending enemy forces, your fleet hastidly retreated to minimize losses!<br>
-		{% endif %}
 	{% endif %}
 </div>
+{% if battle_report.p2.att_flee == True %}
+	Overwhelmed by defending enemy forces, your fleet hastidly retreated to minimize losses!<br>
+{% endif %}
 {% endif %}
 
 {% if battle_report.p3.phase == True %}
@@ -106,11 +106,11 @@
 			{% endfor %}
 		</div>
 		<br>
-		{% if battle_report.p3.att_flee == True %}
-			Overwhelmed by defending enemy forces, your fleet hastidly retreated to minimize losses!<br>
-		{% endif %}
 	{% endif %}
 </div>
+{% if battle_report.p3.att_flee == True %}
+	Overwhelmed by defending enemy forces, your fleet hastidly retreated to minimize losses!<br>
+{% endif %}
 {% endif %}
 
 {% if battle_report.p4.phase == True %}
@@ -136,11 +136,11 @@
 			{% endfor %}
 		</div>
 		<br>
-		{% if battle_report.p4.att_flee == True %}
-			Overwhelmed by defending enemy forces, your fleet hastidly retreated to minimize losses!<br>
-		{% endif %}
 	{% endif %}
 </div>
+{% if battle_report.p4.att_flee == True %}
+	Overwhelmed by defending enemy forces, your fleet hastidly retreated to minimize losses!<br>
+{% endif %}
 {% endif %}
 
 
