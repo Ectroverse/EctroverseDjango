@@ -248,7 +248,7 @@ class UserStatus(models.Model):
     fleet_readiness = models.IntegerField(default=100)
     psychic_readiness = models.IntegerField(default=100)
     agent_readiness = models.IntegerField(default=100)
-    
+
     fleet_readiness_max = models.IntegerField(default=100)
     psychic_readiness_max  = models.IntegerField(default=100)
     agent_readiness_max  = models.IntegerField(default=100)
@@ -383,18 +383,18 @@ class RoundStatus(models.Model):
 
 
 class Relations(models.Model):
-    # When an empire declares a relation, its id number goes to the empire1 field, and the 
+    # When an empire declares a relation, its id number goes to the empire1 field, and the
     # other empire's id goes to empire2 field
     empire1 = models.ForeignKey(Empire, related_name='empire1', on_delete=models.SET_NULL, blank=True, null=True, default=None)
     empire2 = models.ForeignKey(Empire, related_name='empire2', on_delete=models.SET_NULL, blank=True, null=True, default=None)
-    class RelationTypes(models.TextChoices): 
+    class RelationTypes(models.TextChoices):
         AO = 'AO', _('Alliance offered')
         W = 'W', _('War declared')
         A = 'A', _('Alliance')
         NO = 'NO', _('Non agression pact offered')
         NC = 'NC', _('Non agression pact cancelled')
         PC = 'PC', _('Permanent non agression pact cancelled')
-        N = 'N', _('Non agression pact') 
+        N = 'N', _('Non agression pact')
     relation_type = models.CharField(max_length=2, choices=RelationTypes.choices)
     relation_length = models.IntegerField(blank=True, null=True, default=None)
     relation_creation_tick = models.IntegerField(default=0)
@@ -439,4 +439,7 @@ class MapSettings(models.Model):
         V = 'V', _('Violet')
     color_settings = models.CharField(max_length=1, choices=ColorSettings.choices, default='G')
 
-
+class Scouting(models.Model):
+    user = models.ForeignKey(User, related_name='user', on_delete=models.CASCADE)
+    planet = models.ForeignKey(Planet, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    scout = models.FloatField(default=0)

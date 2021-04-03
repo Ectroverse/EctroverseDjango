@@ -451,6 +451,9 @@ def attack_planet(attacking_fleet):
         # destroy some buildings
         attacked_planet.owner = User.objects.get(id=attacker.id)
         attacked_planet.save()
+        Scouting.objects.create(user= User.objects.get(id=attacker.id),
+                                planet = planet,
+                                scout = '1')
 
     generate_news(battle_report, attacker, defender, attacked_planet)
     return battle_report
