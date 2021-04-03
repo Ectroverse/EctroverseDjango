@@ -69,7 +69,7 @@ def generate_fleet_order(fleet, target_x, target_y, speed, order_type, *args):
     # floating points the fleet travel time becomes more than it should, hence the subtraction
     fleet.command_order = order_type
     fleet.save()
-    
+
 def merge_fleets(fleets):
     fleet1 = None
     d = defaultdict(list)
@@ -185,7 +185,6 @@ def explore_planets(fleets):
                 fl.delete()
                 planet.save()
                 status.military_flag = 1;
-                status.save()
                 News.objects.create(user1 = fl.owner,
                                     empire1 = status.empire,
                                     news_type = 'SE',
@@ -194,6 +193,9 @@ def explore_planets(fleets):
                                     is_empire_news=True,
                                     tick_number = RoundStatus.objects.get().tick_number,
                                     planet = planet)
+                Scouting.objects.create(user= fl.owner,
+                                        planet = planet,
+                                        scout = '1')
             else:
                 fl.command_order = 2
                 fl.save()

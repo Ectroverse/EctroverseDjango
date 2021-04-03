@@ -151,6 +151,18 @@ def btn(request):
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
+def scouting(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    scouted = Scouting.objects.filter(user=status.id)
+    context = {"status": status,
+                   "page_title": "Planatery Scouting",
+                   "scouted": scouted,
+                   "planets": Planet.objects.all(),
+                   }
+    return render(request, "scouting.html", context)
+
+@login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
 def battle(request, fleet_id):
     status = get_object_or_404(UserStatus, user=request.user)
     fleet = get_object_or_404(Fleet, pk=fleet_id)
