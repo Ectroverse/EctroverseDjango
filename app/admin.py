@@ -15,6 +15,7 @@ admin.site.register(Relations)
 admin.site.register(Messages)
 admin.site.register(News)
 admin.site.register(MapSettings)
+admin.site.register(Scouting)
 
 class YourModelAdmin(admin.ModelAdmin):
     formfield_overrides = {
