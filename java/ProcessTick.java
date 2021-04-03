@@ -467,8 +467,10 @@ public class ProcessTick
 												" is_empire_news, is_read, tick_number, planet_id) " +
 												" SELECT  " + userID +  " , " + rowInt.get("empire_id") + " , 'SE' , '" + sqlTS + 
 												"' , true, true, false, " + tick_nr + " , " + planetID + " ;" ;
-												System.out.println(news);
 								statement2.execute(news);
+								String scouting = "INSERT INTO app_scouting ( user_id, planet_id, scout) " +
+												" SELECT  " + userID +  " , " + planetID + " , 1.0;" ;
+								statement2.execute(scouting);
 								if (militaryFlag != 1) //if not attacked - it has highest priority
 									militaryFlag = 2;
 								
