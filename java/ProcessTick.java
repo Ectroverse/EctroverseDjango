@@ -1,188 +1,16 @@
+package org.ectroverse.processtick;
+
 import java.sql.*;
 import java.util.*;
 import java.time.Clock; 
 import java.time.Instant; 
 import java.util.concurrent.*;
 //import java.util.Arrays.*;
+import static org.ectroverse.processtick.Constants.*;
 
 public class ProcessTick
 {
-	//some constants temporarily written here, fetch them from app/constants.py later
-	private static final int news_delete_ticks = 288; //teo days in 10min server
-    private static final int total_units = 13;
-	private static final int population_size_factor  = 200;
-	private static final double energy_decay_factor = 0.005;
-	private static final double crystal_decay_factor = 0.02;
-	private static final int upkeep_solar_collectors = 0;
-	private static final int upkeep_fission_reactors = 20;
-	private static final int upkeep_mineral_plants = 2;
-	private static final int upkeep_crystal_labs = 2;
-	private static final int upkeep_refinement_stations = 2;
-	private static final int upkeep_cities = 4;
-	private static final int upkeep_research_centers = 1;
-	private static final int upkeep_defense_sats = 4;
-	private static final int upkeep_shield_networks = 16;
-	private static final int networth_per_building = 8;
-	private static final int building_production_solar = 12;
-	private static final int building_production_fission = 40;
-	private static final int building_production_mineral = 1;
-	private static final int building_production_crystal = 1;
-	private static final int building_production_ectrolium = 1;
-	private static final int building_production_cities = 10000;
-	private static final int building_production_research = 6;
-	private static final double [] unit_upkeep = {2.0, 1.6, 3.2, 12.0, 18.0, 0.4, 0.6, 2.8, 0.0, 0.8, 0.8, 2.4, 60.0};
-	
-	static final HashMap<String,HashMap<String, Double>> race_info_list = new HashMap<>();
-	/* HK = 'HK', _('Harks')
-        MT = 'MT', _('Manticarias')
-        FH = 'FH', _('Foohons')
-        SB = 'SB', _('Spacebornes')
-        DW = 'DW', _('Dreamweavers')
-        WK = 'WK', _('Wookiees')*/
-	static final HashMap<String, Double> harks = new HashMap<>();
-	static final HashMap<String, Double> manticarias = new HashMap<>();
-	static final HashMap<String, Double> foohons = new HashMap<>();
-	static final HashMap<String, Double> spacebournes = new HashMap<>();
-	static final HashMap<String, Double> dreamweavers = new HashMap<>();
-	static final HashMap<String, Double> wookiees = new HashMap<>();
-	static final HashMap<String, String> buildingsNames = new HashMap<>();
-	
-	static {
-	harks.put("pop_growth", 0.8*0.02);
-	harks.put("research_bonus_military",    1.2);
-	harks.put("research_bonus_construction", 1.2);
-	harks.put("research_bonus_tech",         1.2);
-	harks.put("research_bonus_energy",       1.2);
-	harks.put("research_bonus_population",   1.2);
-	harks.put("research_bonus_culture",      0.6);
-	harks.put("research_bonus_operations",   1.2);
-	harks.put("research_bonus_portals",      1.2);
-	harks.put("energy_production",    0.9);
-	harks.put("mineral_production",   1.0);
-	harks.put("crystal_production",   1.25);
-	harks.put("ectrolium_production",   1.0);
-	harks.put("travel_speed",   1.4*2.0);
-	
-	race_info_list.put("HK",harks);
-	
-	manticarias.put("pop_growth", 0.9*0.02);
-	manticarias.put("research_bonus_military",    0.9);
-	manticarias.put("research_bonus_construction", 0.9);
-	manticarias.put("research_bonus_tech",         0.9);
-	manticarias.put("research_bonus_energy",       0.9);
-	manticarias.put("research_bonus_population",   0.9);
-	manticarias.put("research_bonus_culture",      1.8);
-	manticarias.put("research_bonus_operations",   0.9);
-	manticarias.put("research_bonus_portals",      0.9);
-	manticarias.put("energy_production",    1.4);
-	manticarias.put("mineral_production",   1.0);
-	manticarias.put("crystal_production",   1.0);
-	manticarias.put("ectrolium_production",   1.0);
-	manticarias.put("race_special_solar_15",   1.15);
-	manticarias.put("travel_speed",   1.0*2.0);
-	
-	race_info_list.put("MT",manticarias);
-	
-	foohons.put("pop_growth", 0.8*0.02);
-	foohons.put("research_bonus_military",    1.5);
-	foohons.put("research_bonus_construction", 1.5);
-	foohons.put("research_bonus_tech",         1.5);
-	foohons.put("research_bonus_energy",       1.5);
-	foohons.put("research_bonus_population",   1.5);
-	foohons.put("research_bonus_culture",      1.5);
-	foohons.put("research_bonus_operations",   1.5);
-	foohons.put("research_bonus_portals",      1.5);
-	foohons.put("energy_production",    0.8);
-	foohons.put("mineral_production",   1.0);
-	foohons.put("crystal_production",   1.0);
-	foohons.put("ectrolium_production",   1.2);
-	foohons.put("travel_speed",   1.0*2.0);
-	
-	race_info_list.put("FH",foohons);
 
-	spacebournes.put("pop_growth", 1.2*0.02);
-	spacebournes.put("research_bonus_military",    1.1);
-	spacebournes.put("research_bonus_construction", 1.1);
-	spacebournes.put("research_bonus_tech",         0.6);
-	spacebournes.put("research_bonus_energy",       1.1);
-	spacebournes.put("research_bonus_population",   1.1);
-	spacebournes.put("research_bonus_culture",      1.1);
-	spacebournes.put("research_bonus_operations",   1.1);
-	spacebournes.put("research_bonus_portals",      1.1);
-	spacebournes.put("energy_production",    1.3);
-	spacebournes.put("mineral_production",   1.0);
-	spacebournes.put("crystal_production",   1.0);
-	spacebournes.put("ectrolium_production",   1.0);
-	spacebournes.put("travel_speed",   1.8*2.0);
-	
-	race_info_list.put("SB",spacebournes);
-
-	dreamweavers.put("pop_growth", 1.1*0.02);
-	dreamweavers.put("research_bonus_military",    1.4);
-	dreamweavers.put("research_bonus_construction", 1.4);
-	dreamweavers.put("research_bonus_tech",         2.8);
-	dreamweavers.put("research_bonus_energy",       1.4);
-	dreamweavers.put("research_bonus_population",   1.4);
-	dreamweavers.put("research_bonus_culture",      1.4);
-	dreamweavers.put("research_bonus_operations",   1.4);
-	dreamweavers.put("research_bonus_portals",      1.4);
-	dreamweavers.put("energy_production",    0.8);
-	dreamweavers.put("mineral_production",   1.0);
-	dreamweavers.put("crystal_production",   1.0);
-	dreamweavers.put("ectrolium_production",   1.0);
-	dreamweavers.put("travel_speed",   1.0*2.0);
-	
-	race_info_list.put("DW",dreamweavers);
-	
-	wookiees.put("pop_growth", 1.2*0.02);
-	wookiees.put("research_bonus_military",    1.0);
-	wookiees.put("research_bonus_construction", 2.0);
-	wookiees.put("research_bonus_tech",         1.0);
-	wookiees.put("research_bonus_energy",       1.0);
-	wookiees.put("research_bonus_population",   2.0);
-	wookiees.put("research_bonus_culture",      1.0);
-	wookiees.put("research_bonus_operations",   1.0);
-	wookiees.put("research_bonus_portals",      2.0);
-	wookiees.put("energy_production",    0.7);
-	wookiees.put("mineral_production",   1.25);
-	wookiees.put("crystal_production",   1.25);
-	wookiees.put("ectrolium_production",   1.0);
-	wookiees.put("race_special_resource_private static final interest",   1.005);
-	wookiees.put("travel_speed",   1.6*2.0);
-	
-	race_info_list.put("WK",wookiees);
-	
-	buildingsNames.put( "SC", "solar_collectors");
-	buildingsNames.put( "FR", "fission_reactors");
-	buildingsNames.put( "MP", "mineral_plants");
-	buildingsNames.put( "CL", "crystal_labs");
-	buildingsNames.put( "RS", "refinement_stations");
-	buildingsNames.put( "CT", "cities");
-	buildingsNames.put( "RC", "research_centers");
-	buildingsNames.put( "DS", "defense_sats");
-	buildingsNames.put( "SN", "shield_networks");
-	buildingsNames.put( "PL", "portal");
-	}
-	
-	private static final String [][] researchNames = {
-		{"research_points_military", "research_bonus_military", "alloc_research_military", "research_max_military", "research_percent_military"},
-		{"research_points_construction", "research_bonus_construction", "alloc_research_construction", "research_max_construction", "research_percent_construction"},
-		{"research_points_tech", "research_bonus_tech", "alloc_research_tech", "research_max_tech", "research_percent_tech"},
-		{"research_points_energy", "research_bonus_energy", "alloc_research_energy", "research_max_energy", "research_percent_energy"},
-		{"research_points_population", "research_bonus_population", "alloc_research_population", "research_max_population", "research_percent_population" },
-		{"research_points_culture", "research_bonus_culture", "alloc_research_culture", "research_max_culture", "research_percent_culture"},
-		{"research_points_operations", "research_bonus_operations", "alloc_research_operations", "research_max_operations", "research_percent_operations"},
-		{"research_points_portals", "research_bonus_portals", "alloc_research_portals", "research_max_portals", "research_percent_portals"},
-		};
-	
-	private static final double [] units_upkeep_costs = {2.0, 1.6, 3.2, 12.0, 18.0, 0.4, 0.6, 2.8, 0.0, 0.8, 0.8, 2.4, 60.0};
-	
-	private static final double [] units_nw = {4,3,5,12,14,1,1,4,7,2,2,6,30};
-	
-	private static final String [] unit_names = {"bomber", "fighter", "transport", "cruiser", "carrier", "soldier", "droid", "goliath", "phantom", "wizard", "agent", "ghost", "exploration"};
-	private static final String [] unit_labels = {"Bombers","Fighters","Transports","Cruisers","Carriers","Soldiers","Droids","Goliaths","Phantoms","Psychics","Agents","Ghost Ships","Exploration Ships"};
-
-	
 	class Planet{
 		int x;
 		int y;
@@ -194,7 +22,6 @@ public class ProcessTick
 			this.z = z;
 		}
 	}
-
 
     public static void main(String[] args) {
 		long startTime = System.nanoTime();
@@ -238,9 +65,10 @@ public class ProcessTick
 		
 		ScheduledExecutorService s = Executors.newSingleThreadScheduledExecutor();
 		Calendar calendar = Calendar.getInstance();
+		ProcessTick pt = new ProcessTick();
 		Runnable scheduledTask = new Runnable() {
 			public void run() {
-				processTick(con);
+				pt.processTick(con);
 			}
 		};
 		
@@ -253,7 +81,7 @@ public class ProcessTick
 		// s.scheduleAtFixedRate(scheduledTask, millistoNext, 600*1000, TimeUnit.MILLISECONDS);
 	}	
     
-	private static void processTick(Connection con){
+	private void processTick(Connection con){
 		long startTime = 0;
 		long resultTime = 0;
 		long executeBatchTime = 0;
@@ -293,9 +121,6 @@ public class ProcessTick
 		resultSet = statement.executeQuery("SELECT * FROM app_userstatus");
 	   	ResultSetMetaData rsmd = resultSet.getMetaData();
 	   	ArrayList<String []> columns = new ArrayList<>(rsmd.getColumnCount());
-		
-		//test2 = System.nanoTime();
-		//System.out.println("Construction jobs update: " + (double)(test2-test1)/1_000_000_000.0 + " sec.");
 		 
 		 //put user table into list with hash maps, as we cannot use nested resultSet
 	  	for(int i = 1; i <= rsmd.getColumnCount(); i++){
@@ -311,12 +136,6 @@ public class ProcessTick
 		 ArrayList<HashMap<String, Long>> usersLong = new ArrayList<>();
 		 HashMap<Integer, String> usersRace = new HashMap<>();
 		 
-		 String buildingNewsUpdateQuery = "INSERT INTO app_news " +
-			" ( user1_id, empire1_id, news_type, date_and_time, is_personal_news, " + 
-			" is_empire_news, is_read, tick_number, extra_info ) " +
-			" SELECT  ?, ?, 'BB',  ?, true, false, false, ?, ?  ";
-		 PreparedStatement buildingNewsUpdateStatement = con.prepareStatement(buildingNewsUpdateQuery); 
-		 
 		 String fleetsNewsUpdateQuery = "INSERT INTO app_news " +
 			" ( user1_id, empire1_id, news_type, date_and_time, is_personal_news, " + 
 			" is_empire_news, is_read, tick_number, extra_info ) " +
@@ -330,23 +149,7 @@ public class ProcessTick
 		 PreparedStatement fleetsReturnNewsUpdateStatement = con.prepareStatement(fleetsReturnNewsUpdateQuery); 
 
 
-		 String fleetsBuildUpdateQuery = "UPDATE app_fleet  SET" +	
-		 	" bomber = bomber + ?" + //1
-			" , fighter = fighter + ?" + //2
-			" , transport = transport + ?" + //3
-			" , cruiser = cruiser + ?" + //4
-			" , carrier = carrier + ?" + //5
-			" , soldier = soldier + ?" + //6
-			" , droid = droid + ?" + //7
-			" , goliath = goliath + ?" + //8
-			" , phantom = phantom + ?" + //9
-			" , wizard = wizard + ?" + //10
-			" , agent = agent + ?" + //11
-			" , ghost = ghost + ?" + //12
-			" , exploration = exploration + ?" + //13
-			" WHERE owner_id = ?" + //14
-			" AND main_fleet = true;";
-		PreparedStatement fleetsBuildUpdateStatement = con.prepareStatement(fleetsBuildUpdateQuery); 
+
 		
 		String fleetsDeleteUpdateQuery = "DELETE FROM app_fleet WHERE id = ?";
 		PreparedStatement fleetsDeleteUpdateStatement = con.prepareStatement(fleetsDeleteUpdateQuery); 
@@ -515,7 +318,9 @@ public class ProcessTick
 			usersLong.add(rowLong);
 		}
 		
-
+		UpdateFleets updateFleets = new UpdateFleets(con);
+		UpdateNews updateNews = new UpdateNews(con);
+		
 		//loops over users to uodate their stats and planets --main loop!
 		main_loop1 = System.nanoTime();
 		for(int j = 0; j < usersInt.size(); j++){
@@ -528,6 +333,22 @@ public class ProcessTick
 			String race = usersRace.get(userID);
 			HashMap<String, Double> race_info = race_info_list.get(race);
 			
+			
+			HashMap<String, Integer> unitsBuilt = new HashMap<>();
+		
+			String unitsQuery = 
+			" SELECT unit_type, SUM(n) as num_units FROM app_unitconstruction "+
+			" WHERE ticks_remaining = 0 AND user_id = " + userID +
+			" GROUP BY unit_type; ";
+			
+			resultSet = statement.executeQuery(unitsQuery);
+			while (resultSet.next()){
+				unitsBuilt.put(resultSet.getString("unit_type"), resultSet.getInt("num_units"));
+			}
+			
+			updateFleets.addNewUser(userID);
+			updateFleets.updateFleetBuild(unitsBuilt);
+			
 			//set initial news flags
 
 			userStatusUpdateStatement.setInt(56, rowInt.get("construction_flag"));
@@ -536,28 +357,10 @@ public class ProcessTick
 			
 			int militaryFlag = rowInt.get("military_flag");
 						
-			//update fleets
-			String unitsQuery = 
-			" SELECT unit_type, SUM(n) as num_units FROM app_unitconstruction WHERE ticks_remaining = 0 AND user_id = " + userID
-			+ " GROUP BY unit_type; ";
-			resultSet = statement.executeQuery(unitsQuery);
-			
-			HashMap<String, Integer> unitsBuilt = new HashMap<>();
-			while (resultSet.next()){
-				unitsBuilt.put(resultSet.getString("unit_type"), resultSet.getInt("num_units"));
-			}
-						
-			//update built fleets
-			int total_built_units = 0;
-			for(int i = 1; i <= unit_names.length; i++){
-				fleetsBuildUpdateStatement.setLong(i, unitsBuilt.getOrDefault(unit_names[i-1],0));
-				total_built_units += unitsBuilt.getOrDefault(unit_names[i-1],0);
-			}
-			fleetsBuildUpdateStatement.setInt(14, userID);
-			fleetsBuildUpdateStatement.addBatch();
+
 			
 			//update built fleets news 
-			if (total_built_units != 0 ){	
+			if (updateFleets.getTotalBuiltUnits() != 0 ){	
 				userStatusUpdateStatement.setInt(56, 1);			
 				java.util.Date utilDate = new java.util.Date();
 				java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
@@ -590,6 +393,8 @@ public class ProcessTick
 			
 
 			//update mooving fleets
+			//updateMoovingFleets();
+			
 			String fleetsQuery = 
 			" SELECT * FROM app_fleet WHERE main_fleet = false AND ticks_remaining != 0 AND owner_id = " + userID;
 			
@@ -726,11 +531,7 @@ public class ProcessTick
 			}
 			
 			//update returned fleets
-			for(int i = 0; i < unit_names.length; i++){
-				fleetsBuildUpdateStatement.setLong(i+1, returnFleets[i]);
-			}
-			fleetsBuildUpdateStatement.setInt(14, userID);
-			fleetsBuildUpdateStatement.addBatch();
+			updateFleets.updateReturnedFleets(returnFleets);
 
 			long population = 0;
 			long networth = 0;
@@ -987,19 +788,13 @@ public class ProcessTick
 			//add building news if something was actually built
 			int total_buildigns = total_solar_collectors_built + total_fission_reactors_built + total_mineral_plants_built + total_crystal_labs_built
 			+ total_refinement_stations_built + total_cities_built + total_research_centers_built  + total_defense_sats_built
-			+ total_shield_networks_built + total_portals_built;		
+			+ total_shield_networks_built + total_portals_built;
+
 			
 			if (total_buildigns != 0 ){
 				userStatusUpdateStatement.setInt(56, 1);
-				java.util.Date utilDate = new java.util.Date();
-				java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
 				
-				buildingNewsUpdateStatement.setInt(1, userID);
-				buildingNewsUpdateStatement.setInt(2, rowInt.get("empire_id"));
-				buildingNewsUpdateStatement.setTimestamp(3, sqlTS);
-				buildingNewsUpdateStatement.setInt(4, tick_nr);
-				
-				String builtBuildigns = "These constructions were finished : " +
+				String builtBuildings = "These constructions were finished : " +
 										" \n solar collectors: " + total_solar_collectors_built +
 										" \n fission reactors: " + total_fission_reactors_built +
 										" \n mineral plants: " + total_mineral_plants_built +
@@ -1009,10 +804,9 @@ public class ProcessTick
 										" \n research centers: " + total_research_centers_built +
 										" \n defense satelites: " + total_defense_sats_built +
 										" \n shield networks: " + total_shield_networks_built +
-										" \n portals: " + total_portals_built;
+										" \n portals: " + total_portals_built;	
 				
-				buildingNewsUpdateStatement.setString(5, builtBuildigns);
-				buildingNewsUpdateStatement.addBatch();
+				updateNews.createBuildingNews(userID, rowInt.get("empire_id"), tick_nr, builtBuildings);
 			}
 
 			test2 = System.nanoTime();
@@ -1172,9 +966,7 @@ public class ProcessTick
 				userStatusUpdateStatement.setInt(3, ar);
 			}
 				
-			
 
-				
 			//update research funding
 			userStatusUpdateStatement.setLong(23, (long) Math.max(0, rowLong.get("current_research_funding") * 0.9 ) );	
 			//update total buildings
@@ -1241,15 +1033,23 @@ public class ProcessTick
 			HashMap<Integer, LinkedList<Integer>> fleetStation = new HashMap<>();
 			
 			while(stationingFleets.next()){
-				ResultSet planet = statement2.executeQuery("SELECT id FROM \"PLANET\" WHERE x = " + 
+				ResultSet planet = statement2.executeQuery("SELECT id, owner_id FROM \"PLANET\" WHERE x = " + 
 					    stationingFleets.getInt("x") +
 				" AND y = " + stationingFleets.getInt("y") +
 				" AND i = " + stationingFleets.getInt("i") );
-				planet.next();
-				int p = planet.getInt("id");
-				if (!fleetStation.containsKey(p))
-					fleetStation.put(p, new LinkedList<Integer>());
-				fleetStation.get(p).add(stationingFleets.getInt("id"));
+				if (planet.next()){
+					if (planet.getInt("owner_id") != userID)
+						statement3.execute("UPDATE app_fleet SET command_order = 2 WHERE id = " + stationingFleets.getInt("id") + ";");
+					else{
+						int p = planet.getInt("id");
+						if (!fleetStation.containsKey(p))
+							fleetStation.put(p, new LinkedList<Integer>());
+						fleetStation.get(p).add(stationingFleets.getInt("id"));
+					}
+				}
+				else{
+					statement.execute("UPDATE app_fleet SET command_order = 2 WHERE id = " + stationingFleets.getInt("id") + ";");
+				}
 			}
 			//Map.Entry<String, Object> entry : map.entrySet()
 			for(Map.Entry<Integer, LinkedList<Integer>> entry : fleetStation.entrySet()){
@@ -1272,9 +1072,9 @@ public class ProcessTick
 						fleetStationUpdateStatement .setLong(i+1, unit[i]);
 					}
 					
-					fleetStationUpdateStatement .setInt(unit_names.length+1 , pID); //set planet id
-					fleetStationUpdateStatement .setInt(unit_names.length+2 , firstId); //set fleet id
-					fleetStationUpdateStatement .addBatch();
+					fleetStationUpdateStatement.setInt(unit_names.length+1 , pID); //set planet id
+					fleetStationUpdateStatement.setInt(unit_names.length+2 , firstId); //set fleet id
+					fleetStationUpdateStatement.addBatch();
 				}
 			}
 			
@@ -1289,11 +1089,11 @@ public class ProcessTick
 		userStatusUpdateStatement.executeBatch();
 		userUpdate2 = System.nanoTime();
 		
-		//update building news
-		buildingNewsUpdateStatement.executeBatch();
+		//update building news	
+		updateNews.executeBuildingNews();
 		
 		//update building fleets
-		fleetsBuildUpdateStatement.executeBatch();
+		updateFleets.executeFleetBuildUpdate();
 		
 		//delete returned fleets
 		fleetsDeleteUpdateStatement.executeBatch();
