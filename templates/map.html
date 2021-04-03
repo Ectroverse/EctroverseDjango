@@ -702,8 +702,10 @@ g.append("a")
 
 {% for system in systems %}
 
+{% if system.0|mod:10 == 1 %}
+
   g.append("image")
-    .attr("xlink:href", "/static/map/sun.png")
+    .attr("xlink:href", "/static/map/s1.png")
     .attr("x", ({{system.0}}-.1))
     .attr("y", ({{system.1}}-.1))
     .attr("width", .2)
@@ -711,9 +713,110 @@ g.append("a")
     .append("title") // hover-over text
     .text("{{system.0}},{{system.1}}");
 
+    {% elif system.0|mod:10 == 2 %}
+
+      g.append("image")
+        .attr("xlink:href", "/static/map/s2.png")
+        .attr("x", ({{system.0}}-.085))
+        .attr("y", ({{system.1}}-.085))
+        .attr("width", .17)
+        .attr("height", .17)
+        .append("title") // hover-over text
+        .text("{{system.0}},{{system.1}}");
+
+        {% elif system.0|mod:10 == 3 %}
+
+          g.append("image")
+            .attr("xlink:href", "/static/map/s3.png")
+            .attr("x", ({{system.0}}-.11))
+            .attr("y", ({{system.1}}-.11))
+            .attr("width", .22)
+            .attr("height", .22)
+            .append("title") // hover-over text
+            .text("{{system.0}},{{system.1}}");
+
+            {% elif system.0|mod:10 == 4 %}
+
+              g.append("image")
+                .attr("xlink:href", "/static/map/s4.png")
+                .attr("x", ({{system.0}}-.075))
+                .attr("y", ({{system.1}}-.075))
+                .attr("width", .15)
+                .attr("height", .15)
+                .append("title") // hover-over text
+                .text("{{system.0}},{{system.1}}");
+
+                {% elif system.0|mod:10 == 5 %}
+
+                  g.append("image")
+                    .attr("xlink:href", "/static/map/s1.png")
+                    .attr("x", ({{system.0}}-.09))
+                    .attr("y", ({{system.1}}-.09))
+                    .attr("width", .18)
+                    .attr("height", .18)
+                    .append("title") // hover-over text
+                    .text("{{system.0}},{{system.1}}");
+
+                    {% elif system.0|mod:10 == 6 %}
+
+                      g.append("image")
+                        .attr("xlink:href", "/static/map/s1.png")
+                        .attr("x", ({{system.0}}-.09))
+                        .attr("y", ({{system.1}}-.09))
+                        .attr("width", .18)
+                        .attr("height", .18)
+                        .append("title") // hover-over text
+                        .text("{{system.0}},{{system.1}}");
+
+                        {% elif system.0|mod:10 == 7 %}
+
+                          g.append("image")
+                            .attr("xlink:href", "/static/map/s2.png")
+                            .attr("x", ({{system.0}}-.095))
+                            .attr("y", ({{system.1}}-.095))
+                            .attr("width", .19)
+                            .attr("height", .19)
+                            .append("title") // hover-over text
+                            .text("{{system.0}},{{system.1}}");
+
+                            {% elif system.0|mod:10 == 8 %}
+
+                              g.append("image")
+                                .attr("xlink:href", "/static/map/s3.png")
+                                .attr("x", ({{system.0}}-.09))
+                                .attr("y", ({{system.1}}-.09))
+                                .attr("width", .18)
+                                .attr("height", .18)
+                                .append("title") // hover-over text
+                                .text("{{system.0}},{{system.1}}");
+
+                                {% elif system.0|mod:10 == 9 %}
+
+                                  g.append("image")
+                                    .attr("xlink:href", "/static/map/s4.png")
+                                    .attr("x", ({{system.0}}-.085))
+                                    .attr("y", ({{system.1}}-.085))
+                                    .attr("width", .16)
+                                    .attr("height", .16)
+                                    .append("title") // hover-over text
+                                    .text("{{system.0}},{{system.1}}");
+
+                                    {% elif system.0|mod:10 == 0 %}
+
+                                      g.append("image")
+                                        .attr("xlink:href", "/static/map/s1.png")
+                                        .attr("x", ({{system.0}}-.105))
+                                        .attr("y", ({{system.1}}-.105))
+                                        .attr("width", .21)
+                                        .attr("height", .21)
+                                        .append("title") // hover-over text
+                                        .text("{{system.0}},{{system.1}}");
+
+{% endif %}
+
   g.append("text")
     .attr("x", {{system.0}})
-    .attr("y", ({{system.1}})+.025)
+    .attr("y", ({{system.1}})+.11)
     .attr("font-family", "sans-serif")
     .attr("font-size", "0.01px")
     .attr("fill", "white")
