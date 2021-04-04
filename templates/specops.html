@@ -4,6 +4,8 @@
 
 {% block content %}
 
+
+
 {% if msg != '' %}
 	{{msg}}
 	<br>
@@ -57,8 +59,13 @@ box-sizing: border-box;
 width: 50%; 
 margin:0 auto;
 float:right; 
-text-align:right;
+text-align:left;
 padding-right: 15%;
+
+}
+
+.hidden{
+display: none;
 }
 
 .centered2 {
@@ -69,9 +76,30 @@ padding-right: 15%;
 .remove-all-styles {
     all: revert;
   }
+  
+
 
 }
 </style>
+
+<script>
+function yesnoCheck() {
+	{% for name, values in spells.items  %}
+		if (document.getElementById('{{values.4}}').checked) {
+			document.getElementById('spell_{{values.4}}').style.display = 'inline';
+			
+			if (document.getElementById('hidden_values{{ values.4 }}').value == "False" ) {
+				document.getElementById('target_user_psy').style.visibility = 'visible';
+			}
+			else document.getElementById('target_user_psy').style.visibility = 'hidden';
+			
+		}
+		else document.getElementById('spell_{{values.4}}').style.display = 'none';
+	{% endfor %}
+
+
+}
+</script>
 
 
 <div  class ="border_agent"  >
@@ -83,7 +111,7 @@ padding-right: 15%;
 		{% csrf_token %}
 			{% for o in operations %}
 			<input type="radio" id="{{ o }}" name="operation" value="{{ o }}">
-			<label class="remove-all-styles" for="{{ o }}">{{ o }}</label>
+			<label class="remove-all-styles">{{ o }}</label>
 			{% endfor %}
 			<br>
 			<input type="submit" value="Perform">
@@ -102,20 +130,32 @@ padding-right: 15%;
 	<br>
 		<form action="/specops" method="POST">
 		{% csrf_token %}
-			{% for s in spells %}
-			<input type="radio" id="{{ s }}" name="spell" value="{{ s }}">
-			<label class="remove-all-styles" for="{{ s }}">{{ s }}</label>
+			{% for name, values in spells.items  %}
+			<input type="radio" id="{{ values.4 }}" name="spell" value="{{ name }}" onclick="yesnoCheck()">
+			<input type="hidden" id="hidden_values{{ values.4 }}" value="{{ values.3 }}">
+			<label class="remove-all-styles" >{{ name }}</label>
 			<br>
 			{% endfor %}
 			units to send:
 			<input type="number" min="0" max="{{main_fleet.wizard}}" name="unit_ammount" size="12" />
-			user id:
-			<input type="number" name="user_id2" size="12" />
+			<div id="target_user_psy">
+				user name/id:
+				<input type="text" name="user_id2" size="12"  />
+			</div>
 			<input type="submit" value="Perform">
 		</form> 
 	</div>
-	<div class="ops_box2">
-		planet coords
+	<div id="dvtext" class="ops_box2">
+			{% for name, values in spells.items  %}
+				<div id="spell_{{values.4}}" class="hidden" > 
+				Spell name: {{name}}<br>
+				Technology required: {{values.0}}<br>
+				Psychics readiness cost: {{values.1}}<br>
+				Difficulty: {{values.2}}<br>
+				Self-spell: {{values.3}}<br>
+				Description: {{values.5}}
+				</div>
+			{% endfor %}
 	</div>
 </div>
 <br><br>
@@ -129,7 +169,7 @@ padding-right: 15%;
 		{% csrf_token %}
 			{% for i in incantations %}
 			<input type="radio" id="{{ i }}" name="inca" value="{{ i }}">
-			<label class="remove-all-styles" for="{{ i }}">{{ i }}</label>
+			<label class="remove-all-styles" >{{ i }}</label>
 			<br>
 			{% endfor %}
 			<input type="submit" value="Perform">

@@ -6,28 +6,39 @@ from django.db.models import Sum
 
 all_operations = ["Observe Planet"]
 all_spells = ["Irradiate Ectrolium",
-"Dark Web",
-"Incandescence",
-"Black Mist",
-"War Illusions",
-"Psychic Assault",
-"Phantoms",
-"Enlightenment",
-"Grow Planet's Size"]
+              "Dark Web",
+              "Incandescence",
+              "Black Mist",
+              "War Illusions",
+              "Psychic Assault",
+              "Phantoms",
+              "Enlightenment",
+              "Grow Planet's Size"]
 all_incantations = ["Survey System"]
 
 # tech, readiness, difficulty, self-spell
 psychicop_specs = {
-    "Irradiate Ectrolium" : [0, 12, 1.5, False],
-    "Dark Web": [10, 18,  2.4, True],
-    "Incandescence": [0, 30, 2.5, True],
-    "Black Mist": [50, 24, 3.0, False],
-    "War Illusions": [70, 30, 4.0, True],
-    "Psychic Assault": [90, 35, 1.7, False],
-    "Phantoms": [110, 40, 5.0, True],
-    "Enlightenment": [120, 35, 1.0, True],
-    "Grow Planet's Size": [110, 20, 2.5, True]
-    }
+    "Irradiate Ectrolium": [0, 12, 1.5, False, 'IE',
+                            "Your psychics will attempt to irradiate the target's ectrolium reserves, making it unusable.", ],
+    "Incandescence": [0, 30, 2.5, True, 'IN',
+                      "Your psychics will convert crystal into vast amounts of energy."],
+    "Dark Web": [10, 18, 2.4, True, 'DW',
+                 "Creating a thick dark web spreading in space around your planets will make them much harder to locate and attack."],
+    "Black Mist": [50, 24, 3.0, False, 'BM',
+                   "Creating a dense black mist around the target's planets will greatly reduce the effectiveness of solar collectors."],
+    "War Illusions": [70, 30, 4.0, True, 'WI',
+                      "These illusions will help keeping enemy fire away from friendly units."],
+    "Psychic Assault": [90, 35, 1.7, False, 'PA',
+                        "Your psychics will engage the targeted faction's psychics, to cause large casualities."],
+    "Phantoms": [110, 40, 5.0, True, 'PM',
+                 "Your psychics will create etheral creatures to join your fleets in battle."],
+    "Grow Planet's Size": [110, 20, 2.5, True, 'GP',
+                           "Your psychics will try to create new land on one of the planets of your empire. \
+                <br>The more planets and psychic power you have, the better are the chances."],
+    "Enlightenment": [120, 35, 1.0, True, 'EN',
+                      "Philosophers and scientists will try to bring a golden Age of Enlightenment upon your empire."],
+}
+
 
 def specopPsychicsReadiness(spell, user1, *args):
     if args:
@@ -79,7 +90,6 @@ def specopPsychicsReadiness(spell, user1, *args):
         if rel.relation_type == 'NC' or rel.relation_type == 'PC' or rel.relation_type == 'N' and rel.empire2 == empire1:
             nap = True
 
-
     if empire1.id == empire2.id or ally or war:
         fa /= 3
 
@@ -109,34 +119,37 @@ def perform_spell(spell, psychics, status, *args):
     fa = 0.4 + (1.2 / 255.0) * (np.random.randint(0, 2147483647) & 255)
 
     attack = fa * race_info_list[status.get_race_display()].get("psychics_coeff", 1.0) * \
-              psychics * (1.0 + 0.005 * status.research_percent_culture /  psychicop_specs[spell][2]  )
+             psychics * (1.0 + 0.005 * status.research_percent_culture / psychicop_specs[spell][2])
 
-    penalty = get_op_penalty(status.research_percent_culture,  psychicop_specs[spell][0] )
+    penalty = get_op_penalty(status.research_percent_culture, psychicop_specs[spell][0])
 
     if penalty == -1:
         return
 
     if penalty > 0:
-        attack /=  1.0 + 0.01 * penalty
+        attack /= 1.0 + 0.01 * penalty
 
-    fleet1 = Fleet.objects.get(owner=status.id,main_fleet=True)
+    fleet1 = Fleet.objects.get(owner=status.id, main_fleet=True)
+
+    news_message = ""
+    message = ""
 
     if args[0]:
-        user2 = UserStatus.objects.get(id=args[0])
+        user2 = args[0]
+        if user2 == status and psychicop_specs[spell][3] is False:
+            message = "You cannot perform this spell on yourself!"
+            return message
         empire2 = user2.empire
         fleet2 = Fleet.objects.get(owner=user2.id, main_fleet=True)
         psychics2 = Fleet.objects.filter(owner=user2.id).aggregate(Sum('wizard'))
         psychics2 = psychics2['wizard__sum']
         print(psychics2)
         defence = race_info_list[user2.get_race_display()].get("psychics_coeff", 1.0) * psychics2 * \
-                  (1.0 + 0.005 * user2.research_percent_culture )
+                  (1.0 + 0.005 * user2.research_percent_culture)
         success = attack / (defence + 1)
 
     if penalty > 0:
         attack = attack / (1.0 + 0.01 * penalty)
-
-    news_message = ""
-    message = ""
 
     if spell == "Incandescence":
         status.crystals
@@ -148,7 +161,7 @@ def perform_spell(spell, psychics, status, *args):
 
         energy = int(cry_converted * 24.0 * (1.0 + 0.01 * status.research_percent_culture))
         status.energy += energy
-        status.psychic_readiness -= specopPsychicsReadiness(spell, status, user2)
+        status.psychic_readiness -= specopPsychicsReadiness(spell, status)
         status.save()
         news_message = str(cry_converted) + " crystals were converted into " + str(energy) + " energy!"
         message = "Your " + str(cry_converted) + " crystals were converted into " + str(energy) + " energy!"
@@ -158,7 +171,7 @@ def perform_spell(spell, psychics, status, *args):
         if success > 1:
             frac_destroyed = 0.2
         else:
-            frac_destroyed = (20.0/0.6) * (success - 0.4) * 0.01
+            frac_destroyed = (20.0 / 0.6) * (success - 0.4) * 0.01
 
         if frac_destroyed > 0:
             destroyed_ectro = int(frac_destroyed * user2.ectrolium)
@@ -166,12 +179,15 @@ def perform_spell(spell, psychics, status, *args):
             user2.military_flag = 1
             user2.save()
 
+        status.psychic_readiness -= specopPsychicsReadiness(spell, status, user2)
+        status.save()
+
         news_message = str(destroyed_ectro) + " ectrolium was destroyed!"
         message = "You have irradiated " + str(destroyed_ectro) + " ectrolium!"
 
     if spell == "Psychic Assault":
-        refdef = pow(attack / (attack + defence), 1.1 )
-        refatt = pow(defence / (attack + defence), 1.1 )
+        refdef = pow(attack / (attack + defence), 1.1)
+        refatt = pow(defence / (attack + defence), 1.1)
         tlosses = 0.2
 
         psychics_loss1 = min(int(refatt * tlosses * psychics), psychics)
@@ -182,23 +198,26 @@ def perform_spell(spell, psychics, status, *args):
         fleet2.wizard -= psychics_loss2
         fleet2.save()
 
+        status.psychic_readiness -= specopPsychicsReadiness(spell, status, user2)
+        status.save()
+
         news_message = str(psychics_loss1) + " psychics were lost by " + status.user_name + \
                        " and " + str(psychics_loss2) + " were lost by " + user2.user_name + "!"
         message = "You have assaulted " + str(psychics_loss2) + " enemy psychics of " + user2.user_name + \
-            " however " + str(psychics_loss1) + " of your psychics have also suffered critical brain damages!"
+                  " however " + str(psychics_loss1) + " of your psychics have also suffered critical brain damages!"
 
-    if  psychicop_specs[spell][3] == True:
+    if psychicop_specs[spell][3] == True:
         News.objects.create(user1=User.objects.get(id=status.id),
-                        user2=User.objects.get(id=status.id),
-                        empire1=status.empire,
-                        fleet1=spell,
-                        news_type='PD',
-                        date_and_time=datetime.now(),
-                        is_personal_news=True,
-                        is_empire_news=True,
-                        extra_info=news_message,
-                        tick_number=RoundStatus.objects.get().tick_number
-                        )
+                            user2=User.objects.get(id=status.id),
+                            empire1=status.empire,
+                            fleet1=spell,
+                            news_type='PD',
+                            date_and_time=datetime.now(),
+                            is_personal_news=True,
+                            is_empire_news=True,
+                            extra_info=news_message,
+                            tick_number=RoundStatus.objects.get().tick_number
+                            )
     else:
         News.objects.create(user1=User.objects.get(id=status.id),
                             user2=User.objects.get(id=user2.id),
@@ -232,7 +251,6 @@ def perform_spell(spell, psychics, status, *args):
     #
     #
     # if news_message2_empire2:
-
 
 
 '''

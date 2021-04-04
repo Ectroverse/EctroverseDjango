@@ -223,27 +223,14 @@ def map_settings(request):
             map_settings = request.POST.getlist("map_settings")
             details = request.POST.getlist("details")
             for i in range(0, len(settings_id)):
-                try:
-                    details[i] = int(details[i])
-                except ValueError:
-                    details[i] = str(details[i])
-
                 if map_settings[i] == 'PF':
                     if not details[i]:
                         err_msg = "You have to specify faction id or name for setting # " + str(i) +" !"
                         break
-                    if isinstance(details[i], int):
-                        if UserStatus.objects.filter(id=details[i]).first() is None:
-                            err_msg = "The faction id " + str(details[i]) + " doesn't exist for setting # " + str(i) +"!"
-                            break
-                        else:
-                            faction_setting = UserStatus.objects.filter(id=details[i]).first()
-                    else:
-                        if UserStatus.objects.filter(user_name=details[i]).first() is None:
-                            err_msg = "The faction name " + str(details[i]) + " doesn't exist for setting # " + str(i) +"!"
-                            break
-                        else:
-                            faction_setting = UserStatus.objects.filter(user_name=details[i]).first()
+
+                    faction_setting, err_msg = get_userstatus_from_id_or_name(details[i])
+                    if faction_setting == None:
+                        break
 
                 elif map_settings[i] == 'PE':
                     if not details[i]:
@@ -1644,23 +1631,32 @@ def specops(request):
     race_spells = race_info_list[status.get_race_display()]["spell_list"]
     race_inca = race_info_list[status.get_race_display()]["incantation_list"]
     ops = list(set(race_ops) & set(all_operations))
-    spells = list(set(race_spells) & set(all_spells))
+
+    spells = {}
+    for s in race_spells:
+        if s in psychicop_specs:
+            spells[s] = psychicop_specs[s]
+
     inca = list(set(race_inca) & set(all_incantations))
     msg = ""
     main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True)
+
     if request.method == 'POST':
         if request.POST['spell'] and request.POST['unit_ammount']:
-            print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", request.POST['spell'])
             if status.psychic_readiness < 0:
                 msg = "You don't have enough psychic readiness to perform this spell!"
             elif int(request.POST['unit_ammount']) > main_fleet.wizard:
                 msg = "You don't have that many psychics!"
             else:
-                if 'user_id2' not in request.POST:
-                    user_id2 = 0
+                print("request.POST['user_id2']" , request.POST['user_id2'])
+                if psychicop_specs[request.POST['spell']][3] == False and request.POST['user_id2'] == "" :
+                    msg = "You must specify a target player for this spell!"
                 else:
-                    user_id2 = request.POST['user_id2']
-                msg = perform_spell(request.POST['spell'], int(request.POST['unit_ammount']), status, user_id2)
+                    faction, err_msg = get_userstatus_from_id_or_name(request.POST['user_id2'])
+                    if faction == None and psychicop_specs[request.POST['spell']][3] == False :
+                        msg = err_msg
+                    else:
+                        msg = perform_spell(request.POST['spell'], int(request.POST['unit_ammount']), status, faction)
 
     context = {"status": status,
                 "page_title": "Special Operations",

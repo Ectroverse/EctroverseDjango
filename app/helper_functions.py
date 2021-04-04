@@ -215,3 +215,26 @@ def calc_exploration_cost(status):
     expo_ship_nr = Fleet.objects.filter(owner = status.user, main_fleet = False, exploration = 1).count()
     pl_number = Planet.objects.filter(owner = status.user).count()
     return (pl_number + expo_ship_nr + 40) >> 2
+
+
+def get_userstatus_from_id_or_name(d):
+    try:
+        detail = int(d)
+    except ValueError:
+        detail = str(d)
+
+    faction_setting = None
+    err_msg = ""
+
+    if isinstance(detail, int):
+        if UserStatus.objects.filter(id=detail).first() is None:
+            err_msg += "The faction id " + str(detail) + " doesn't exist!"
+        else:
+            faction_setting = UserStatus.objects.filter(id=detail).first()
+    else:
+        if UserStatus.objects.filter(user_name=detail).first() is None:
+            err_msg += "The faction name " + str(detail) + " doesn't exist!"
+        else:
+            faction_setting = UserStatus.objects.filter(user_name=detail).first()
+
+    return faction_setting, err_msg
