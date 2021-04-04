@@ -18,7 +18,7 @@ from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.template import RequestContext
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.contrib.auth.decorators import user_passes_test
 from app.map_settings import *
 from app.helper_functions import *
@@ -320,6 +320,9 @@ def choose_empire_race(request):
                 status.race = request.POST['chose_race']
                 status.empire = empire1
                 status.networth = 1
+                status.construction_flag = 0
+                status.economy_flag = 0
+                status.military_flag = 0
                 status.save()
                 for p in Planet.objects.filter(x=empire1.x, y=empire1.y):
                     if p.owner is None:
@@ -1974,3 +1977,23 @@ def bulk_del_message_in(request):
 def custom_logout(request):
     logout(request)
     return HttpResponseRedirect('/')
+
+
+def hall_of_fame(request):
+    rounds = HallOfFame.objects.aggregate(Max('round'))
+    round_records = {}
+    msg = ""
+
+    if rounds["round__max"] is None:
+        msg = "The hall of fame is empty!"
+    else:
+        num_rounds = int(rounds["round__max"])
+        for i in range ((num_rounds), -1, -1):
+            round_records[i] = HallOfFame.objects.filter(round=i).order_by('-planets')
+
+    context = {"page_title": "Hall of Fame",
+               "round_records": round_records,
+               "msg":msg
+                }
+
+    return render(request, "hall_of_fame.html", context)

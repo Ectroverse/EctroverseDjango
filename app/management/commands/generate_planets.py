@@ -34,19 +34,38 @@ def fill_system(x,y):
 class Command(BaseCommand): # must be called command, use file name to name the functionality
     @transaction.atomic
     def handle(self, *args, **options):
+        game_round = RoundStatus.objects.filter().first()
+        # record data for hall of fame
+        for status in UserStatus.objects.all():
+            if status.empire is not None:
+                HallOfFame.objects.create(round=game_round.round_number,
+                                          user=status.user_name,
+                                          empire=status.empire.name_with_id,
+                                          planets=status.num_planets,
+                                          networth=status.networth,
+                                          race=status.get_race_display())
+
         start_t = time.time()
         Planet.objects.all().delete() # remove all planets
-        Empire.objects.all().delete() # remove all empires
-        RoundStatus.objects.all().delete()
         Relations.objects.all().delete()
         News.objects.all().delete()
         Construction.objects.all().delete()
         Fleet.objects.all().delete()
         UnitConstruction.objects.all().delete()
         Messages.objects.all().delete()
+        MapSettings.objects.all().delete()
+        Scouting.objects.all().delete()
+        Empire.objects.all().delete()  # remove all empires -remove after players
         planet_buffer = [] # MUCH quicker to save them all at once, like 100x faster
         empires_buffer = []
-        RoundStatus.objects.create()
+        game_round = RoundStatus.objects.filter().first()
+        game_round.galaxy_size = map_size
+        game_round.tick_number = 0
+        game_round.is_running = False
+        game_round.round_number += 1
+        game_round.save()
+
+		
 
         # We also need to purge all the non-needed info of players, without actualy deleting them!
         theta = 0
@@ -100,8 +119,9 @@ class Command(BaseCommand): # must be called command, use file name to name the 
 
         # reset round user data
         for status in UserStatus.objects.all():
-
             Fleet.objects.create(owner=status.user, main_fleet=True)
+
+            status.user_name = ""
 
             status.fleet_readiness = 100
             status.psychic_readiness = 100
@@ -192,6 +212,8 @@ class Command(BaseCommand): # must be called command, use file name to name the 
             status.military_flag = 0
 
             status.save()
+			
+		
 
 
 

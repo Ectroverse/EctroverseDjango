@@ -380,6 +380,7 @@ class RoundStatus(models.Model):
     galaxy_size = models.IntegerField(default=100)
     tick_number = models.IntegerField(default=0)
     is_running = models.BooleanField(default=False)
+    round_number = models.IntegerField(default=0)
 
 
 class Relations(models.Model):
@@ -443,3 +444,12 @@ class Scouting(models.Model):
     user = models.ForeignKey(User, related_name='user', on_delete=models.CASCADE)
     planet = models.ForeignKey(Planet, on_delete=models.SET_NULL, blank=True, null=True, default=None)
     scout = models.FloatField(default=0)
+
+
+class HallOfFame(models.Model):
+    round = models.IntegerField(default=0)
+    user = models.CharField(max_length=30) # Display name
+    empire = models.CharField(max_length=35) #empire name with id
+    planets = models.IntegerField(default=0)
+    networth = models.BigIntegerField(default=0)
+    race = models.CharField(max_length=30)

@@ -54,6 +54,7 @@ urlpatterns = [
 	url(r'^battle(?P<fleet_id>[0-9]+)/$', views.battle, name='battle'),
     path('map_settings', views.map_settings, name='map_settings'),
     path('scouting', views.scouting, name='scouting'),
+    path('halloffame', views.hall_of_fame, name='hall_of_fame'),
 ]
 
 if settings.DEBUG:

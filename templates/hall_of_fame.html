@@ -1,0 +1,49 @@
+{% extends "front_page.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<style>
+
+  .hall_of_fame_table {
+    margin: 0 auto; 
+	margin-bottom: 30px;
+  }
+
+</style>
+
+
+
+{% include "box_top.html" with heading=page_title minwidth="300px" textalign="center"  %}
+
+{% if msg %}
+	{{msg}}
+{% endif %}
+	
+{% for round, players in round_records.items %}
+	Round # {{round}}<br>
+	<table class="hall_of_fame_table">
+	<tr><td>name</td>
+	<td>planets</td>
+	<td>networth</td>
+	<td>empire</td>
+	<td>race</td>
+	</tr>	
+	{% for player in players%}
+	
+	<tr><td>{{player.user}}</td>
+		<td>{{player.planets}}</td>
+		<td>{{player.networth}}</td>
+		<td>{{player.empire}}</td>
+		<td>{{player.race}}</td>
+	</tr>	
+
+	{% endfor %}
+	</table>
+	
+{% endfor %}
+
+{% include "box_bottom.html" %}
+	
+{% endblock %}

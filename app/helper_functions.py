@@ -20,6 +20,7 @@ def give_first_planet(user, status, planet):
     status.home_planet = planet
     status.num_planets = 1
     status.save()
+    Scouting.objects.create(user=status.user, planet=planet, scout=1.0 )
 
 def give_first_fleet(main_fleet):
     for i,unit in enumerate(unit_info["unit_list"]):

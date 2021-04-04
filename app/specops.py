@@ -53,8 +53,8 @@ def specopPsychicsReadiness(spell, user1, *args):
     elif psychicop_specs[spell][3]:
         return int((1.0 + 0.01 * penalty) * psychicop_specs[spell][1])
 
-    empire1 = Empire.objects.get(id=user1.empire)
-    empire2 = Empire.objects.get(id=user2.empire)
+    empire1 = user1.empire
+    empire2 = user2.empire
 
     fa = (1 + user1.num_planets) / (1 + user2.num_planets)
     fb = (1 + empire1.planets) / (1 + empire2.planets)
