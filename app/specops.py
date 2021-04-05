@@ -201,6 +201,30 @@ def perform_spell(spell, psychics, status, *args):
         status.psychic_readiness -= specopPsychicsReadiness(spell, status, user2)
         status.save()
 
+    if spell =="Phantoms":
+        phantom_cast = round(attack / 2)
+        fleet1.phantom += phantom_cast
+        fleet1.save()
+
+        news_message = status.user_name + " has summoned " + str(phantom_cast) + " Phantoms to fight in their army!"
+        message = "You have summoned " + str(phantom_cast) + " Phantoms to join your army!"
+
+        status.psychic_readiness -= specopPsychicsReadiness(spell, status)
+        status.save()
+
+    if spell =="Grow Planet's Size":
+        planet = random.choice(Planet.objects.filter(owner=status.user))
+        grow = (attack * 1.3)
+        growth = np.clip(round(200 * grow / status.networth / 2 / status.num_planets),0,300)
+        planet.size += growth
+        planet.save()
+
+        news_message = status.user_name + " planet " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown " + str(growth)
+        message = "Your planet  " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown by " + str(growth)
+
+        status.psychic_readiness -= specopPsychicsReadiness(spell, status)
+        status.save()
+
         news_message = str(psychics_loss1) + " psychics were lost by " + status.user_name + \
                        " and " + str(psychics_loss2) + " were lost by " + user2.user_name + "!"
         message = "You have assaulted " + str(psychics_loss2) + " enemy psychics of " + user2.user_name + \
