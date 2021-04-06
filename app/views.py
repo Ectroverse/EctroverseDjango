@@ -1043,8 +1043,6 @@ def fleets(request):
             if unit not in ['wizard', 'agent', 'ghost', 'exploration']:
                 send_fleet_list.append({"name": unit_info[unit]["label"], "value": num, "i": unit_info[unit]["i"]})
 
-    # TODO Generate list of traveling and stationed fleets (in old game i dont see anywhere a list of stationed fleets is shown)
-
     display_fleet = {}
     for fleet in other_fleets:
         display_fleet_inner = {}
@@ -1189,16 +1187,9 @@ def fleetsend(request):
         request.session['error'] = "You need at least one portal to send the fleet from!"
         return fleets(request)
 
-
     best_portal_planet =  find_nearest_portal(x, y, portal_planets)
     min_dist = np.sqrt((best_portal_planet.x - x) ** 2 + (best_portal_planet.y - y) ** 2)
-
-    # print("Fleet is starting from", best_portal_planet.x, best_portal_planet.y)
-
     speed = race_info_list[status.get_race_display()]["travel_speed"]  # * specopEnlightemntCalc(id,CMD_ENLIGHT_SPEED);
-    # CODE for artefact that decreases/increases travel speed by n%
-    # if ( maind.artefacts & ARTEFACT_4_BIT)
-    # fa *= 0.8
     fleet_time = int(np.ceil(min_dist / speed))  # in ticks
 
     if not 'exploration' in request.POST:
@@ -1633,11 +1624,16 @@ def specops(request):
     race_ops = race_info_list[status.get_race_display()]["op_list"]
     race_spells = race_info_list[status.get_race_display()]["spell_list"]
     race_inca = race_info_list[status.get_race_display()]["incantation_list"]
-    ops = list(set(race_ops) & set(all_operations))
+
+    ops = {}
+    for o in agentop_specs:
+        if o in race_ops:
+            ops[o] = agentop_specs[o]
+    print(ops)
 
     spells = {}
-    for s in race_spells:
-        if s in psychicop_specs:
+    for s in psychicop_specs:
+        if s in race_spells:
             spells[s] = psychicop_specs[s]
 
     inca = list(set(race_inca) & set(all_incantations))
@@ -1645,7 +1641,7 @@ def specops(request):
     main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True)
 
     if request.method == 'POST':
-        if request.POST['spell'] and request.POST['unit_ammount']:
+        if 'spell' in request.POST and 'unit_ammount' in request.POST:
             if status.psychic_readiness < 0:
                 msg = "You don't have enough psychic readiness to perform this spell!"
             elif int(request.POST['unit_ammount']) > main_fleet.wizard:
@@ -1654,14 +1650,32 @@ def specops(request):
                 if psychicop_specs[request.POST['spell']][3] == False and request.POST['user_id2'] == "" :
                     msg = "You must specify a target player for this spell!"
                 else:
-
                     faction, err_msg = get_userstatus_from_id_or_name(request.POST['user_id2'])
                     # if second faction not found and not self spell
                     if faction == None and psychicop_specs[request.POST['spell']][3] == False:
                         msg = err_msg
                     else:
-                        print("teeeeeeeeeeeeest")
                         msg = perform_spell(request.POST['spell'], int(request.POST['unit_ammount']), status, faction)
+
+        print(request.POST)
+        if 'operation' in request.POST and 'unit_ammount' in request.POST:
+            if status.agent_readiness < 0:
+                msg = "You don't have enough agent readiness to perform this spell!"
+            elif int(request.POST['unit_ammount']) > main_fleet.agent:
+                msg = "You don't have that many agents!"
+            elif request.POST['X'] == "" or request.POST['Y'] == "" or request.POST['I'] == "":
+                msg = "You must specify a planet!"
+            else:
+                planet = None
+                try:
+                    planet = Planet.objects.get(x=request.POST['X'], y=request.POST['Y'], i=request.POST['I'])
+                except Planet.DoesNotExist:
+                   msg = "This planet doesn't exist"
+                if planet:
+                    msg = send_agents_ghosts(status, int(request.POST['unit_ammount']), 0,
+                        request.POST['X'], request.POST['Y'], request.POST['I'], request.POST['operation'])
+
+    agent_fleets = Fleet.objects.filter(owner=status.user, agent__gt=1, main_fleet=False)
 
     context = {"status": status,
                 "page_title": "Special Operations",
@@ -1669,7 +1683,8 @@ def specops(request):
                 "spells": spells,
                 "incantations": inca,
                 "msg": msg,
-                "main_fleet": main_fleet
+                "main_fleet": main_fleet,
+                "agent_fleets": agent_fleets,
                }
     return render(request, "specops.html", context)
 

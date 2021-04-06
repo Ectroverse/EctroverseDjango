@@ -4,6 +4,7 @@ import numpy as np
 import miniball
 from collections import defaultdict
 from .map_settings import *
+from .specops import *
 from datetime import datetime
 from datetime import timedelta
 from django.template import RequestContext
@@ -239,3 +240,37 @@ def get_userstatus_from_id_or_name(d):
             faction_setting = UserStatus.objects.filter(user_name=detail).first()
 
     return faction_setting, err_msg
+
+
+def send_agents_ghosts(status, agents, ghosts, x, y, i, specop):
+    x = int(x)
+    y = int(y)
+    i = int(i)
+    portal_planets = Planet.objects.filter(owner=status.user, portal=True)
+    if not portal_planets:
+        return "You need at least one portal to send the fleet from!"
+    best_portal_planet = find_nearest_portal(x, y, portal_planets)
+    min_dist = np.sqrt((best_portal_planet.x - x) ** 2 + (best_portal_planet.y - y) ** 2)
+    speed = race_info_list[status.get_race_display()]["travel_speed"]  # * specopEnlightemntCalc(id,CMD_ENLIGHT_SPEED);
+    fleet_time = int(np.ceil(min_dist / speed))
+    fleet = Fleet.objects.create(owner=status.user,
+                         command_order=6,
+                         x=x,
+                         y=y,
+                         i=i,
+                         ticks_remaining=fleet_time,
+                         current_position_x=best_portal_planet.x,
+                         current_position_y=best_portal_planet.y,
+                         agent=agents,
+                         ghost=ghosts,
+                         specop=specop)
+    main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True)
+    main_fleet.agent -= agents
+    main_fleet.ghost -= ghosts
+    main_fleet.save()
+    if fleet_time == 0:
+        if agents > 0:
+            perform_operation()
+        if ghosts > 0:
+            perform_incantation()
+

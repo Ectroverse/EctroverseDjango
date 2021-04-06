@@ -83,7 +83,7 @@ display: none;
 </style>
 
 <script>
-function yesnoCheck() {
+function psychicCheck() {
 	{% for name, values in spells.items  %}
 		if (document.getElementById('{{values.4}}').checked) {
 			document.getElementById('spell_{{values.4}}').style.display = 'inline';
@@ -96,49 +96,107 @@ function yesnoCheck() {
 		}
 		else document.getElementById('spell_{{values.4}}').style.display = 'none';
 	{% endfor %}
-
-
+}
+function agentsCheck() {
+	{% for name, values in operations.items  %}
+		if (document.getElementById('{{values.4}}').checked) {
+			document.getElementById('ops_{{values.4}}').style.display = 'inline';
+		}
+		else document.getElementById('ops_{{values.4}}').style.display = 'none';
+	{% endfor %}
 }
 </script>
 
 
+
 <div  class ="border_agent"  >
-<div class="centered2"><h3>Operations</h3></div>
-	<div class="ops_box">
-	Agents ammount: {{main_fleet.agent}}
-	<br>
+<div class="centered2"><h3>Covert Operations</h3></div>
+	<div class="ops_box spaceUnder">
+	<b>Agents ammount: {{main_fleet.agent}}</b>
+	<br><br>
 		<form action="/specops" method="POST">
 		{% csrf_token %}
-			{% for o in operations %}
-			<input type="radio" id="{{ o }}" name="operation" value="{{ o }}">
-			<label class="remove-all-styles">{{ o }}</label>
-			{% endfor %}
+			{% for name, values in operations.items  %}
+			<input class="spaceUnder" type="radio" id="{{ values.4 }}" name="operation" value="{{ name }}" onclick="agentsCheck()">
+			<input class="spaceUnder" type="hidden" id="hidden_values{{ values.4 }}" value="{{ values.3 }}">
+			<label class="remove-all-styles " >{{ name }}</label>
 			<br>
+			{% endfor %}
+			<div class = "spaceUnder"></div>
+			units to send:
+			<input class="spaceUnder" type="number"  min="0" max="{{main_fleet.agent}}" name="unit_ammount" size="12" />
+			<div class="spaceUnder" id="target_planet">
+				Target coordinates:
+				X:<input class="spaceUnder" pattern="[0-9]+" type="text" name="X" size="4" value ="{{planet_to_agent_op.x}}">
+				Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4" value ="{{planet_to_agent_op.y}}">
+				Planet:<input class="spaceUnder" pattern="[0-9]+" type="text" name="I" size="4" value ="{{planet_to_agent_op.i}}">
+			</div>
 			<input type="submit" value="Perform">
 		</form> 
 	</div>
-	<div class="ops_box2">
-		planet coords
+	<div id="dvtext2" class="ops_box2">
+			{% for name, values in operations.items  %}
+				<div id="ops_{{values.4}}" class="hidden" > 
+				Covert operation name: {{name}}<br>
+				Technology required: {{values.0}}<br>
+				Agents readiness cost: {{values.1}}<br>
+				Difficulty: {{values.2}}<br>
+				Stealth: {{values.3}}<br>
+				Description: {{values.5}}
+				</div>
+			{% endfor %}
 	</div>
+{% if agent_fleets %}
+	<div style="width:100%; float:left;">
+		Agents out:	
+		<form action="/specops" method="POST" name="cancelAgents" >
+		{% csrf_token %}
+		<table style="margin: 0 auto;">
+		<tr>
+		<td>Special operation:</td>
+		<td>Ammount of agents</td>
+		<td>Target planet</td>
+		<td>Order</td>
+		<td></td>
+		</tr>
+		{% for agents in agent_fleets %}
+		<tr>
+		<td>{{agents.specop}}</td>
+		<td>{{agents.agent}}</td>
+		<td>{{agents.x}},{{agents.y}}:{{agents.i}}</td>
+		<td>{% if agents.command_order == 6 %} perform covert operation {% else %} return to main fleet {% endif %}</td>
+		<td>			<input type="hidden" name="fleet_select" value="0" />
+						<input type="checkbox" name="fleet_select" value="1" /></td>
+		</tr>
+		{% endfor %}
+		</table>
+		<input type="submit" value="Cancel operations">
+		</form>
+	</div>
+{% endif %}
+
 </div>
 <br><br>
 
+
+
 <div class="border_psyhic" >
 <div class="centered2"><h3>Spells</h3></div>
-	<div class="ops_box">
-	Psychics ammount: {{main_fleet.wizard}}
-	<br>
+	<div class="ops_box spaceUnder">
+	<b>Psychics ammount: {{main_fleet.wizard}}</b>
+	<br><br>
 		<form action="/specops" method="POST">
 		{% csrf_token %}
 			{% for name, values in spells.items  %}
-			<input type="radio" id="{{ values.4 }}" name="spell" value="{{ name }}" onclick="yesnoCheck()">
-			<input type="hidden" id="hidden_values{{ values.4 }}" value="{{ values.3 }}">
-			<label class="remove-all-styles" >{{ name }}</label>
+			<input class="spaceUnder" type="radio" id="{{ values.4 }}" name="spell" value="{{ name }}" onclick="psychicCheck()">
+			<input class="spaceUnder" type="hidden" id="hidden_values{{ values.4 }}" value="{{ values.3 }}">
+			<label class="remove-all-styles " >{{ name }}</label>
 			<br>
 			{% endfor %}
+			<div class = "spaceUnder"></div>
 			units to send:
-			<input type="number" min="0" max="{{main_fleet.wizard}}" name="unit_ammount" size="12" />
-			<div id="target_user_psy">
+			<input class="spaceUnder" type="number"  min="0" max="{{main_fleet.wizard}}" name="unit_ammount" size="12" />
+			<div class="spaceUnder" id="target_user_psy">
 				user name/id:
 				<input type="text" name="user_id2" size="12"  />
 			</div>

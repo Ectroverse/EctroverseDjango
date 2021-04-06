@@ -17,6 +17,8 @@ admin.site.register(News)
 admin.site.register(MapSettings)
 admin.site.register(Scouting)
 admin.site.register(HallOfFame)
+admin.site.register(Specops)
+
 
 class YourModelAdmin(admin.ModelAdmin):
     formfield_overrides = {

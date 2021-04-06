@@ -5,7 +5,6 @@ from datetime import datetime
 from django.db.models import Sum
 import random
 
-all_operations = ["Observe Planet"]
 all_spells = ["Irradiate Ectrolium",
               "Dark Web",
               "Incandescence",
@@ -39,6 +38,52 @@ psychicop_specs = {
     "Enlightenment": [120, 35, 1.0, True, 'EN',
                       "Philosophers and scientists will try to bring a golden Age of Enlightenment upon your empire."],
 }
+
+all_operations = ["Spy Target",
+                "Observe Planet",
+                "Network Infiltration",
+                "Infiltration",
+                "Diplomatic Espionage",
+                "Bio Infection",
+                "Energy Transfer",
+                "Military Sabotage",
+                "Planetary Beacon",
+                "Computer virus",
+                "Nuke Planet",
+                "Maps theft",
+                "High Infiltration",
+                ]
+
+# tech, readiness, difficulty, stealth
+agentop_specs = {
+    "Spy Target": [0, 12, 1.5, True, 'ST',
+                            "Spy target will reveal information regarding an faction resources and readiness.", ],
+    "Observe Planet": [0, 5, 1.0, True, 'OP',
+                      "Your agents will observe the planet and provide you with all information regarding it, habited or not."],
+    "Network Infiltration": [25, 22, 3.5, False, 'NW',
+                 "Your agents will try to infiltrate research network in order to steal new technologies."],
+    "Infiltration": [40, 18, 2.5, True, 'IF',
+                   "Infiltrating the target network will provide you with information regarding its resources, research and buildings."],
+    "Diplomatic Espionage": [40, 15, 1.5, True, 'DE',
+                             "Your diplomats will try to gather information regarding operations and spells, currently affecting the target faction."],
+    "Bio Infection": [60, 25, 3.0, False, 'BI',
+                      "Your agents will attempt to spread a dangerous infection which will kill most of the population and spread in nearby planets."],
+    "Energy Transfer": [80, 22, 2.5, False, 'ET',
+                        "Your agents will infiltrate the enemy energy storage facilities and transfer energy to your own energy storage."],
+    "Military Sabotage": [100, 30, 3.5, False, 'MT',
+                 "Through an enemy portal, your agents will attempt to reach the enemy fleet and destroy military units."],
+    "Planetary Beacon": [100, 7, 1.0, False, 'PB',
+                         "Your agents will attempt to place a beacon on target planet, if successful it will remove any dark webs present."],
+    "Computer virus": [120, 22, 2.5, False, 'CV',
+                       "Your hackers will try to plant a nasty computer virus that will increase targets resources decay rate!"],
+    "Nuke Planet": [120, 20, 5.0, False, 'NP',
+                           "Your agents will place powerful nuclear devices on the surface of the planet, destroying all buildings and units, leaving in uninhabited."],
+    "Maps theft": [140, 40, 4.5, False, 'MT',
+                   "Your agents will try to steal the maps of the enemie's territory!"],
+    "High Infiltration": [160, 40, 6.0, False, 'HI',
+                      "Performing this operation will provide you with detailled information about an faction for several weeks."],
+}
+
 
 
 def specopPsychicsReadiness(spell, user1, *args):
@@ -300,89 +345,5 @@ def perform_spell(spell, psychics, status, *args):
     # if news_message2_empire2:
 
 
-'''
-char *cmdAgentopName[CMD_AGENTOP_NUMUSED] =
-{
-"Spy Target",
-"Observe Planet",
-"Network Virus",
-"Infiltration",
-"Bio Infection",
-"Energy Transfer",
-"Military Sabotage",
-"Nuke Planet",
-"High Infiltration",
-"Planetary Beacon",
-"Diplomatic Espionage",
-"Steal Resources"
-};
-
-char *cmdPsychicopName[CMD_PSYCHICOP_NUMUSED] =
-{
-"Irradiate Ectrolium",
-"Dark Web",
-"Incandescence",
-"Black Mist",
-"War Illusions",
-"Psychic Assault",
-"Phantoms",
-"Enlightenment",
-"Grow Planet's Size"
-};
-
-char *cmdGhostopName[CMD_GHOSTOP_NUMUSED] =
-{
-"Sense Artefact",
-"Survey System",
-"Planetary Shielding",
-"Portal Force Field",
-"Vortex Portal",
-"Mind Control",
-"Energy Surge",
-"Call to Arms"
-};
-
-
-int cmdAgentopTech[CMD_AGENTOP_NUMUSED] =
-{
-0, 0, 25, 40, 60, 80, 100, 120, 160, 100, 40, 80
-};
-
-
-
-int cmdGhostopTech[CMD_GHOSTOP_NUMUSED] =
-{
-20, 40, 60, 80, 100, 120, 140, 110
-};
-
-
-float cmdAgentopReadiness[CMD_AGENTOP_NUMUSED] =
-{
-12.0, 5.0, 22.0, 18.0, 25.0, 22.0, 30.0, 20.0, 40.0, 7.0, 15.0, 22.0
-};
-
-
-
-int cmdGhostopReadiness[CMD_GHOSTOP_NUMUSED] =
-{
-50, 20, 40, 30, 60, 40, 70, 20
-};
-
-
-float cmdAgentopDifficulty[CMD_AGENTOP_NUMUSED] =
-{
-1.0, 1.0, 3.5, 2.5, 3.0, 2.5, 3.5, 5.0, 6.0, 1.0, 1.5, 2.5
-};
-
-
-
-float cmdGhostopDifficulty[CMD_GHOSTOP_NUMUSED] =
-{
-1.0, 1.0, 2.0, 1.5, 1.0, 5.0, 6.0, 2.0
-};
-
-int cmdAgentopStealth[CMD_AGENTOP_NUMUSED] =
-{
-1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0
-};
-'''
+def perform_operation():
+    pass

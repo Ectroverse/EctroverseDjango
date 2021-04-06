@@ -343,6 +343,8 @@ class Fleet(models.Model):
         MERGE_IN_SYSTEM   = 3
         MERGE_IN_SYSTEM_A = 4
         JOIN_MAIN_FLEET   = 5
+        PERFORM_OPERATION = 6
+        PERFORM_INCANTATION = 7
         EXPLORE_PLANET    = 10
     command_order = models.IntegerField(choices=CommandOrder.choices, default=0)
 
@@ -365,6 +367,8 @@ class Fleet(models.Model):
     agent       = models.BigIntegerField(default=0, verbose_name="Agents")
     ghost       = models.BigIntegerField(default=0, verbose_name="Ghost Ships")
     exploration = models.BigIntegerField(default=0, verbose_name="Exploration Ships")
+
+    specop = models.CharField(max_length=50, blank=True, null=True, default=None)
 
 
 
