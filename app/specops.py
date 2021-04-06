@@ -53,8 +53,8 @@ def specopPsychicsReadiness(spell, user1, *args):
     elif psychicop_specs[spell][3]:
         return int((1.0 + 0.01 * penalty) * psychicop_specs[spell][1])
 
-    empire1 = user1.empire
-    empire2 = user2.empire
+    empire1 = Empire.objects.get(id=user1.empire)
+    empire2 = Empire.objects.get(id=user2.empire)
 
     fa = (1 + user1.num_planets) / (1 + user2.num_planets)
     fb = (1 + empire1.planets) / (1 + empire2.planets)
@@ -199,6 +199,30 @@ def perform_spell(spell, psychics, status, *args):
         fleet2.save()
 
         status.psychic_readiness -= specopPsychicsReadiness(spell, status, user2)
+        status.save()
+
+    if spell =="Phantoms":
+        phantom_cast = round(attack / 2)
+        fleet1.phantom += phantom_cast
+        fleet1.save()
+
+        news_message = status.user_name + " has summoned " + str(phantom_cast) + " Phantoms to fight in their army!"
+        message = "You have summoned " + str(phantom_cast) + " Phantoms to join your army!"
+
+        status.psychic_readiness -= specopPsychicsReadiness(spell, status)
+        status.save()
+
+    if spell =="Grow Planet's Size":
+        planet = random.choice(Planet.objects.filter(owner=status.user))
+        grow = (attack * 1.3)
+        growth = np.clip(round(200 * grow / status.networth / 2 / status.num_planets),0,300)
+        planet.size += growth
+        planet.save()
+
+        news_message = status.user_name + " planet " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown " + str(growth)
+        message = "Your planet  " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown by " + str(growth)
+
+        status.psychic_readiness -= specopPsychicsReadiness(spell, status)
         status.save()
 
         news_message = str(psychics_loss1) + " psychics were lost by " + status.user_name + \
