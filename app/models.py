@@ -453,3 +453,19 @@ class HallOfFame(models.Model):
     planets = models.IntegerField(default=0)
     networth = models.BigIntegerField(default=0)
     race = models.CharField(max_length=30)
+
+
+class Specops(models.Model):
+    user_to = models.ForeignKey(User, related_name='Suser1', on_delete=models.CASCADE)
+    user_from = models.ForeignKey(User, related_name='Suser2', blank=True, null=True,
+                                  default=None, on_delete=models.SET_DEFAULT)
+    class SpecopType(models.TextChoices):
+        O = 'O', _('Agent operation')
+        S = 'S', _('Psychic spell')
+        G = 'G', _('Ghost incantation')
+    specop_type = models.CharField(max_length=1, choices=SpecopType.choices, default='O')
+    name = models.CharField(max_length=50, blank=True, null=True, default=None)
+    specop_strength = models.FloatField(default=0)
+    # for spells like enlightment
+    extra_effect = models.CharField(max_length=50, blank=True, null=True, default=None)
+    ticks_left = models.IntegerField(default=0)

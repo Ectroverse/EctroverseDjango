@@ -3,6 +3,7 @@ from app.constants import *
 from app.models import *
 from datetime import datetime
 from django.db.models import Sum
+import random
 
 all_operations = ["Observe Planet"]
 all_spells = ["Irradiate Ectrolium",
@@ -53,8 +54,8 @@ def specopPsychicsReadiness(spell, user1, *args):
     elif psychicop_specs[spell][3]:
         return int((1.0 + 0.01 * penalty) * psychicop_specs[spell][1])
 
-    empire1 = Empire.objects.get(id=user1.empire)
-    empire2 = Empire.objects.get(id=user2.empire)
+    empire1 = user1.empire
+    empire2 = user2.empire
 
     fa = (1 + user1.num_planets) / (1 + user2.num_planets)
     fb = (1 + empire1.planets) / (1 + empire2.planets)
@@ -124,12 +125,14 @@ def perform_spell(spell, psychics, status, *args):
     penalty = get_op_penalty(status.research_percent_culture, psychicop_specs[spell][0])
 
     if penalty == -1:
-        return
+        return "You don't have enough psychic research to perform this spell!"
 
     if penalty > 0:
         attack /= 1.0 + 0.01 * penalty
 
     fleet1 = Fleet.objects.get(owner=status.id, main_fleet=True)
+
+    print(spell, psychics, status, args)
 
     news_message = ""
     message = ""
@@ -185,7 +188,25 @@ def perform_spell(spell, psychics, status, *args):
         news_message = str(destroyed_ectro) + " ectrolium was destroyed!"
         message = "You have irradiated " + str(destroyed_ectro) + " ectrolium!"
 
+    if spell == "Black Mist":
+        if success >= 1.0:
+            effect = 25
+        else:
+            effect = int((25.0 / 0.6) * (success - 0.4))
+        time = random.randint(26, 57)
+        Specops.objects.create(user_to=user2.user,
+                               user_from=status.user,
+                               specop_type='S',
+                               name="Black Mist",
+                               specop_strength=effect,
+                               ticks_left=time)
+        news_message = " solar power deduced by " + str(effect) + "%!"
+        message = "A black mist is spreading over " + str(user2.user_name) + \
+                  " planetes, reducing solar collectors efficiency by " + str(effect)
+
+
     if spell == "Psychic Assault":
+        print("teest2")
         refdef = pow(attack / (attack + defence), 1.1)
         refatt = pow(defence / (attack + defence), 1.1)
         tlosses = 0.2
@@ -200,6 +221,11 @@ def perform_spell(spell, psychics, status, *args):
 
         status.psychic_readiness -= specopPsychicsReadiness(spell, status, user2)
         status.save()
+
+        news_message = str(psychics_loss1) + " psychics were lost by " + status.user_name + \
+                       " and " + str(psychics_loss2) + " were lost by " + user2.user_name + "!"
+        message = "You have assaulted " + str(psychics_loss2) + " enemy psychics of " + user2.user_name + \
+                  " however " + str(psychics_loss1) + " of your psychics have also suffered critical brain damages!"
 
     if spell =="Phantoms":
         phantom_cast = round(attack / 2)
@@ -225,10 +251,7 @@ def perform_spell(spell, psychics, status, *args):
         status.psychic_readiness -= specopPsychicsReadiness(spell, status)
         status.save()
 
-        news_message = str(psychics_loss1) + " psychics were lost by " + status.user_name + \
-                       " and " + str(psychics_loss2) + " were lost by " + user2.user_name + "!"
-        message = "You have assaulted " + str(psychics_loss2) + " enemy psychics of " + user2.user_name + \
-                  " however " + str(psychics_loss1) + " of your psychics have also suffered critical brain damages!"
+
 
     if psychicop_specs[spell][3] == True:
         News.objects.create(user1=User.objects.get(id=status.id),
