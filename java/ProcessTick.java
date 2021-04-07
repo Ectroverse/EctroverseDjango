@@ -10,19 +10,6 @@ import static org.ectroverse.processtick.Constants.*;
 
 public class ProcessTick
 {
-
-	class Planet{
-		int x;
-		int y;
-		int z;
-		
-		public Planet(int x, int y, int z){
-			this.x = x;
-			this.y = y;
-			this.z = z;
-		}
-	}
-
     public static void main(String[] args) {
 		long startTime = System.nanoTime();
 		long connectionTime = 0;
@@ -31,7 +18,7 @@ public class ProcessTick
 		try{
 			tmpCon = DriverManager.getConnection("jdbc:postgresql://ectroversedjango_db_1:5432/djangodatabase", "dbadmin", "admin12345");
 			
-			//create stored procedure 
+			//create stored procedure - update population on planets, one of the biggest updates
 			String createSP = "CREATE OR REPLACE PROCEDURE updatePlanets( "
 				+ " pop_rc DOUBLE PRECISION, race_pop_growth DOUBLE PRECISION, user_id IN \"PLANET\".ID%TYPE)"
 				+ "LANGUAGE SQL"
@@ -44,9 +31,7 @@ public class ProcessTick
 			
 			Statement statementSP = tmpCon.createStatement();
 			statementSP.execute(createSP);
-			
 			connectionTime = System.nanoTime();
-			
 		}
 		catch (Exception e) {
 			try{
@@ -93,15 +78,17 @@ public class ProcessTick
 		long postgresProcedureExecTime = 0;
 		long planet_loop = 0;
 		long main_loop1 = 0, main_loop2 = 0;
+		
+		System.out.println("PROCESS TICK STARTED!");
 
 		try {
 		con.setAutoCommit(false);
 	 	startTime = System.nanoTime();
 		Statement statement = con.createStatement();
 		Statement statement2 = con.createStatement();
-		//statement.executeQuery("BEGIN; ");
-		//test1 = System.nanoTime();
-		statement.execute("LOCK TABLE \"PLANET\", app_roundstatus, app_userstatus, app_construction IN ACCESS EXCLUSIVE MODE;");
+		
+		//lock the tables so that users dont interfere with the update
+		statement.execute("LOCK TABLE \"PLANET\", app_roundstatus, app_userstatus, app_construction, app_fleet IN ACCESS EXCLUSIVE MODE;");
 		
 		//update tick number
 		ResultSet resultSet = statement.executeQuery("SELECT tick_number FROM app_roundstatus");
@@ -122,7 +109,7 @@ public class ProcessTick
 	   	ResultSetMetaData rsmd = resultSet.getMetaData();
 	   	ArrayList<String []> columns = new ArrayList<>(rsmd.getColumnCount());
 		 
-		 //put user table into list with hash maps, as we cannot use nested resultSet
+		//put user table into list with hash maps, as we cannot use nested resultSet
 	  	for(int i = 1; i <= rsmd.getColumnCount(); i++){
 			String [] arr = new String[2];
 			arr[0] = rsmd.getColumnName(i);
@@ -135,22 +122,7 @@ public class ProcessTick
 		 ArrayList<HashMap<String, Integer>> usersInt = new ArrayList<>();
 		 ArrayList<HashMap<String, Long>> usersLong = new ArrayList<>();
 		 HashMap<Integer, String> usersRace = new HashMap<>();
-		 
-		 String fleetsNewsUpdateQuery = "INSERT INTO app_news " +
-			" ( user1_id, empire1_id, news_type, date_and_time, is_personal_news, " + 
-			" is_empire_news, is_read, tick_number, extra_info ) " +
-			" SELECT  ?, ?, 'UB',  ?, true, false, false, ?, ?  ";
-		 PreparedStatement fleetsNewsUpdateStatement = con.prepareStatement(fleetsNewsUpdateQuery); 
-		 
-		 String fleetsReturnNewsUpdateQuery = "INSERT INTO app_news " +
-			" ( user1_id, empire1_id, news_type, date_and_time, is_personal_news, " + 
-			" is_empire_news, is_read, tick_number, extra_info ) " +
-			" SELECT  ?, ?, 'FJ',  ?, true, false, false, ?, ?  ";
-		 PreparedStatement fleetsReturnNewsUpdateStatement = con.prepareStatement(fleetsReturnNewsUpdateQuery); 
 
-
-
-		
 		String fleetsDeleteUpdateQuery = "DELETE FROM app_fleet WHERE id = ?";
 		PreparedStatement fleetsDeleteUpdateStatement = con.prepareStatement(fleetsDeleteUpdateQuery); 
 		
@@ -247,44 +219,8 @@ public class ProcessTick
 		String planetStatusUpdateQuery2 = "UPDATE \"PLANET\"  SET" +
 			" current_population = ? "+	 //1		 
 			" WHERE id = ?"  ; //2
-			
 		
-		String fleetMergeQuery = "UPDATE app_fleet SET" +
-						" bomber = ?" + //1
-						" , fighter = ? "+ //2
-						" , transport = ? "+ //3
-						" , cruiser = ? " + //4
-						" , carrier = ? " + //5
-						" , soldier = ? " + //6
-						" , droid = ? " + //7
-						" , goliath = ? "+ //8
-						" , phantom = ? " + //9
-						" , wizard = ? " + //10
-						" , agent = ? " + //11
-						" , ghost = ? "+ //12
-						" , exploration = ? "+ //13
-						" WHERE id = ?"; //14
 
-		PreparedStatement fleetMergeUpdateStatement = con.prepareStatement(fleetMergeQuery); 
-		
-		String fleetStationQuery = "UPDATE app_fleet SET" +
-						" bomber = ?" + //1
-						" , fighter = ? "+ //2
-						" , transport = ? "+ //3
-						" , cruiser = ? " + //4
-						" , carrier = ? " + //5
-						" , soldier = ? " + //6
-						" , droid = ? " + //7
-						" , goliath = ? "+ //8
-						" , phantom = ? " + //9
-						" , wizard = ? " + //10
-						" , agent = ? " + //11
-						" , ghost = ? "+ //12
-						" , exploration = ? "+ //13
-						" , on_planet_id = ? "+ //14
-						" WHERE id = ?"; //15
-
-		PreparedStatement fleetStationUpdateStatement = con.prepareStatement(fleetStationQuery); 
 			
 		 //loop over users to get their stats
 		while(resultSet.next()){
@@ -318,8 +254,9 @@ public class ProcessTick
 			usersLong.add(rowLong);
 		}
 		
-		UpdateFleets updateFleets = new UpdateFleets(con);
+		
 		UpdateNews updateNews = new UpdateNews(con);
+		UpdateFleets updateFleets = new UpdateFleets(con, updateNews);
 		
 		//loops over users to uodate their stats and planets --main loop!
 		main_loop1 = System.nanoTime();
@@ -329,6 +266,7 @@ public class ProcessTick
 			HashMap<String,Integer> rowInt = usersInt.get(j);
 			HashMap<String,Long> rowLong  = usersLong.get(j);
 			int userID = rowInt.get("user_id");
+			int empireID = rowInt.get("empire_id");
 			userStatusUpdateStatement.setInt(59, userID);
 			String race = usersRace.get(userID);
 			HashMap<String, Double> race_info = race_info_list.get(race);
@@ -346,40 +284,20 @@ public class ProcessTick
 				unitsBuilt.put(resultSet.getString("unit_type"), resultSet.getInt("num_units"));
 			}
 			
-			updateFleets.addNewUser(userID);
+			updateFleets.addNewUser(userID, empireID, tick_nr);
 			updateFleets.updateFleetBuild(unitsBuilt);
+			if (updateFleets.getTotalBuiltUnits() > 0)
+				userStatusUpdateStatement.setInt(56, 1);	
 			
 			//set initial news flags
 
 			userStatusUpdateStatement.setInt(56, rowInt.get("construction_flag"));
 			userStatusUpdateStatement.setInt(57, rowInt.get("economy_flag"));
-
 			
 			int militaryFlag = rowInt.get("military_flag");
-						
 
-			
 			//update built fleets news 
-			if (updateFleets.getTotalBuiltUnits() != 0 ){	
-				userStatusUpdateStatement.setInt(56, 1);			
-				java.util.Date utilDate = new java.util.Date();
-				java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
-				
-				fleetsNewsUpdateStatement.setInt(1, userID);
-				fleetsNewsUpdateStatement.setInt(2, rowInt.get("empire_id"));
-				fleetsNewsUpdateStatement.setTimestamp(3, sqlTS);
-				fleetsNewsUpdateStatement.setInt(4, tick_nr);
-				
-				String builtFleets = "These units constructions were finished : ";
-				for(int i = 0; i < unit_names.length; i++){
-					if ( unitsBuilt.getOrDefault(unit_names[i],0) > 0)
-						builtFleets += "\n " + unit_labels[i] + " " +  unitsBuilt.getOrDefault(unit_names[i],0);
-				}
-				
-				fleetsNewsUpdateStatement.setString(5, builtFleets);
-				fleetsNewsUpdateStatement.addBatch();
-			}
-
+			
 			Statement statement3 = con.createStatement();
 			ResultSet portalstSet = statement3.executeQuery("SELECT * FROM \"PLANET\" WHERE portal = TRUE AND owner_id = " + userID );
 			
@@ -509,29 +427,7 @@ public class ProcessTick
 				fleetMoveUpdateStatement.addBatch();
 			}
 			fleetMoveUpdateStatement.executeBatch();
-			
-						
-			//fleet return news	
-			if (totalReturnedFleets > 0 ){
-				java.util.Date utilDate = new java.util.Date();
-				java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
-				fleetsReturnNewsUpdateStatement.setInt(1, userID);
-				fleetsReturnNewsUpdateStatement.setInt(2, rowInt.get("empire_id"));
-				fleetsReturnNewsUpdateStatement.setTimestamp(3, sqlTS);
-				fleetsReturnNewsUpdateStatement.setInt(4, tick_nr);
 
-				String builtFleets = "These units have joined main fleet : ";
-				for(int i = 0; i < unit_names.length; i++){
-					if (returnFleets[i] > 0)
-						builtFleets += "\n " + unit_labels[i] + " " +  returnFleets[i];
-				}
-				
-				System.out.println(builtFleets);
-				
-				fleetsReturnNewsUpdateStatement.setString(5, builtFleets);
-				fleetsReturnNewsUpdateStatement.addBatch();
-			}
-			
 			//update returned fleets
 			updateFleets.updateReturnedFleets(returnFleets);
 
@@ -994,91 +890,10 @@ public class ProcessTick
 			userStatusUpdateStatement.addBatch();
 			
 			//udate merging fleets
-			ResultSet mergingFleets = statement.executeQuery("SELECT * FROM app_fleet WHERE (command_order = 3 OR command_order = 4) AND owner_id = " + userID + 
-			" AND ticks_remaining = 0;");
-			
-			HashMap<String, LinkedList<Integer>> fleetMarge = new HashMap<>();
-			
-			while(mergingFleets.next()){
-				String p = "x" + mergingFleets.getInt("x") + "y" + mergingFleets.getInt("y");
-				if (!fleetMarge.containsKey(p))
-					fleetMarge.put(p, new LinkedList<Integer>());
-				fleetMarge.get(p).add(mergingFleets.getInt("id"));
-			}
-			
-			for(LinkedList<Integer> idList : fleetMarge.values()){
-				if (idList.size() > 1){
-					long [] unit = new long[unit_names.length];
-					int firstId = idList.getFirst();
-					for (Integer id : idList) {
-						ResultSet fleet = statement.executeQuery("SELECT * FROM app_fleet WHERE id = " + id + ";");
-						fleet.next();
-						for(int i =0; i < unit_names.length; i++){
-							unit[i] += fleet.getLong(unit_names[i]);
-						}
-						if (id != firstId)
-							statement.execute("DELETE FROM app_fleet WHERE id = " + id + ";");
-					}
-					for(int i =0; i < unit_names.length; i++){
-						fleetMergeUpdateStatement.setLong(i+1, unit[i]);
-					}
-
-					fleetMergeUpdateStatement.setInt(unit_names.length+1 , firstId);
-					fleetMergeUpdateStatement.addBatch();
-				}
-			}
+			updateFleets.updateFleetsMerge();
 			
 			//udate stationed fleets
-			ResultSet stationingFleets = statement.executeQuery("SELECT * FROM app_fleet WHERE command_order = 1 AND owner_id = " + userID + 
-			" AND ticks_remaining = 0;");
-			
-			HashMap<Integer, LinkedList<Integer>> fleetStation = new HashMap<>();
-			
-			while(stationingFleets.next()){
-				ResultSet planet = statement2.executeQuery("SELECT id, owner_id FROM \"PLANET\" WHERE x = " + 
-					    stationingFleets.getInt("x") +
-				" AND y = " + stationingFleets.getInt("y") +
-				" AND i = " + stationingFleets.getInt("i") );
-				if (planet.next()){
-					if (planet.getInt("owner_id") != userID)
-						statement3.execute("UPDATE app_fleet SET command_order = 2 WHERE id = " + stationingFleets.getInt("id") + ";");
-					else{
-						int p = planet.getInt("id");
-						if (!fleetStation.containsKey(p))
-							fleetStation.put(p, new LinkedList<Integer>());
-						fleetStation.get(p).add(stationingFleets.getInt("id"));
-					}
-				}
-				else{
-					statement.execute("UPDATE app_fleet SET command_order = 2 WHERE id = " + stationingFleets.getInt("id") + ";");
-				}
-			}
-			//Map.Entry<String, Object> entry : map.entrySet()
-			for(Map.Entry<Integer, LinkedList<Integer>> entry : fleetStation.entrySet()){
-				LinkedList<Integer> idList = entry.getValue();
-				int pID = entry.getKey();
-
-				if (idList.size() > 1){
-					long [] unit = new long[unit_names.length];
-					int firstId = idList.getFirst();
-					for (Integer id : idList) {
-						ResultSet fleet = statement.executeQuery("SELECT * FROM app_fleet WHERE id = " + id + ";");
-						fleet.next();
-						for(int i =0; i < unit_names.length; i++){
-							unit[i] += fleet.getLong(unit_names[i]);
-						}
-						if (id != firstId)
-							statement.execute("DELETE FROM app_fleet WHERE id = " + id + ";");
-					}
-					for(int i =0; i < unit_names.length; i++){
-						fleetStationUpdateStatement .setLong(i+1, unit[i]);
-					}
-					
-					fleetStationUpdateStatement.setInt(unit_names.length+1 , pID); //set planet id
-					fleetStationUpdateStatement.setInt(unit_names.length+2 , firstId); //set fleet id
-					fleetStationUpdateStatement.addBatch();
-				}
-			}
+			updateFleets.updateStationedFleets();
 			
 		}
 		main_loop2 = System.nanoTime();
@@ -1092,19 +907,14 @@ public class ProcessTick
 		userUpdate2 = System.nanoTime();
 		
 		//update building news	
-		updateNews.executeBuildingNews();
+		updateNews.executeNews();
 		
 		//update building fleets
-		updateFleets.executeFleetBuildUpdate();
+		updateFleets.executeFleetsUpdate();
 		
 		//delete returned fleets
 		fleetsDeleteUpdateStatement.executeBatch();
 		
-		//update built fleets news
-		fleetsNewsUpdateStatement.executeBatch();
-		
-		//update returned fleet news
-		fleetsReturnNewsUpdateStatement.executeBatch();
 		
 		//update empire ranks
 		String updateEmpireRanks = 
@@ -1120,12 +930,6 @@ public class ProcessTick
 		
 		statement.execute(updateEmpireRanks);
 		
-		//update merged fleets
-		fleetMergeUpdateStatement.executeBatch();
-		
-		//update stationed fleets
-		fleetStationUpdateStatement.executeBatch();
-
 		//purge old news
 		String deletePersonalNews = "DELETE FROM app_news WHERE is_personal_news = false AND " + tick_nr + "  - tick_number > " + news_delete_ticks + " ;"; 
 		String deleteEmpireNews =  "DELETE FROM app_news WHERE is_personal_news = true AND is_read = true AND "+
@@ -1337,6 +1141,18 @@ public class ProcessTick
 			return (current_position_y - move_y);
 		else
 			return (current_position_y + move_y);
+	}
+	
+	class Planet{
+		int x;
+		int y;
+		int z;
+		
+		public Planet(int x, int y, int z){
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
 	}
 }
 

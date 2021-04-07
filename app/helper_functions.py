@@ -106,13 +106,17 @@ def station_fleets(request, fleets, status):
             f.command_order = 2
             f.save()
             msg = "could not station because it doesn't exist!"
-            request.session['error'] = "Could not station because the planet doesnt exist!"
+            request.session['error'] = "Could not station on " \
+                                       + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) \
+                                       + " because the planet doesnt exist!"
             news_type = 'FU'
-        elif planet.owner.id != status.id:
+        elif planet.owner is None or planet.owner.id != status.id:
             f.command_order = 2
             f.save()
             msg = "could not station because you do not own it!"
-            request.session['error'] = "Could not station because you do not own the planet!"
+            request.session['error'] = "Could not station on " \
+                                       + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) \
+                                        + " because you do not own the planet!"
             news_type = 'FU'
         elif planet.id in sf_dict:
             stationed_fleet = sf_dict[planet.id]
@@ -121,13 +125,15 @@ def station_fleets(request, fleets, status):
             f.delete()
             stationed_fleet.save()
             news_type = 'FS'
-            msg = "successfully merged with the other fleet allready stationed on it!"
+            msg = "successfully merged with the other fleet allready stationed on planet: " \
+                  + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) + "!"
         else:
             f.on_planet = planet
             f.save()
             sf_dict[planet.id] = f
             news_type = 'FS'
-            msg = "successfully stationed on it!"
+            msg = "successfully stationed on planet: " \
+                  + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) + "!"
 
         News.objects.create(user1=User.objects.get(id=status.id),
                             empire1=status.empire,

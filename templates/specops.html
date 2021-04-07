@@ -157,6 +157,7 @@ function agentsCheck() {
 		<td>Ammount of agents</td>
 		<td>Target planet</td>
 		<td>Order</td>
+		<td>Time remaining</td>
 		<td></td>
 		</tr>
 		{% for agents in agent_fleets %}
@@ -165,6 +166,7 @@ function agentsCheck() {
 		<td>{{agents.agent}}</td>
 		<td>{{agents.x}},{{agents.y}}:{{agents.i}}</td>
 		<td>{% if agents.command_order == 6 %} perform covert operation {% else %} return to main fleet {% endif %}</td>
+		<td>{{agents.ticks_remaining}}</td>
 		<td>			<input type="hidden" name="fleet_select" value="0" />
 						<input type="checkbox" name="fleet_select" value="1" /></td>
 		</tr>

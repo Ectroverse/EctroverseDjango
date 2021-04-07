@@ -6,7 +6,8 @@ import static org.ectroverse.processtick.Constants.*;
 
 class UpdateFleets {
 
-	private final String fleetsUpdateQuery = "UPDATE app_fleet SET" +	
+	private final String fleetsUpdateQuery =
+	"UPDATE app_fleet SET" +	
 	" bomber = bomber + ?" + //1
 	" , fighter = fighter + ?" + //2
 	" , transport = transport + ?" + //3
@@ -23,22 +24,66 @@ class UpdateFleets {
 	" WHERE owner_id = ?" + //14
 	" AND main_fleet = true;";
 	
+	private final String fleetMergeQuery = 
+	"UPDATE app_fleet SET" +
+	" bomber = ?" + //1
+	" , fighter = ? "+ //2
+	" , transport = ? "+ //3
+	" , cruiser = ? " + //4
+	" , carrier = ? " + //5
+	" , soldier = ? " + //6
+	" , droid = ? " + //7
+	" , goliath = ? "+ //8
+	" , phantom = ? " + //9
+	" , wizard = ? " + //10
+	" , agent = ? " + //11
+	" , ghost = ? "+ //12
+	" , exploration = ? "+ //13
+	" WHERE id = ?"; //14
+	
+	String fleetStationQuery = "UPDATE app_fleet SET" +
+	" bomber = ?" + //1
+	" , fighter = ? "+ //2
+	" , transport = ? "+ //3
+	" , cruiser = ? " + //4
+	" , carrier = ? " + //5
+	" , soldier = ? " + //6
+	" , droid = ? " + //7
+	" , goliath = ? "+ //8
+	" , phantom = ? " + //9
+	" , wizard = ? " + //10
+	" , agent = ? " + //11
+	" , ghost = ? "+ //12
+	" , exploration = ? "+ //13
+	" , on_planet_id = ? "+ //14
+	" WHERE id = ?"; //15
+	
 	private PreparedStatement fleetsUpdateStatement;
+	private PreparedStatement fleetMergeUpdateStatement;
+	private PreparedStatement fleetStationUpdateStatement; 
 	private Connection connection;
 	private Statement statement;
 	private Statement statement2;
 	private int total_built_units;
 	private int userID;
+	private int empireID;
+	private int tickNumber;
+	private UpdateNews addNews;
 	
-	public UpdateFleets(Connection connection) throws Exception{
+	public UpdateFleets(Connection connection, UpdateNews addNews) throws Exception{
 		this.connection = connection;
+		this.addNews = addNews; 
 		statement = connection.createStatement();
 		statement2 = connection.createStatement();
 		fleetsUpdateStatement = connection.prepareStatement(fleetsUpdateQuery); 
+		fleetMergeUpdateStatement = connection.prepareStatement(fleetMergeQuery); 
+		fleetStationUpdateStatement = connection.prepareStatement(fleetStationQuery); 
 	}
 	
-	public void addNewUser(int userID){
+	public void addNewUser(int userID, int empireID, int tickNumber) throws Exception{
 		this.userID = userID;
+		this.empireID = empireID;
+		this.tickNumber = tickNumber;
 		total_built_units = 0;
 	}
 	
@@ -48,24 +93,142 @@ class UpdateFleets {
 			fleetsUpdateStatement.setLong(i, unitsBuilt.getOrDefault(unit_names[i-1],0));
 			total_built_units += unitsBuilt.getOrDefault(unit_names[i-1],0);
 		}
+		if (total_built_units > 0)
+			addNews.createfleetBuildingNews(userID, empireID, tickNumber, unitsBuilt);
+		
 		fleetsUpdateStatement.setInt(14, userID);
 		fleetsUpdateStatement.addBatch();
 	}
-	
-	public void executeFleetBuildUpdate() throws Exception{
-		fleetsUpdateStatement.executeBatch();
+
+	public void updateFleetsMerge() throws Exception{
+		ResultSet mergingFleets = statement.executeQuery("SELECT * FROM app_fleet WHERE (command_order = 3 OR command_order = 4) AND owner_id = " + userID + 
+			" AND ticks_remaining = 0;");
+			
+		HashMap<String, LinkedList<Integer>> fleetMarge = new HashMap<>();
+		
+		while(mergingFleets.next()){
+			String p = "x" + mergingFleets.getInt("x") + ":y" + mergingFleets.getInt("y");
+			if (!fleetMarge.containsKey(p))
+				fleetMarge.put(p, new LinkedList<Integer>());
+			fleetMarge.get(p).add(mergingFleets.getInt("id"));
+		}
+			
+		for(Map.Entry<String, LinkedList<Integer>> entry : fleetMarge.entrySet()){
+			String planet = entry.getKey();
+			LinkedList<Integer> idList = entry.getValue();
+			if (idList.size() > 1){
+				long [] unit = new long[unit_names.length];
+				int firstId = idList.getFirst();
+				for (Integer id : idList) {
+					ResultSet fleet = statement.executeQuery("SELECT * FROM app_fleet WHERE id = " + id + ";");
+					fleet.next();
+					for(int i =0; i < unit_names.length; i++){
+						unit[i] += fleet.getLong(unit_names[i]);
+					}
+					if (id != firstId)
+						statement.execute("DELETE FROM app_fleet WHERE id = " + id + ";");
+				}
+				for(int i =0; i < unit_names.length; i++){
+					fleetMergeUpdateStatement.setLong(i+1, unit[i]);
+				}
+				fleetMergeUpdateStatement.setInt(unit_names.length+1 , firstId);
+				fleetMergeUpdateStatement.addBatch();
+				addNews.createfleetMergeNews(userID, empireID, tickNumber, unit, planet);
+			}
+		}
 	}
-	
+
 	public void updateReturnedFleets(long [] returnFleets) throws Exception{
+		boolean returnedUnits = false;
 		for(int i = 0; i < unit_names.length; i++){
 			fleetsUpdateStatement.setLong(i+1, returnFleets[i]);
+			if (returnFleets[i] > 0)
+				returnedUnits = true;
 		}
 		fleetsUpdateStatement.setInt(14, userID);
 		fleetsUpdateStatement.addBatch();
+		
+		if (returnedUnits)
+			addNews.createfleetReturnNews(userID, empireID, tickNumber, returnFleets);
+	}
+	
+	public void updateStationedFleets() throws Exception{
+		ResultSet stationingFleets = statement.executeQuery("SELECT * FROM app_fleet WHERE command_order = 1 AND owner_id = " + userID + 
+		" AND ticks_remaining = 0;");
+
+		HashMap<Integer, LinkedList<Integer>> fleetStation = new HashMap<>();
+		while(stationingFleets.next()){
+			int x = stationingFleets.getInt("x");
+			int y = stationingFleets.getInt("y") ;
+			int i = stationingFleets.getInt("i");
+			ResultSet planet = statement2.executeQuery("SELECT id, owner_id FROM \"PLANET\" WHERE x = "  +  x +
+			" AND y = " + y +
+			" AND i = " + i );
+			
+			long [] fleet = new long[unit_names.length];
+			for(int j =0; j < unit_names.length; j++){
+				fleet[j] += stationingFleets.getLong(unit_names[j]);
+			}
+			
+			if (planet.next()){
+				if (planet.getInt("owner_id") != userID){
+					statement2.execute("UPDATE app_fleet SET command_order = 2 WHERE id = " + stationingFleets.getInt("id") + ";");
+					addNews.createfleetStationNews(userID, empireID, tickNumber, fleet, 0, x, y, i);
+				}
+				else{
+					int p = planet.getInt("id");
+					if (!fleetStation.containsKey(p))
+						fleetStation.put(p, new LinkedList<Integer>());
+					fleetStation.get(p).add(stationingFleets.getInt("id"));
+				}
+			}
+			else{
+				statement.execute("UPDATE app_fleet SET command_order = 2 WHERE id = " + stationingFleets.getInt("id") + ";");
+				addNews.createfleetStationNews(userID, empireID, tickNumber, fleet, 2, x, y, i );
+			}
+		}
+
+		//Map.Entry<String, Object> entry : map.entrySet()
+		for(Map.Entry<Integer, LinkedList<Integer>> entry : fleetStation.entrySet()){
+			LinkedList<Integer> idList = entry.getValue();
+			int pID = entry.getKey();
+			System.out.println("update fleets4 " + userID + " idList.size() " + idList.size());
+			if (idList.size() > 1){
+				long [] unit = new long[unit_names.length];
+				int firstId = idList.getFirst();
+				System.out.println("idList.size() " + idList.size());
+				for (Integer id : idList) {
+					ResultSet fleet = statement.executeQuery("SELECT * FROM app_fleet WHERE id = " + id + ";");
+					fleet.next();
+					for(int i =0; i < unit_names.length; i++){
+						unit[i] += fleet.getLong(unit_names[i]);
+					}
+					System.out.println("update fleets5");
+					addNews.createfleetStationNews(userID, empireID, tickNumber, unit, 1, fleet.getInt("x"), fleet.getInt("y"), fleet.getInt("i"));
+					if (id != firstId)
+						statement.execute("DELETE FROM app_fleet WHERE id = " + id + ";");
+				}
+
+				for(int i =0; i < unit_names.length; i++){
+					fleetStationUpdateStatement.setLong(i+1, unit[i]);
+				}
+				
+				fleetStationUpdateStatement.setInt(unit_names.length+1 , pID); //set planet id
+				fleetStationUpdateStatement.setInt(unit_names.length+2 , firstId); //set fleet id
+				fleetStationUpdateStatement.addBatch();
+			}
+			
+		}
 	}
 	
 	public int getTotalBuiltUnits(){
 		return total_built_units;
+	}
+	
+	public void executeFleetsUpdate() throws Exception{
+		fleetsUpdateStatement.executeBatch();
+		fleetMergeUpdateStatement.executeBatch();
+		fleetStationUpdateStatement.executeBatch();
 	}
 
 }
