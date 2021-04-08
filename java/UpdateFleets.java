@@ -59,9 +59,22 @@ public class UpdateFleets {
 	" , command_order = 8 "+
 	" WHERE id = ?"; //16
 	
+	private final String phantomsUpdateQuery =
+	"UPDATE app_fleet SET" +
+	" phantom = ? " + //1
+	" WHERE id = ?"; //1
+	
+	String fleetsDeleteUpdateQuery = "DELETE FROM app_fleet WHERE id = ?";
+	
+	String emptyFleetsDelete = "DELETE FROM app_fleet WHERE " + 
+	"bomber = 0 AND fighter = 0 AND transport = 0 AND cruiser = 0 AND carrier = 0 AND soldier = 0 AND droid = 0 AND " + 
+	"goliath = 0 AND phantom = 0 AND wizard = 0 AND agent = 0 AND ghost = 0 and exploration = 0 AND main_fleet = false";
+	
 	private PreparedStatement fleetsUpdateStatement;
 	private PreparedStatement fleetMergeUpdateStatement;
 	private PreparedStatement fleetStationUpdateStatement; 
+	private PreparedStatement fleetPhantomsUpdateStatement; 
+	private PreparedStatement fleetsDeleteUpdateStatement;
 	private Connection connection;
 	private Statement statement;
 	private Statement statement2;
@@ -80,6 +93,8 @@ public class UpdateFleets {
 		fleetsUpdateStatement = connection.prepareStatement(fleetsUpdateQuery); 
 		fleetMergeUpdateStatement = connection.prepareStatement(fleetMergeQuery); 
 		fleetStationUpdateStatement = connection.prepareStatement(fleetStationQuery); 
+		fleetPhantomsUpdateStatement = connection.prepareStatement(phantomsUpdateQuery); 
+		fleetsDeleteUpdateStatement = connection.prepareStatement(fleetsDeleteUpdateQuery); 
 	}
 	
 	public void addNewUser(int userID, int empireID, int tickNumber, PreparedStatement userStatus) throws Exception{
@@ -230,6 +245,36 @@ public class UpdateFleets {
 		}
 	}
 	
+	public void updatePhantomDecay(long networth) throws Exception{
+		ResultSet phantomsResultSet = statement.executeQuery("SELECT id, phantom FROM app_fleet WHERE owner_id = " + userID + ";");
+		ResultSet psychicsResultSet = statement2.executeQuery("SELECT wizard FROM app_fleet WHERE main_fleet = true AND owner_id = " + userID + ";");
+		psychicsResultSet.next();
+		double psychics = psychicsResultSet.getLong("wizard");
+		while(phantomsResultSet.next()){
+			long phantoms = phantomsResultSet.getLong("phantom");
+			// calculate phantoms decay rate
+			double phdecay = 0.20;
+			double fa = phantoms /  psychics;
+			if( fa < 0.05 ) {
+				phdecay = 0.01;
+			} else {
+					fa = Math.pow( (1.0/0.05) * fa, 2.4 );
+					phdecay = 0.01*fa;
+				if( phdecay > 0.20 ) {
+					phdecay = 0.20;
+				}
+			}
+			phantoms = (long)(phantoms * (1 - phdecay));
+			fleetPhantomsUpdateStatement.setLong(1, phantoms);
+			fleetPhantomsUpdateStatement.setInt(2, phantomsResultSet.getInt("id"));
+			fleetPhantomsUpdateStatement.addBatch();
+		}
+	}
+	
+	public void deleteEmptyFleets() throws Exception{
+		statement.execute(emptyFleetsDelete);
+	}
+	
 	public int getTotalBuiltUnits(){
 		return total_built_units;
 	}
@@ -238,6 +283,7 @@ public class UpdateFleets {
 		fleetsUpdateStatement.executeBatch();
 		fleetMergeUpdateStatement.executeBatch();
 		fleetStationUpdateStatement.executeBatch();
+		fleetPhantomsUpdateStatement.executeBatch();
 	}
 
 }

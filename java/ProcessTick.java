@@ -5,7 +5,7 @@ import java.util.*;
 import java.time.Clock; 
 import java.time.Instant; 
 import java.util.concurrent.*;
-//import java.util.Arrays.*;
+import java.util.Arrays.*;
 import static org.ectroverse.processtick.Constants.*;
 
 public class ProcessTick
@@ -183,13 +183,10 @@ public class ProcessTick
 			" WHERE id = ?" ; //59 wow what a long string :P
 		PreparedStatement userStatusUpdateStatement = con.prepareStatement(userStatusUpdateQuery); //mass update, much faster
 		 
-		 
 		String planetStatusUpdateQuery2 = "UPDATE \"PLANET\"  SET" +
 			" current_population = ? "+	 //1		 
 			" WHERE id = ?"  ; //2
-		
 
-			
 		 //loop over users to get their stats
 		while(resultSet.next()){
 
@@ -473,17 +470,19 @@ public class ProcessTick
             userPlanetsUpdate.getTotalBuildings(7) * upkeep_defense_sats +
             userPlanetsUpdate.getTotalBuildings(8) * upkeep_shield_networks);
 			userStatusUpdateStatement.setLong(34, buildings_upkeep);
+			
 			//units upkeep
+			
+			
 			//get unit amounts
 			long [] unitsSums = new long[total_units];
 			statement2 = con.createStatement();		
 			for(int z = 0; z < unit_names.length; z++){
-				
 				String s = unit_names[z];
-				String query = "SELECT SUM(" + s + ") FROM app_fleet WHERE id = " + userID;
+				String query = "SELECT SUM(" + s + ") FROM app_fleet WHERE owner_id = " + userID;
 				ResultSet result = statement2.executeQuery(query);
 				result.next();
-				unitsSums[z] = result.getLong("sum"); 
+				unitsSums[z] += result.getLong("sum"); 
 			}
 
 			long units_upkeep = 0;
@@ -579,9 +578,12 @@ public class ProcessTick
 			networth += userPlanetsUpdate.getPopulation() * 0.005;
 			networth += (0.001 * totalRcPoints);
 			userStatusUpdateStatement.setLong(54, networth);	
-
+			
+			
+			//fleets update
 			updateFleets.updateFleetsMerge();
 			updateFleets.updateStationedFleets();
+			updateFleets.updatePhantomDecay(networth);
 			
 			//this must be the last update!
 			userStatusUpdateStatement.addBatch();
@@ -629,6 +631,9 @@ public class ProcessTick
 
 		//delete elapsed fleet construction
 		statement.execute("DELETE FROM app_unitconstruction WHERE ticks_remaining = 0;");
+		
+		//delete empty fleets
+		updateFleets.deleteEmptyFleets();
 		
 		con.commit();
 		}
