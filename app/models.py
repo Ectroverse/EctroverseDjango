@@ -345,6 +345,7 @@ class Fleet(models.Model):
         JOIN_MAIN_FLEET   = 5
         PERFORM_OPERATION = 6
         PERFORM_INCANTATION = 7
+        STATIONED = 8
         EXPLORE_PLANET    = 10
     command_order = models.IntegerField(choices=CommandOrder.choices, default=0)
 

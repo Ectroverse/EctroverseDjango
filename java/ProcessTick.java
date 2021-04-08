@@ -58,11 +58,11 @@ public class ProcessTick
 		};
 		
 		//use this for 10 second tick
-		long millistoNext = secondsToFirstOccurence10(calendar);	
+		long millistoNext = HelperFunctions.secondsToFirstOccurence10(calendar);	
 		s.scheduleAtFixedRate(scheduledTask, millistoNext, 10*1000, TimeUnit.MILLISECONDS);
 		
 		//use this for 10 minute tick
-		// long millistoNext = secondsToFirstOccurence600(calendar);	
+		// long millistoNext = HelperFunctions.secondsToFirstOccurence600(calendar);	
 		// s.scheduleAtFixedRate(scheduledTask, millistoNext, 600*1000, TimeUnit.MILLISECONDS);
 	}	
     
@@ -97,11 +97,6 @@ public class ProcessTick
 	
 		statement.executeUpdate("UPDATE app_roundstatus SET tick_number = " + (tick_nr + 1) );
 		
-		//update construction jobs	
-		jobsUpdate1 = System.nanoTime();
-		HashMap<Integer, HashMap<String, Integer>> jobs = execute_jobs(con);
-		jobsUpdate2 = System.nanoTime();
-		 
 		//update fleet construction time
 		statement.execute("UPDATE app_unitconstruction SET ticks_remaining = ticks_remaining - 1;");
 
@@ -125,33 +120,6 @@ public class ProcessTick
 
 		String fleetsDeleteUpdateQuery = "DELETE FROM app_fleet WHERE id = ?";
 		PreparedStatement fleetsDeleteUpdateStatement = con.prepareStatement(fleetsDeleteUpdateQuery); 
-		
-		
-		 String planetStatusUpdateQuery = "UPDATE \"PLANET\"  SET" +
-			//" current_population = ? ,"+ //1
-			//" max_population = ? ," + //2
-			" protection = ? ," + //3
-			" overbuilt = ? ," + //4
-			" overbuilt_percent = ? ," + //5
-			" solar_collectors = ? ," + //6
-			" fission_reactors = ? ," + //7
-			" mineral_plants = ? ," + //8
-			" crystal_labs = ? ," + //9
-			" refinement_stations = ? , " + //10
-			" cities = ? ," + //11
-			" research_centers = ? ," + //12
-			" defense_sats = ? ," + //13
-			" shield_networks = ? ," + //14
-			" portal = ? ," + //15
-			" portal_under_construction = ? ," + //16
-			" total_buildings = ? ," + //17
-			" buildings_under_construction = ? " + //18
-			 
-		 	" WHERE id = ?" ; //19
-			
-		 //Statement planetsStatement = con.createStatement();
-			
-		 PreparedStatement planetsUpdateStatement = con.prepareStatement(planetStatusUpdateQuery); //mass update, much faster
 
 		 String userStatusUpdateQuery = "UPDATE app_userstatus SET "+
 			" fleet_readiness  = ? ," +  //1
@@ -240,38 +208,45 @@ public class ProcessTick
 			String race = resultSet.getString("race");
 			usersRace.put(id, race);
 			
-			HashMap<String,Integer> rowInt = new HashMap<>(columns.size());
-			HashMap<String,Long> rowLong = new HashMap<>(columns.size());
+			HashMap<String,Integer> userIntValues = new HashMap<>(columns.size());
+			HashMap<String,Long> userLongValues = new HashMap<>(columns.size());
 			for(String[] col : columns) {
 				if(col[1].equals("java.lang.Integer"))
-			    		rowInt.put(col[0], resultSet.getInt(col[0]));
+			    		userIntValues.put(col[0], resultSet.getInt(col[0]));
 				else if(col[1].equals("java.lang.Long"))
-			    		rowLong.put(col[0], resultSet.getLong(col[0]));
+			    		userLongValues.put(col[0], resultSet.getLong(col[0]));
 			}
-			//System.out.println(rowInt);
-			//System.out.println(rowLong);
-			usersInt.add(rowInt);
-			usersLong.add(rowLong);
+			//System.out.println(userIntValues);
+			//System.out.println(userLongValues);
+			usersInt.add(userIntValues);
+			usersLong.add(userLongValues);
 		}
 		
 		
-		UpdateNews updateNews = new UpdateNews(con);
+		UpdateNews updateNews = new UpdateNews(con, tick_nr);
 		UpdateFleets updateFleets = new UpdateFleets(con, updateNews);
 		
+		UpdatePlanets userPlanetsUpdate = new UpdatePlanets(con);
+					
 		//loops over users to uodate their stats and planets --main loop!
 		main_loop1 = System.nanoTime();
 		for(int j = 0; j < usersInt.size(); j++){
 		
 			
-			HashMap<String,Integer> rowInt = usersInt.get(j);
-			HashMap<String,Long> rowLong  = usersLong.get(j);
-			int userID = rowInt.get("user_id");
-			int empireID = rowInt.get("empire_id");
+			HashMap<String,Integer> userIntValues = usersInt.get(j);
+			HashMap<String,Long> userLongValues  = usersLong.get(j);
+			int userID = userIntValues.get("user_id");
+			int empireID = userIntValues.get("empire_id");
 			userStatusUpdateStatement.setInt(59, userID);
 			String race = usersRace.get(userID);
 			HashMap<String, Double> race_info = race_info_list.get(race);
+			long networth = 1;
 			
-			
+			//set initial news flags
+			userStatusUpdateStatement.setInt(56, userIntValues.get("construction_flag"));
+			userStatusUpdateStatement.setInt(57, userIntValues.get("economy_flag"));
+			userStatusUpdateStatement.setInt(58, userIntValues.get("military_flag"));
+						
 			HashMap<String, Integer> unitsBuilt = new HashMap<>();
 		
 			String unitsQuery = 
@@ -284,17 +259,13 @@ public class ProcessTick
 				unitsBuilt.put(resultSet.getString("unit_type"), resultSet.getInt("num_units"));
 			}
 			
-			updateFleets.addNewUser(userID, empireID, tick_nr);
+			updateFleets.addNewUser(userID, empireID, tick_nr, userStatusUpdateStatement);
 			updateFleets.updateFleetBuild(unitsBuilt);
+
 			if (updateFleets.getTotalBuiltUnits() > 0)
 				userStatusUpdateStatement.setInt(56, 1);	
 			
-			//set initial news flags
-
-			userStatusUpdateStatement.setInt(56, rowInt.get("construction_flag"));
-			userStatusUpdateStatement.setInt(57, rowInt.get("economy_flag"));
-			
-			int militaryFlag = rowInt.get("military_flag");
+			int militaryFlag = userIntValues.get("military_flag");
 
 			//update built fleets news 
 			
@@ -305,7 +276,7 @@ public class ProcessTick
 			LinkedList<Planet> portals = new LinkedList<>();
 
 			while(portalstSet.next()){
-				Planet planet = new ProcessTick().new Planet(portalstSet.getInt("x"), portalstSet.getInt("y"), portalstSet.getInt("i"));
+				Planet planet = new Planet(portalstSet.getInt("x"), portalstSet.getInt("y"), portalstSet.getInt("i"));
 				portals.add(planet);
 			}
 			
@@ -341,15 +312,15 @@ public class ProcessTick
 				double speed = race_info.get("travel_speed");
 				
 				if (resultSet.getInt("command_order") == 5){ //return to main
-					Planet portal = find_nearest_portal(current_position_x, current_position_y, portals);
+					Planet portal = HelperFunctions.find_nearest_portal(current_position_x, current_position_y, portals);
 					if (portal.x != x && portal.y != y)
-						ticks_rem  = find_travel_time(portal, current_position_x, current_position_y, speed);
+						ticks_rem  = HelperFunctions.find_travel_time(portal, current_position_x, current_position_y, speed);
 					x = portal.x;
 					y = portal.y;
 				}
 
-				double cur_x = x_move_calc(speed, x, current_position_x, y, current_position_y);
-                double cur_y = y_move_calc(speed, x, current_position_x, y, current_position_y);
+				double cur_x = HelperFunctions.x_move_calc(speed, x, current_position_x, y, current_position_y);
+                double cur_y = HelperFunctions.y_move_calc(speed, x, current_position_x, y, current_position_y);
 				--ticks_rem;
 					
 				if (ticks_rem == 0){
@@ -383,7 +354,7 @@ public class ProcessTick
 								statement2.execute("DELETE FROM app_fleet WHERE id = " + resultSet.getInt("id") + ";");
 								String news = "INSERT INTO app_news ( user1_id, empire1_id, news_type, date_and_time, is_personal_news, " +
 												" is_empire_news, is_read, tick_number, planet_id) " +
-												" SELECT  " + userID +  " , " + rowInt.get("empire_id") + " , 'SE' , '" + sqlTS + 
+												" SELECT  " + userID +  " , " + userIntValues.get("empire_id") + " , 'SE' , '" + sqlTS + 
 												"' , true, true, false, " + tick_nr + " , " + planetID + " ;" ;
 								statement2.execute(news);
 								String scouting = "INSERT INTO app_scouting ( user_id, planet_id, scout) " +
@@ -396,7 +367,7 @@ public class ProcessTick
 							else{ //planet is allready taken
 								String news = "INSERT INTO app_news (user1_id, empire1_id, news_type, date_and_time, is_personal_news, "+
 								" is_empire_news, is_read, tick_number, planet_id ) " +
-								" SELECT  " + userID +  " , " + rowInt.get("empire_id") + " , 'UE' , '" + sqlTS + 
+								" SELECT  " + userID +  " , " + userIntValues.get("empire_id") + " , 'UE' , '" + sqlTS + 
 								"' , true, true, false, " + tick_nr + " , " + planetID + " ;" ;
 								statement2.execute(news);
 								statement2.execute("UPDATE app_fleet SET ticks_remaining = 0 WHERE id = " + resultSet.getInt("id") +  ";");
@@ -430,292 +401,15 @@ public class ProcessTick
 
 			//update returned fleets
 			updateFleets.updateReturnedFleets(returnFleets);
-
-			long population = 0;
-			long networth = 0;
-			int num_planets = 0;
-			long cmdTickProduction_solar = 0;
-			long cmdTickProduction_fission = 0;
-			int cmdTickProduction_mineral = 0;
-			int cmdTickProduction_crystal = 0;
-			int cmdTickProduction_ectrolium = 0;
-			//long cmdTickProduction_cities = 0;
-			int cmdTickProduction_research = 0;
-
-			int total_solar_collectors = 0;
-			int total_fission_reactors = 0;
-			int total_mineral_plants = 0;
-			int total_crystal_labs = 0;
-			int total_refinement_stations = 0;
-			int total_cities = 0;
-			int total_research_centers = 0;
-			int total_defense_sats = 0;
-			int total_shield_networks = 0;
-			int total_portals = portals.size();
 			
-			int total_solar_collectors_built = 0;
-			int total_fission_reactors_built = 0;
-			int total_mineral_plants_built = 0;
-			int total_crystal_labs_built = 0;
-			int total_refinement_stations_built = 0;
-			int total_cities_built = 0;
-			int total_research_centers_built = 0;
-			int total_defense_sats_built = 0;
-			int total_shield_networks_built = 0;
-			int total_portals_built = 0;
-			
-			//test1 = System.nanoTime();
-			resultSet = statement.executeQuery("SELECT * FROM \"PLANET\" WHERE owner_id = " + userID);
-			//test2 = System.nanoTime();
-			//System.out.println("Select planets: " + (double)(test2-test1)/1_000_000_000.0 + " sec.");
-
-			rsmd = resultSet.getMetaData();
-			int colNumber = rsmd.getColumnCount();
-			
-			int[] colTypes = new int[colNumber];
-			
-			//sowe dont have to search colums everytime later on
-			int [] colLocation  = new int [31];
-			for (int i = 0; i < colNumber; i++) {
-				colTypes[i] = rsmd.getColumnType(i + 1);
-				//System.out.println(i + " " + rsmd.getColumnName(i+1) + " colTypes[i]: " + colTypes[i] + " " );
-				switch (rsmd.getColumnName(i+1)){
-					case "current_population": colLocation[0] = i; break;
-					case "max_population": colLocation[1] = i; break;
-					case "protection": colLocation[2] = i; break;
-					case "overbuilt": colLocation[3] = i; break;
-					case "overbuilt_percent": colLocation[4] = i; break;
-					case "solar_collectors": colLocation[5] = i; break;
-					case "fission_reactors": colLocation[6] = i; break;
-					case "mineral_plants": colLocation[7] = i; break;
-					case "crystal_labs": colLocation[8] = i; break;
-					case "refinement_stations": colLocation[9] = i; break;
-					case "cities": colLocation[10] = i; break;
-					case "research_centers": colLocation[11] = i; break;
-					case "defense_sats": colLocation[12] = i; break;
-					case "shield_networks": colLocation[13] = i; break;
-					case "portal": colLocation[14] = i; break;
-					case "portal_under_construction": colLocation[15] = i; break;
-					case "total_buildings": colLocation[16] = i; break; 
-					case "buildings_under_construction": colLocation[17] = i; break;
-					case "id": colLocation[18] = i; break;
-					case "size": colLocation[19] = i; break;
-					case "x": colLocation[20] = i; break;
-					case "y": colLocation[21] = i; break;
-					case "bonus_solar": colLocation[22] = i; break;
-					case "bonus_mineral": colLocation[23] = i; break;
-					case "bonus_crystal": colLocation[24] = i; break;
-					case "bonus_ectrolium": colLocation[25] = i; break;
-					case "bonus_fission": colLocation[26] = i; break;
-					default:;
-				}
-
-			}
-			
-			//execute stored procedure -- update planets population
-			test1 = System.nanoTime();
-			String runSP = "CALL updatePlanets(?, ?, ?); ";
-			
-			CallableStatement callableStatement = con.prepareCall(runSP); 
-			callableStatement.setDouble(1, (1.00 + 0.01 * rowInt.get("research_percent_population"))); //research factor
-			callableStatement.setDouble(2, race_info.get("pop_growth")); //race bonus for pop growth
-			
-			
-			callableStatement.setInt(3, userID); //user id
-			callableStatement.executeUpdate();
-			test2 = System.nanoTime();
-			postgresProcedureExecTime = test2 - test1;
-			
-			
-			test1 = System.nanoTime();	
-			//loop over planets of each user
-			while(resultSet.next()){
-				num_planets++;
-
-				Object[] rowValues = new Object[colNumber];
-				for (int i = 0; i < colNumber; i++) {
-					 rowValues[i] = getValueByType(i + 1, colTypes[i], resultSet);
-				}
-				
-				int planetID = (int)rowValues[colLocation[18]]; // (resultSet.getInt("id"));
-
-				HashMap<String, Integer> buildgsBuiltFromJobs = null;
-
-				
-				if(jobs.containsKey(planetID))
-					buildgsBuiltFromJobs = jobs.get(planetID);
-				else
-					buildgsBuiltFromJobs = new HashMap<>();
-						
-				//add planets population to total population
-				population += (int)rowValues[colLocation[0]];
-
-				//update portal coverage
-				int portalCoverage = 0;
-				if((boolean)rowValues[colLocation[14]] == true)
-					portalCoverage = 100;
-					
-				else{
-					if(portals.size() == 0)
-						portalCoverage = 0;
-					else
-						portalCoverage = (int)(100.0 * battlePortalCalc((int)rowValues[colLocation[20]], (int)rowValues[colLocation[21]], 
-													portals, rowInt.get("research_percent_portals")) );
-				}
-
-
-				//System.out.println("buildgsBuiltFromJobs" + buildgsBuiltFromJobs);
-				//update planets buildings
-				int solar_collectors = (int)rowValues[colLocation[5]] + buildgsBuiltFromJobs.getOrDefault("solar_collectors",0);
-				int fission_reactors = (int)rowValues[colLocation[6]] + buildgsBuiltFromJobs.getOrDefault("fission_reactors",0);
-				int mineral_plants = (int)rowValues[colLocation[7]] + buildgsBuiltFromJobs.getOrDefault("mineral_plants",0);
-				int crystal_labs = (int)rowValues[colLocation[8]] + buildgsBuiltFromJobs.getOrDefault("crystal_labs",0);
-				int refinement_stations = (int)rowValues[colLocation[9]] + buildgsBuiltFromJobs.getOrDefault("refinement_stations",0);
-				int cities = (int)rowValues[colLocation[10]] + buildgsBuiltFromJobs.getOrDefault("cities",0);
-				int research_centers = (int)rowValues[colLocation[11]] + buildgsBuiltFromJobs.getOrDefault("research_centers",0);
-				int defense_sats = (int)rowValues[colLocation[12]] + buildgsBuiltFromJobs.getOrDefault("defense_sats",0);
-				int shield_networks = (int)rowValues[colLocation[13]] + buildgsBuiltFromJobs.getOrDefault("shield_networks",0);
-				
-				boolean portal = (boolean)rowValues[colLocation[14]] || (buildgsBuiltFromJobs.getOrDefault("portal",0) == 1 ? true : false);
-				
-				total_solar_collectors_built += buildgsBuiltFromJobs.getOrDefault("solar_collectors",0);
-				total_fission_reactors_built += buildgsBuiltFromJobs.getOrDefault("fission_reactors",0);
-				total_mineral_plants_built += buildgsBuiltFromJobs.getOrDefault("mineral_plants",0);
-				total_crystal_labs_built += buildgsBuiltFromJobs.getOrDefault("crystal_labs",0);
-				total_refinement_stations_built += buildgsBuiltFromJobs.getOrDefault("refinement_stations",0);
-				total_cities_built += buildgsBuiltFromJobs.getOrDefault("cities",0);
-				total_research_centers_built += buildgsBuiltFromJobs.getOrDefault("research_centers",0);
-				total_defense_sats_built +=  buildgsBuiltFromJobs.getOrDefault("defense_sats",0);
-				total_shield_networks_built += buildgsBuiltFromJobs.getOrDefault("shield_networks",0);
-				total_portals_built += buildgsBuiltFromJobs.getOrDefault("portal",0);
-		
-				// Add buildings to running total for player
-				total_solar_collectors += solar_collectors;
-				total_fission_reactors += fission_reactors;
-				total_mineral_plants += mineral_plants;
-				total_crystal_labs += crystal_labs;
-				total_refinement_stations += refinement_stations;
-				total_cities += cities;
-				total_research_centers +=research_centers;
-				total_defense_sats += defense_sats;
-				total_shield_networks += shield_networks;
-				total_portals += (portal == true? 1 : 0);
-				
-				
-				int total_buildings = solar_collectors + 
-					fission_reactors + mineral_plants +
-					crystal_labs + refinement_stations +
-					cities + research_centers +
-					defense_sats + shield_networks +
-					(portal == true? 1 : 0);
-				
-				networth += total_buildings * networth_per_building;
-                networth += (int)rowValues[colLocation[22]] * 1.25;
-                networth += (int)rowValues[colLocation[23]] * 1.45;
-                networth += (int)rowValues[colLocation[24]] * 2.25;
-                networth += (int)rowValues[colLocation[25]] * 1.65;
-                networth += (int)rowValues[colLocation[26]] * 5.0;
-                networth += (int)rowValues[colLocation[19]] * 1.75; //size
-				int buildingsUnderConstr = (int)rowValues[colLocation[17]] - (total_buildings - (int)rowValues[colLocation[16]]); //total new - total old, change it!! might not work when raze
-				buildingsUnderConstr = Math.max(0 , buildingsUnderConstr);
-				/*
-							case "total_buildings": colLocation[16] = i; break; 
-					case "buildings_under_construction": colLocation[17] = i; break;*/
-				
-				//update player production
-				cmdTickProduction_solar += (building_production_solar * solar_collectors) * (1 + (int)rowValues[colLocation[22]] /100.0);
-				cmdTickProduction_fission += (building_production_fission  * fission_reactors) * (1 + (int)rowValues[colLocation[26]] /100.0);
-				cmdTickProduction_mineral += (building_production_mineral   * mineral_plants) * (1 + (int)rowValues[colLocation[23]] /100.0);
-				cmdTickProduction_crystal += (building_production_crystal    * crystal_labs) * (1 + (int)rowValues[colLocation[24]]/100.0);
-				cmdTickProduction_ectrolium += (building_production_ectrolium    * refinement_stations) * (1 + (int)rowValues[colLocation[25]]/100.0);
-				//cmdTickProduction_cities += building_production_cities * cities;
-				cmdTickProduction_research += building_production_research * research_centers;
-				
-				double overbuilt = (double)(calc_overbuild((int)rowValues[colLocation[19]], total_buildings + buildingsUnderConstr));
-                double overbuilt_percent = (double)((overbuilt-1.0)*100); 
-
-						
-				//add planet only if something has changed
-				if (//current_population != (int)rowValues[colLocation[0]] ||
-					//max_population != (int)rowValues[colLocation[1]] ||
-					portalCoverage != (int)rowValues[colLocation[2]] ||
-					overbuilt != (double)rowValues[colLocation[3]] ||
-					overbuilt_percent != (double)rowValues[colLocation[4]] ||
-					solar_collectors != (int)rowValues[colLocation[5]] ||
-					fission_reactors != (int)rowValues[colLocation[6]] ||
-					mineral_plants != (int)rowValues[colLocation[7]] ||
-					crystal_labs != (int)rowValues[colLocation[8]] ||
-					refinement_stations != (int)rowValues[colLocation[9]] ||
-					cities != (int)rowValues[colLocation[10]] ||
-					research_centers != (int)rowValues[colLocation[11]] ||
-					defense_sats != (int)rowValues[colLocation[12]] ||
-					shield_networks != (int)rowValues[colLocation[13]] ||
-					portal != (boolean)rowValues[colLocation[14]] ||
-					total_buildings != (int)rowValues[colLocation[16]] ||
-					buildingsUnderConstr != (int)rowValues[colLocation[17]] 
-				)
-				{
-					//System.out.println("updating planet nr:" + planetID);
-					//planetsUpdateStatement.setInt(1, current_population);
-					//planetsUpdateStatement.setInt(2, max_population);
-					planetsUpdateStatement.setInt(1, portalCoverage);
-					planetsUpdateStatement.setDouble(2, overbuilt);
-					planetsUpdateStatement.setDouble(3, overbuilt_percent);
-					planetsUpdateStatement.setInt(4, solar_collectors );
-					planetsUpdateStatement.setInt(5, fission_reactors );
-					planetsUpdateStatement.setInt(6, mineral_plants);
-					planetsUpdateStatement.setInt(7, crystal_labs);
-					planetsUpdateStatement.setInt(8, refinement_stations);
-					planetsUpdateStatement.setInt(9, cities);
-					planetsUpdateStatement.setInt(10, research_centers);
-					planetsUpdateStatement.setInt(11, defense_sats);
-					planetsUpdateStatement.setInt(12, shield_networks);	
-					planetsUpdateStatement.setBoolean(13, portal);	
-					if (portal)
-						planetsUpdateStatement.setBoolean(14, false);	
-					else
-						planetsUpdateStatement.setBoolean(14, resultSet.getBoolean("portal_under_construction"));	//keep the initial value
-					planetsUpdateStatement.setInt(15, total_buildings);
-					planetsUpdateStatement.setInt(16, buildingsUnderConstr);
-					planetsUpdateStatement.setInt(17, planetID);
-
-					planetsUpdateStatement.addBatch();
-				}
-			}
-			
-			//add building news if something was actually built
-			int total_buildigns = total_solar_collectors_built + total_fission_reactors_built + total_mineral_plants_built + total_crystal_labs_built
-			+ total_refinement_stations_built + total_cities_built + total_research_centers_built  + total_defense_sats_built
-			+ total_shield_networks_built + total_portals_built;
-
-			
-			if (total_buildigns != 0 ){
-				userStatusUpdateStatement.setInt(56, 1);
-				
-				String builtBuildings = "These constructions were finished : " +
-										" \n solar collectors: " + total_solar_collectors_built +
-										" \n fission reactors: " + total_fission_reactors_built +
-										" \n mineral plants: " + total_mineral_plants_built +
-										" \n crystal labs: "+ total_crystal_labs_built +
-										" \n refinement stations: " + total_refinement_stations_built +
-										" \n cities: " + total_cities_built +
-										" \n research centers: " + total_research_centers_built +
-										" \n defense satelites: " + total_defense_sats_built +
-										" \n shield networks: " + total_shield_networks_built +
-										" \n portals: " + total_portals_built;	
-				
-				updateNews.createBuildingNews(userID, rowInt.get("empire_id"), tick_nr, builtBuildings);
-			}
-
-			test2 = System.nanoTime();
-			planet_loop += test2 - test1;
-			
+			//calculate various stuff for and from users planets
+			userPlanetsUpdate.updateUserPlanets(userID, empireID, userIntValues, race_info, portals, updateNews, userStatusUpdateStatement);
 
 			//update planets
-			userStatusUpdateStatement.setInt(55, num_planets);
+			userStatusUpdateStatement.setInt(55, userPlanetsUpdate.getNumPlanets());
 			
 			//update population
-			userStatusUpdateStatement.setLong(4, population);
+			userStatusUpdateStatement.setLong(4, userPlanetsUpdate.getPopulation());
 			
 			//update reseach
 			int artibonus = 0;
@@ -726,19 +420,19 @@ public class ProcessTick
 			long totalRcPoints = 0;
 			for(int i = 0; i < researchNames.length; i++){				
 				long rc = (long) (
-				rowLong.get(researchNames[i][0]) +
-				1.2 * race_info.get(researchNames[i][1])  * rowInt.get(researchNames[i][2])
-				* (cmdTickProduction_research + rowLong.get("current_research_funding")/100 + artibonus +
-				(racebonus * rowLong.get("population") / 6000.0) )  / 100
+				userLongValues.get(researchNames[i][0]) +
+				1.2 * race_info.get(researchNames[i][1])  * userIntValues.get(researchNames[i][2])
+				* (userPlanetsUpdate.getResearchProduction() + userLongValues.get("current_research_funding")/100 + artibonus +
+				(racebonus * userPlanetsUpdate.getPopulation() / 6000.0) )  / 100
 				);			
 				
 				rc = Math.max(0, rc);
 				totalRcPoints += rc;
 				userStatusUpdateStatement.setLong(15 + i, rc);
 				Double raceMax = race_info.getOrDefault(researchNames[i][3], 200.0);
-				long nw = rowLong.get("networth");
+				long nw = userLongValues.get("networth");
 				int rcPercent = (int) Math.floor(raceMax * (1.0 - Math.exp(rc / (-10.0 * nw))));
-				int currPercent = (int) (rowInt.get(researchNames[i][4]));			
+				int currPercent = (int) (userIntValues.get(researchNames[i][4]));			
 				
 				if (rcPercent > currPercent )
 					userStatusUpdateStatement.setInt(24 + i, currPercent + 1);
@@ -748,36 +442,36 @@ public class ProcessTick
 					userStatusUpdateStatement.setInt(24 + i, currPercent);
 			}
 
-			long current_research_funding  = rowLong.get("current_research_funding") * 9 / 10;
+			long current_research_funding  = userLongValues.get("current_research_funding") * 9 / 10;
 
 			//update energy income
 			//race_special_solar_15
-			long energyProduction = (long)(cmdTickProduction_solar * race_info.getOrDefault("race_special_solar_15", 1.0));
-			energyProduction += cmdTickProduction_fission;
+			long energyProduction = (long)(userPlanetsUpdate.getEnergyProduction(0) * race_info.getOrDefault("race_special_solar_15", 1.0));
+			energyProduction += userPlanetsUpdate.getEnergyProduction(1);
 			double energyResearchFactor = 1.0 + 0.01* race_info.getOrDefault("energy_production", 1.0);
 			energyProduction = (long) (energyProduction * energyResearchFactor);
 			userStatusUpdateStatement.setLong(32, energyProduction);
 			
 			//energy decay
-			long lastTickEnergy = rowLong.get("energy");
+			long lastTickEnergy = userLongValues.get("energy");
 			long energyDecay = (long) (Math.max(0,lastTickEnergy * energy_decay_factor));
 			userStatusUpdateStatement.setLong(33, energyDecay);
 			
 			//energy interest
-			long energy_interest = (long) (rowLong.get("energy") * race_info.getOrDefault("race_special_resource_interest", 0.0));
+			long energy_interest = (long) (userLongValues.get("energy") * race_info.getOrDefault("race_special_resource_interest", 0.0));
 			userStatusUpdateStatement.setLong(42, energy_interest);
 		
 			//buildings upkeep
 			long buildings_upkeep = 
-            (long) (total_solar_collectors * upkeep_solar_collectors * energyResearchFactor +
-            total_fission_reactors * upkeep_fission_reactors * energyResearchFactor +
-            total_mineral_plants * upkeep_mineral_plants +
-            total_crystal_labs * upkeep_crystal_labs +
-            total_refinement_stations * upkeep_refinement_stations +
-            total_cities * upkeep_cities +
-            total_research_centers * upkeep_research_centers +
-            total_defense_sats * upkeep_defense_sats +
-            total_shield_networks * upkeep_shield_networks);
+            (long) (userPlanetsUpdate.getTotalBuildings(0) * upkeep_solar_collectors * energyResearchFactor +
+            userPlanetsUpdate.getTotalBuildings(1) * upkeep_fission_reactors * energyResearchFactor +
+            userPlanetsUpdate.getTotalBuildings(2) * upkeep_mineral_plants +
+            userPlanetsUpdate.getTotalBuildings(3) * upkeep_crystal_labs +
+            userPlanetsUpdate.getTotalBuildings(4) * upkeep_refinement_stations +
+            userPlanetsUpdate.getTotalBuildings(5) * upkeep_cities +
+            userPlanetsUpdate.getTotalBuildings(6) * upkeep_research_centers +
+            userPlanetsUpdate.getTotalBuildings(7) * upkeep_defense_sats +
+            userPlanetsUpdate.getTotalBuildings(8) * upkeep_shield_networks);
 			userStatusUpdateStatement.setLong(34, buildings_upkeep);
 			//units upkeep
 			//get unit amounts
@@ -799,12 +493,13 @@ public class ProcessTick
 			}
 			userStatusUpdateStatement.setLong(35, units_upkeep);
 			
-			//portals upkeep
-			int portals_upkeep = (int)(Math.max(0, (Math.pow(Math.max(1, total_portals) - 1, 1.2736) * 10000.0 / (1.0 + rowInt.get("research_percent_culture")/100.0))));
+			//portals upkeep 
+			int portals_upkeep = (int)(Math.max(0, (Math.pow(Math.max(1, userPlanetsUpdate.getTotalBuildings(9)) - 1, 1.2736) * 10000.0 /
+								(1.0 + userIntValues.get("research_percent_culture")/100.0))));
 			userStatusUpdateStatement.setInt(37, portals_upkeep);
 
 			//population upkeep reduction		
-			long population_upkeep_reduction = population / 35;
+			long population_upkeep_reduction = userPlanetsUpdate.getPopulation() / 35;
 			population_upkeep_reduction = Math.min(population_upkeep_reduction, buildings_upkeep + units_upkeep + portals_upkeep);
 			userStatusUpdateStatement.setLong(36, population_upkeep_reduction);
 			
@@ -814,18 +509,18 @@ public class ProcessTick
 			userStatusUpdateStatement.setLong(46, energy_income);
 
 			//minerals
-		    int mineral_production = (int) (race_info.get("mineral_production") * cmdTickProduction_mineral);
+		    int mineral_production = (int) (race_info.get("mineral_production") * userPlanetsUpdate.getResourceProduction(0));
 		    int mineral_decay = 0;
-		    int mineral_interest = (int) (rowLong.get("minerals") * race_info.getOrDefault("race_special_resource_interest", 0.0));
+		    int mineral_interest = (int) (userLongValues.get("minerals") * race_info.getOrDefault("race_special_resource_interest", 0.0));
 		    int mineral_income = mineral_production - mineral_decay + mineral_interest;
 		    userStatusUpdateStatement.setInt(38, mineral_production);
 		    userStatusUpdateStatement.setInt(43, mineral_interest);
 		    userStatusUpdateStatement.setInt(47, mineral_income);
 
 		    //crystals
-    	    int crystal_production = (int) (race_info.get("crystal_production") * cmdTickProduction_crystal);
-    	    int crystal_decay = (int) (Math.max(0.0,rowLong.get("crystals") * crystal_decay_factor));
-    	    int crystal_interest = (int) (rowLong.get("crystals") * race_info.getOrDefault("race_special_resource_interest", 0.0));
+    	    int crystal_production = (int) (race_info.get("crystal_production") *  userPlanetsUpdate.getResourceProduction(1));
+    	    int crystal_decay = (int) (Math.max(0.0,userLongValues.get("crystals") * crystal_decay_factor));
+    	    int crystal_interest = (int) (userLongValues.get("crystals") * race_info.getOrDefault("race_special_resource_interest", 0.0));
     	    int crystal_income = crystal_production - crystal_decay + crystal_interest;
     	    userStatusUpdateStatement.setInt(39, crystal_production);
     	    userStatusUpdateStatement.setInt(40, crystal_decay);
@@ -833,75 +528,69 @@ public class ProcessTick
     	    userStatusUpdateStatement.setInt(48, crystal_income);
 			
     	    //ectrolium		    	    
-    	    int ectrolium_production = (int) (race_info.get("ectrolium_production") * cmdTickProduction_ectrolium);
+    	    int ectrolium_production = (int) (race_info.get("ectrolium_production") * userPlanetsUpdate.getResourceProduction(2));
     	    int ectrolium_decay = 0;
-    	    int ectrolium_interest =(int) (rowLong.get("ectrolium") * race_info.getOrDefault("race_special_resource_interest", 0.0));
+    	    int ectrolium_interest =(int) (userLongValues.get("ectrolium") * race_info.getOrDefault("race_special_resource_interest", 0.0));
     	    int ectrolium_income = ectrolium_production + ectrolium_decay + ectrolium_interest;
     	    userStatusUpdateStatement.setInt(41, ectrolium_production);
     	    userStatusUpdateStatement.setInt(45, ectrolium_interest);
     	    userStatusUpdateStatement.setInt(49, ectrolium_income);
     	    
     	    //update total resources
-    	    userStatusUpdateStatement.setLong(50, Math.max(0, rowLong.get("energy") + energy_income));
-    	    userStatusUpdateStatement.setLong(51, Math.max(0, rowLong.get("minerals") + mineral_income));
-    	    userStatusUpdateStatement.setLong(52, Math.max(0,rowLong.get("crystals") + crystal_income));
-    	    userStatusUpdateStatement.setLong(53, Math.max(0,rowLong.get("ectrolium") + ectrolium_income));
+    	    userStatusUpdateStatement.setLong(50, Math.max(0, userLongValues.get("energy") + energy_income));
+    	    userStatusUpdateStatement.setLong(51, Math.max(0, userLongValues.get("minerals") + mineral_income));
+    	    userStatusUpdateStatement.setLong(52, Math.max(0,userLongValues.get("crystals") + crystal_income));
+    	    userStatusUpdateStatement.setLong(53, Math.max(0,userLongValues.get("ectrolium") + ectrolium_income));
 			
-			if( Math.max(0, rowLong.get("energy") + energy_income) > 0){
-				int fr = Math.min(rowInt.get("fleet_readiness")+2, rowInt.get("fleet_readiness_max"));
+			if( Math.max(0, userLongValues.get("energy") + energy_income) > 0){
+				int fr = Math.min(userIntValues.get("fleet_readiness")+2, userIntValues.get("fleet_readiness_max"));
 				userStatusUpdateStatement.setInt(1, fr);
-				int pr = Math.min(rowInt.get("psychic_readiness")+2, rowInt.get("psychic_readiness_max"));
+				int pr = Math.min(userIntValues.get("psychic_readiness")+2, userIntValues.get("psychic_readiness_max"));
 				userStatusUpdateStatement.setInt(2, pr);
-				int ar = Math.min(rowInt.get("agent_readiness")+2, rowInt.get("agent_readiness_max"));
+				int ar = Math.min(userIntValues.get("agent_readiness")+2, userIntValues.get("agent_readiness_max"));
 				userStatusUpdateStatement.setInt(3, ar);
 			}
 			else{
-				int fr = Math.max(rowInt.get("fleet_readiness")-3, -200);
+				int fr = Math.max(userIntValues.get("fleet_readiness")-3, -200);
 				userStatusUpdateStatement.setInt(1, fr);
-				int pr = Math.max(rowInt.get("psychic_readiness")-3, -200);
+				int pr = Math.max(userIntValues.get("psychic_readiness")-3, -200);
 				userStatusUpdateStatement.setInt(2, pr);
-				int ar = Math.max(rowInt.get("agent_readiness")-3, -200);
+				int ar = Math.max(userIntValues.get("agent_readiness")-3, -200);
 				userStatusUpdateStatement.setInt(3, ar);
 			}
-				
 
 			//update research funding
-			userStatusUpdateStatement.setLong(23, (long) Math.max(0, rowLong.get("current_research_funding") * 0.9 ) );	
+			userStatusUpdateStatement.setLong(23, (long) Math.max(0, userLongValues.get("current_research_funding") * 0.9 ) );	
 			//update total buildings
-			userStatusUpdateStatement.setInt(5, total_solar_collectors);
-			userStatusUpdateStatement.setInt(6, total_fission_reactors);
-			userStatusUpdateStatement.setInt(7, total_mineral_plants);
-			userStatusUpdateStatement.setInt(8, total_crystal_labs);
-			userStatusUpdateStatement.setInt(9, total_refinement_stations);
-			userStatusUpdateStatement.setInt(10, total_cities);
-			userStatusUpdateStatement.setInt(11, total_research_centers);
-			userStatusUpdateStatement.setInt(12, total_defense_sats);
-			userStatusUpdateStatement.setInt(13, total_shield_networks);
-			userStatusUpdateStatement.setInt(14, total_portals);
+			userStatusUpdateStatement.setInt(5, userPlanetsUpdate.getTotalBuildings(0)); //solar
+			userStatusUpdateStatement.setInt(6, userPlanetsUpdate.getTotalBuildings(1)); //fission
+			userStatusUpdateStatement.setInt(7, userPlanetsUpdate.getTotalBuildings(2)); //mineral
+			userStatusUpdateStatement.setInt(8, userPlanetsUpdate.getTotalBuildings(3)); //crystal
+			userStatusUpdateStatement.setInt(9, userPlanetsUpdate.getTotalBuildings(4)); //refirement
+			userStatusUpdateStatement.setInt(10, userPlanetsUpdate.getTotalBuildings(5)); //cities
+			userStatusUpdateStatement.setInt(11, userPlanetsUpdate.getTotalBuildings(6)); //research centers
+			userStatusUpdateStatement.setInt(12, userPlanetsUpdate.getTotalBuildings(7)); //def sats
+			userStatusUpdateStatement.setInt(13, userPlanetsUpdate.getTotalBuildings(8)); //shield network
+			userStatusUpdateStatement.setInt(14, userPlanetsUpdate.getTotalBuildings(9)); //portals
 			
 			//update networth
-			networth += population * 0.005;
+
+			networth += userPlanetsUpdate.getNetworth();
+			networth += userPlanetsUpdate.getPopulation() * 0.005;
 			networth += (0.001 * totalRcPoints);
 			userStatusUpdateStatement.setLong(54, networth);	
-			
-			//update military flag
-			userStatusUpdateStatement.setInt(58, militaryFlag);
-			
-			userStatusUpdateStatement.addBatch();
-			
-			//udate merging fleets
+
 			updateFleets.updateFleetsMerge();
-			
-			//udate stationed fleets
 			updateFleets.updateStationedFleets();
 			
+			//this must be the last update!
+			userStatusUpdateStatement.addBatch();
 		}
 		main_loop2 = System.nanoTime();
 	
-		planetsUpdate1 = System.nanoTime();
-		planetsUpdateStatement.executeBatch();
-		//planetsStatement.executeBatch();
-		planetsUpdate2 = System.nanoTime();
+		//execute update planets for all users
+		userPlanetsUpdate.UpdatePlanetsExecute();
+
 		userUpdate1 = System.nanoTime();
 		userStatusUpdateStatement.executeBatch();
 		userUpdate2 = System.nanoTime();
@@ -971,242 +660,4 @@ public class ProcessTick
 		System.out.println("Total time: " + (double)(endTime-startTime)/1_000_000_000.0 + " sec.");
 		System.out.println("");
 	}
-	
-    private static double calc_overbuild(int size, int buildings) {
-		if (buildings <= size) return 1.0;
-    	return Math.pow((buildings/(double)size),2);
-    }
-	
-	private static double battlePortalCalc(int x, int y, LinkedList<Planet> portals, int portalResearch){
-		double cover = 0;
-		for (Planet portal : portals){
-		    double d = Math.sqrt(Math.pow((x-portal.x),2) + Math.pow((y-portal.y),2));
-		    cover = Math.max(0, 1.0 - Math.sqrt(d/(7.0*(1.0 + 0.01*portalResearch))));
-		}
-		return cover;
-	}
-	
-	private static HashMap<Integer, HashMap<String, Integer>> execute_jobs (Connection con){
-		
-		HashMap<String, String> buildingsNames = new HashMap<>();
-		buildingsNames.put( "SC", "solar_collectors");
-		buildingsNames.put( "FR", "fission_reactors");
-		buildingsNames.put( "MP", "mineral_plants");
-		buildingsNames.put( "CL", "crystal_labs");
-		buildingsNames.put( "RS", "refinement_stations");
-		buildingsNames.put( "CT", "cities");
-		buildingsNames.put( "RC", "research_centers");
-		buildingsNames.put( "DS", "defense_sats");
-		buildingsNames.put( "SN", "shield_networks");
-		buildingsNames.put( "PL", "portal");
-		HashMap<Integer, HashMap<String, Integer>> planetJobsCombined = new HashMap<>();
-		
-		try{
-			String planetjobsUpdateQuery = "UPDATE app_construction SET " +
-				" ticks_remaining  = ? " + //1
-				" WHERE id = ? " ; //2
-			PreparedStatement updateJobsTicks = con.prepareStatement(planetjobsUpdateQuery);	
-			
-			String deleteJobsQuery = "DELETE FROM app_construction WHERE id = ?";
-			PreparedStatement deleteJobs = con.prepareStatement(deleteJobsQuery);	
-			
-			Statement statement = con.createStatement();
-			ResultSet resultSet = statement.executeQuery("SELECT * FROM app_construction");
-			
-			while(resultSet.next()){
-				int ticksRemaining = resultSet.getInt("ticks_remaining");
-
-				int jobID = resultSet.getInt("id");
-				if(ticksRemaining <= 1){
-					String building = buildingsNames.get(resultSet.getString("building_type"));
-					int numberBuilt = resultSet.getInt("n");
-					int planetID = resultSet.getInt("planet_id");
-					if (!planetJobsCombined.containsKey(planetID)){
-						planetJobsCombined.put(planetID, new HashMap<String, Integer>());
-					}
-					HashMap<String, Integer> tmp = planetJobsCombined.get(planetID);
-					if (!tmp.containsKey(building)){
-						tmp.put(building, 0);
-					}
-					tmp.put(building, tmp.get(building) + numberBuilt);
-					deleteJobs.setInt(1, jobID);
-					deleteJobs.addBatch();
-				}
-				else{
-
-					updateJobsTicks.setInt(1, ticksRemaining-1);
-					updateJobsTicks.setInt(2, jobID);
-					updateJobsTicks.addBatch();
-				}
-			}
-			
-			updateJobsTicks.executeBatch();
-			deleteJobs.executeBatch();
-
-		}
-		catch (Exception e) {
-            System.out.println("exception " +  e.getMessage());
-			e.printStackTrace();
-        }
-		
-		return planetJobsCombined;
-	}
-	
-	
-	private static long secondsToFirstOccurence10(Calendar calendar) {
-    int seconds = calendar.get(Calendar.SECOND);
-    int millis = calendar.get(Calendar.MILLISECOND);
-    int secondsToNextTenSeconds = 10 - seconds % 10 -1;
-    int millisToNextSecond = 1000 - millis;
-    return secondsToNextTenSeconds*1000 + millisToNextSecond;
-	}
-	
-	private static long secondsToFirstOccurence600(Calendar calendar) {
-	int minutes = calendar.get(Calendar.MINUTE);
-    int seconds = calendar.get(Calendar.SECOND);
-    int millis = calendar.get(Calendar.MILLISECOND);
-	int minutesToNextTenMinutes = 10 - minutes % 10 -1;
-    int secondsToNextMinute = 60 - seconds -1;
-    int millisToNextSecond = 1000 - millis;
-    return minutesToNextTenMinutes*60*1000 + secondsToNextMinute*1000 + millisToNextSecond;
-	}
-
-	private static Object getValueByType(int columnIndex, int columnType, ResultSet queryResult) throws SQLException {
-		switch (columnType) {
-			case Types.CHAR:
-			case Types.NCHAR:
-			case Types.VARCHAR:
-			case Types.NVARCHAR:
-				return queryResult.getString(columnIndex);
-			case Types.INTEGER:
-				return queryResult.getInt(columnIndex);
-			case Types.TIMESTAMP:
-				return queryResult.getTimestamp(columnIndex);
-			case Types.DATE:
-				return queryResult.getDate(columnIndex);
-			case Types.BOOLEAN:
-				return queryResult.getBoolean(columnIndex);
-			case Types.DOUBLE:
-				return queryResult.getDouble(columnIndex);
-			case Types.BIT:
-				return queryResult.getBoolean(columnIndex);
-			default:
-				return queryResult.getString(columnIndex);
-		}
-	}
-	
-	
-	private static Planet find_nearest_portal(double x, double y, LinkedList<Planet> portal_list){
-		Planet portal = portal_list.getFirst();
-		double min_dist = Math.pow(((double)portal.x - x),2) + 
-							Math.pow(((double)portal.y - y),2);
-
-		for (Planet p : portal_list){
-			double dist = Math.pow(((double)p.x - x),2) + 
-							Math.pow(((double)p.y - y),2);
-			if (dist < min_dist){
-				min_dist = dist;
-				portal = p;
-			}
-		}
-		return portal;
-	}
-
-	private static int find_travel_time(Planet portal, double current_position_x, double current_position_y, double speed){
-		double min_dist = Math.sqrt(current_position_x - portal.x) + Math.sqrt(current_position_y - portal.y);
-		return (int)(min_dist / speed);
-	}
-
-	private static double x_move_calc(double speed, int x, double current_position_x, int y, double current_position_y){
-		double dist_x = (double)x - current_position_x;
-		double dist_y = (double)y - current_position_y;
-		if (dist_x == 0)
-			return x;
-		double move_x = speed / Math.sqrt(1.0 + Math.pow(dist_y/dist_x,2));
-
-		if (x < current_position_x)
-			return (current_position_x - move_x);
-		else
-			return (current_position_x + move_x);
-	}
-
-	private static double y_move_calc(double speed, int x, double current_position_x, int y, double current_position_y){
-		double dist_x = (double)x - current_position_x;
-		double dist_y = (double)y - current_position_y;
-		if (dist_y == 0)
-			return y;
-		double move_y = speed / Math.sqrt(1.0 + Math.pow(dist_x/dist_y,2));
-
-		if (y < current_position_y)
-			return (current_position_y - move_y);
-		else
-			return (current_position_y + move_y);
-	}
-	
-	class Planet{
-		int x;
-		int y;
-		int z;
-		
-		public Planet(int x, int y, int z){
-			this.x = x;
-			this.y = y;
-			this.z = z;
-		}
-	}
 }
-
-
-/* String userStatusUpdateQuery = "UPDATE app_userstatus SET "+
-+			" fleet_readiness  = ? ," +  //1
-+			" psychic_readiness  = ? ," + //2
-+			" agent_readiness  = ? ," + //3
-			" population   = ? ," + //4
-+			" total_solar_collectors  = ? ," + //5
-+			" total_fission_reactors  = ? ," + //6
-+			" total_mineral_plants  = ? ," + //7
-+			" total_crystal_labs  = ? ," + //8
-+			" total_refinement_stations   = ? ," + //9
-+			" total_cities  = ? ," + //10
-+			" total_research_centers   = ? ," + //11
-+			" total_defense_sats    = ? ," + //12
-+			" total_shield_networks   = ? ," + //13
-+			" total_portals  = ? ," + //14
-+			" research_points_military   = ? ," + //17
-+			" research_points_construction   = ? ," + //18
-+			" research_points_tech   = ? ," + //19
-+			" research_points_energy    = ? ," + //20
-+			" research_points_population   = ? ," + //21
-+			" research_points_culture    = ? ," + //22
-+			" research_points_operations   = ? ," + //23
-+			" research_points_portals    = ? ," + //24
-+			" current_research_funding    = ? ," + //25
-+			" research_percent_military   = ? ," + //26
-+			" research_percent_construction    = ? ," + //27
-+			" research_percent_tech            = ? ," + //28
-+			" research_percent_energy          = ? ," + //29
-+			" research_percent_population      = ? ," + //30
-+			" research_percent_culture         = ? ," + //31
-+			" research_percent_operations      = ? ," + //32
-+			" research_percent_portals         = ? ," + //33
-			" energy_production          = ? ," + //34
-			" energy_decay          = ? ," + //35
-			" buildings_upkeep          = ? ," + //36
-			" units_upkeep          = ? ," + //37
-			" population_upkeep_reduction           = ? ," + //38
-			" portals_upkeep           = ? ," + //39
-			" mineral_production           = ? ," + //40
-			" crystal_production            = ? ," + //41
-			" crystal_decay            = ? ," + //42
-			" ectrolium_production             = ? ," + //43
-			" energy_interest              = ? ," + //44
-			" mineral_interest              = ? ," + //45
-			" crystal_interest              = ? ," + //46
-			" ectrolium_interest              = ? ," + //47
-			" energy                  = ? ," + //48
-			" minerals                = ? ," + //49
-			" crystals                = ? ," + //50
-			" ectrolium               = ? ," + //51
-			" networth                = ? ," + //52
-
-			"WHERE id = ?" ; //53 wow what a long string :P*/

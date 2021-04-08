@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.*;
 import static org.ectroverse.processtick.Constants.*;
 
-class UpdateNews {
+public class UpdateNews {
 	
 	private final String buildingNewsUpdateQuery = "INSERT INTO app_news " +
 	" ( user1_id, empire1_id, news_type, date_and_time, is_personal_news, " + 
@@ -38,8 +38,9 @@ class UpdateNews {
 	
 	private Connection connection;
 	private Statement statement;
+	private int tickNumber;
 	
-	public UpdateNews(Connection connection) throws Exception{    
+	public UpdateNews(Connection connection, int tickNumber) throws Exception{    
 		this.connection = connection;
 		statement = connection.createStatement();
 		buildingNewsUpdateStatement = connection.prepareStatement(buildingNewsUpdateQuery); 
@@ -47,9 +48,10 @@ class UpdateNews {
 		fleetsReturnNewsUpdateStatement = connection.prepareStatement(fleetsReturnNewsUpdateQuery); 
 		fleetsMergeNewsUpdateStatement = connection.prepareStatement(fleetsMergeNewsUpdateQuery); 
 		fleetsStationNewsUpdateStatement = connection.prepareStatement(fleetsStationNewsUpdateQuery); 
+		this.tickNumber = tickNumber;
 	}
 	
-	public void createBuildingNews(int userID, int empireId, int tickNumber, String builtBuildings) throws Exception{
+	public void createBuildingNews(int userID, int empireId, String builtBuildings) throws Exception{
 		java.util.Date utilDate = new java.util.Date();
 		java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
 
@@ -61,7 +63,7 @@ class UpdateNews {
 		buildingNewsUpdateStatement.addBatch();				
 	}
 	
-	public void createfleetBuildingNews(int userID, int empireId, int tickNumber, HashMap<String, Integer> unitsBuilt) throws Exception{
+	public void createfleetBuildingNews(int userID, int empireId, HashMap<String, Integer> unitsBuilt) throws Exception{
 				
 		java.util.Date utilDate = new java.util.Date();
 		java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
@@ -82,7 +84,7 @@ class UpdateNews {
 		
 	}
 	
-	public void createfleetReturnNews(int userID, int empireId, int tickNumber, long [] returnFleets) throws Exception{
+	public void createfleetReturnNews(int userID, int empireId, long [] returnFleets) throws Exception{
 		java.util.Date utilDate = new java.util.Date();
 		java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
 		fleetsReturnNewsUpdateStatement.setInt(1, userID);
@@ -100,7 +102,7 @@ class UpdateNews {
 		fleetsReturnNewsUpdateStatement.addBatch();
 	}
 	
-	public void createfleetMergeNews(int userID, int empireId, int tickNumber, long [] fleets, String planet) throws Exception{
+	public void createfleetMergeNews(int userID, int empireId, long [] fleets, String planet) throws Exception{
 		java.util.Date utilDate = new java.util.Date();
 		java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
 		fleetsMergeNewsUpdateStatement.setInt(1, userID);
@@ -119,7 +121,7 @@ class UpdateNews {
 		fleetsMergeNewsUpdateStatement.addBatch();
 	}
 	
-	public void createfleetStationNews(int userID, int empireID, int tickNumber, long [] fleets, 
+	public void createfleetStationNews(int userID, int empireID, long [] fleets, 
 										int success, int x, int y, int i) throws Exception{
 		java.util.Date utilDate = new java.util.Date();
 		java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
@@ -153,8 +155,7 @@ class UpdateNews {
 		fleetsStationNewsUpdateStatement.setString(7, stationInfo);
 		fleetsStationNewsUpdateStatement.addBatch();
 	}
-	
-	
+		
 	public void executeNews() throws Exception{
 		buildingNewsUpdateStatement.executeBatch();
 		fleetsNewsUpdateStatement.executeBatch();

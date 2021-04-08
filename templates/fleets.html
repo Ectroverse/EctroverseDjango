@@ -114,6 +114,8 @@
 							Auto merge in system {{fleet_nr.x}},{{fleet_nr.y}}
 						{% elif fleet_nr.command_order == 5 %}
 							Join main fleet at {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
+						{% elif fleet_nr.command_order == 8 %}
+							Stationed on planet  {{fleet_nr.x}},{{fleet_nr.y}}:{{fleet_nr.i}}
 						{% endif %}
 
 						</td>
@@ -124,8 +126,8 @@
 							Fleet merged
 						{% elif fleet_nr.command_order == 2 %}
 							Fleet hoovering at position
-						{% elif fleet_nr.command_order == 1 %}
-							Fleet stationed at position
+						{% elif fleet_nr.command_order == 8 %}
+							Stationed
 						{% elif fleet_nr.command_order == 0 %}
 							<a href = "/battle{{fleet_nr.id}}">Attack planet!</a>
 						{% endif %}

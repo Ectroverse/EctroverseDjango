@@ -122,6 +122,7 @@ def station_fleets(request, fleets, status):
             stationed_fleet = sf_dict[planet.id]
             for unit in unit_info["unit_list"]:
                 setattr(stationed_fleet, unit, getattr(stationed_fleet, unit) + getattr(f, unit))
+            stationed_fleet.command_order=8
             f.delete()
             stationed_fleet.save()
             news_type = 'FS'
@@ -129,6 +130,7 @@ def station_fleets(request, fleets, status):
                   + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) + "!"
         else:
             f.on_planet = planet
+            f.command_order = 8
             f.save()
             sf_dict[planet.id] = f
             news_type = 'FS'

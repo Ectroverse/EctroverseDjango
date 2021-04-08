@@ -177,5 +177,16 @@ public final class Constants {
 	
 	public static final String [] unit_names = {"bomber", "fighter", "transport", "cruiser", "carrier", "soldier", "droid", "goliath", "phantom", "wizard", "agent", "ghost", "exploration"};
 	public static final String [] unit_labels = {"Bombers","Fighters","Transports","Cruisers","Carriers","Soldiers","Droids","Goliaths","Phantoms","Psychics","Agents","Ghost Ships","Exploration Ships"};
+	public static final String [] building_names = {"Solar collectors", 
+													"Fission reactors",
+													"Mineral plants",
+													"Crystal labs",
+													"Refinement stations",
+													"Cities",
+													"Research centers",
+													"Defense satelites",
+													"Shield networks",
+													"Portals"
+													};
 
 }

@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.*;
 import static org.ectroverse.processtick.Constants.*;
 
-class UpdateFleets {
+public class UpdateFleets {
 
 	private final String fleetsUpdateQuery =
 	"UPDATE app_fleet SET" +	
@@ -56,7 +56,8 @@ class UpdateFleets {
 	" , ghost = ? "+ //12
 	" , exploration = ? "+ //13
 	" , on_planet_id = ? "+ //14
-	" WHERE id = ?"; //15
+	" , command_order = 8 "+
+	" WHERE id = ?"; //16
 	
 	private PreparedStatement fleetsUpdateStatement;
 	private PreparedStatement fleetMergeUpdateStatement;
@@ -69,6 +70,7 @@ class UpdateFleets {
 	private int empireID;
 	private int tickNumber;
 	private UpdateNews addNews;
+	PreparedStatement userStatusUpdateStatement;
 	
 	public UpdateFleets(Connection connection, UpdateNews addNews) throws Exception{
 		this.connection = connection;
@@ -80,11 +82,12 @@ class UpdateFleets {
 		fleetStationUpdateStatement = connection.prepareStatement(fleetStationQuery); 
 	}
 	
-	public void addNewUser(int userID, int empireID, int tickNumber) throws Exception{
+	public void addNewUser(int userID, int empireID, int tickNumber, PreparedStatement userStatus) throws Exception{
 		this.userID = userID;
 		this.empireID = empireID;
 		this.tickNumber = tickNumber;
 		total_built_units = 0;
+		this.userStatusUpdateStatement = userStatus;
 	}
 	
 	public void updateFleetBuild(HashMap<String, Integer> unitsBuilt) throws Exception{
@@ -93,8 +96,10 @@ class UpdateFleets {
 			fleetsUpdateStatement.setLong(i, unitsBuilt.getOrDefault(unit_names[i-1],0));
 			total_built_units += unitsBuilt.getOrDefault(unit_names[i-1],0);
 		}
-		if (total_built_units > 0)
-			addNews.createfleetBuildingNews(userID, empireID, tickNumber, unitsBuilt);
+		if (total_built_units > 0) {
+			addNews.createfleetBuildingNews(userID, empireID, unitsBuilt);
+			userStatusUpdateStatement.setInt(56, 1); //set button flag for header menu
+		}
 		
 		fleetsUpdateStatement.setInt(14, userID);
 		fleetsUpdateStatement.addBatch();
@@ -133,7 +138,9 @@ class UpdateFleets {
 				}
 				fleetMergeUpdateStatement.setInt(unit_names.length+1 , firstId);
 				fleetMergeUpdateStatement.addBatch();
-				addNews.createfleetMergeNews(userID, empireID, tickNumber, unit, planet);
+				addNews.createfleetMergeNews(userID, empireID, unit, planet);
+				System.out.println("merged!");
+				userStatusUpdateStatement.setInt(58, 2); //set military flag green for the header menu
 			}
 		}
 	}
@@ -148,8 +155,10 @@ class UpdateFleets {
 		fleetsUpdateStatement.setInt(14, userID);
 		fleetsUpdateStatement.addBatch();
 		
-		if (returnedUnits)
-			addNews.createfleetReturnNews(userID, empireID, tickNumber, returnFleets);
+		if (returnedUnits) {
+			addNews.createfleetReturnNews(userID, empireID, returnFleets);
+			userStatusUpdateStatement.setInt(58, 2);
+		}
 	}
 	
 	public void updateStationedFleets() throws Exception{
@@ -173,18 +182,22 @@ class UpdateFleets {
 			if (planet.next()){
 				if (planet.getInt("owner_id") != userID){
 					statement2.execute("UPDATE app_fleet SET command_order = 2 WHERE id = " + stationingFleets.getInt("id") + ";");
-					addNews.createfleetStationNews(userID, empireID, tickNumber, fleet, 0, x, y, i);
+					addNews.createfleetStationNews(userID, empireID, fleet, 0, x, y, i);
+					userStatusUpdateStatement.setInt(58, 3);
 				}
 				else{
 					int p = planet.getInt("id");
 					if (!fleetStation.containsKey(p))
 						fleetStation.put(p, new LinkedList<Integer>());
 					fleetStation.get(p).add(stationingFleets.getInt("id"));
+					addNews.createfleetStationNews(userID, empireID, fleet, 1, x, y, i);
+					userStatusUpdateStatement.setInt(58, 2);
 				}
 			}
 			else{
 				statement.execute("UPDATE app_fleet SET command_order = 2 WHERE id = " + stationingFleets.getInt("id") + ";");
-				addNews.createfleetStationNews(userID, empireID, tickNumber, fleet, 2, x, y, i );
+				addNews.createfleetStationNews(userID, empireID, fleet, 2, x, y, i );
+				userStatusUpdateStatement.setInt(58, 3);
 			}
 		}
 
@@ -192,19 +205,16 @@ class UpdateFleets {
 		for(Map.Entry<Integer, LinkedList<Integer>> entry : fleetStation.entrySet()){
 			LinkedList<Integer> idList = entry.getValue();
 			int pID = entry.getKey();
-			System.out.println("update fleets4 " + userID + " idList.size() " + idList.size());
-			if (idList.size() > 1){
+			if (idList.size() > 0){
 				long [] unit = new long[unit_names.length];
 				int firstId = idList.getFirst();
-				System.out.println("idList.size() " + idList.size());
 				for (Integer id : idList) {
 					ResultSet fleet = statement.executeQuery("SELECT * FROM app_fleet WHERE id = " + id + ";");
 					fleet.next();
 					for(int i =0; i < unit_names.length; i++){
 						unit[i] += fleet.getLong(unit_names[i]);
 					}
-					System.out.println("update fleets5");
-					addNews.createfleetStationNews(userID, empireID, tickNumber, unit, 1, fleet.getInt("x"), fleet.getInt("y"), fleet.getInt("i"));
+					
 					if (id != firstId)
 						statement.execute("DELETE FROM app_fleet WHERE id = " + id + ";");
 				}
@@ -212,7 +222,6 @@ class UpdateFleets {
 				for(int i =0; i < unit_names.length; i++){
 					fleetStationUpdateStatement.setLong(i+1, unit[i]);
 				}
-				
 				fleetStationUpdateStatement.setInt(unit_names.length+1 , pID); //set planet id
 				fleetStationUpdateStatement.setInt(unit_names.length+2 , firstId); //set fleet id
 				fleetStationUpdateStatement.addBatch();
