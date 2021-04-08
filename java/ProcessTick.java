@@ -498,7 +498,7 @@ public class ProcessTick
 			userStatusUpdateStatement.setInt(37, portals_upkeep);
 
 			//population upkeep reduction		
-			long population_upkeep_reduction = userPlanetsUpdate.getPopulation() / 35;
+			long population_upkeep_reduction = userPlanetsUpdate.getPopulation() / 350;
 			population_upkeep_reduction = Math.min(population_upkeep_reduction, buildings_upkeep + units_upkeep + portals_upkeep);
 			userStatusUpdateStatement.setLong(36, population_upkeep_reduction);
 			
