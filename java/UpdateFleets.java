@@ -123,7 +123,7 @@ public class UpdateFleets {
 		" WHERE ticks_remaining = 0 AND user_id = " + userID +
 		" GROUP BY unit_type; ";
 
-		resultSet = statement.executeQuery(unitsQuery);
+		ResultSet resultSet = statement.executeQuery(unitsQuery);
 		while (resultSet.next()){
 			unitsBuilt.put(resultSet.getString("unit_type"), resultSet.getInt("num_units"));
 		}

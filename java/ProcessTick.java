@@ -16,7 +16,7 @@ public class ProcessTick
 		
 		Connection tmpCon = null;
 		try{
-			tmpCon = DriverManager.getConnection("", "", "");
+			tmpCon = DriverManager.getConnection(Settings.connectionPath, Settings.dbUserName, Settings.dbPass);
 			
 			//create stored procedure - update population on planets, one of the biggest updates
 			String createSP = "CREATE OR REPLACE PROCEDURE updatePlanets( "
