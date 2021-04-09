@@ -16,7 +16,7 @@ public class ProcessTick
 		
 		Connection tmpCon = null;
 		try{
-			tmpCon = DriverManager.getConnection("jdbc:postgresql://ectroversedjango_db_1:5432/djangodatabase", "dbadmin", "admin12345");
+			tmpCon = DriverManager.getConnection("", "", "");
 			
 			//create stored procedure - update population on planets, one of the biggest updates
 			String createSP = "CREATE OR REPLACE PROCEDURE updatePlanets( "
@@ -59,7 +59,7 @@ public class ProcessTick
 		
 		//use this for 10 second tick
 		long millistoNext = HelperFunctions.secondsToFirstOccurence10(calendar);	
-		s.scheduleAtFixedRate(scheduledTask, millistoNext, 10*1000, TimeUnit.MILLISECONDS);
+		s.scheduleAtFixedRate(scheduledTask, millistoNext, Settings.tickTime*1000, TimeUnit.MILLISECONDS);
 		
 		//use this for 10 minute tick
 		// long millistoNext = HelperFunctions.secondsToFirstOccurence600(calendar);	
