@@ -33,8 +33,14 @@ public class UpdateNews {
 	private final String fleetsStationNewsUpdateQuery = "INSERT INTO app_news " +
 	" ( user1_id, empire1_id, news_type, date_and_time, is_personal_news, " + 
 	" is_empire_news, is_read, tick_number, fleet1, extra_info ) " +
-	" SELECT  ?, ?, ?,  ?, true, false, false, ?, ?, ?  ";
+	" SELECT  ?, ?, ?, ?, true, false, false, ?, ?, ?  ";
 	private PreparedStatement fleetsStationNewsUpdateStatement; 
+	
+	private final String fleetsExplorationNewsUpdateQuery = "INSERT INTO app_news " +
+	" ( user1_id, empire1_id, news_type, date_and_time, is_personal_news, " +
+	" is_empire_news, is_read, tick_number, planet_id) " +
+	" SELECT ? , ? , ? , ?, true, true, false, ?, ?  ;" ;
+	private PreparedStatement fleetsExplorationNewsUpdateStatement; 
 	
 	private Connection connection;
 	private Statement statement;
@@ -48,6 +54,7 @@ public class UpdateNews {
 		fleetsReturnNewsUpdateStatement = connection.prepareStatement(fleetsReturnNewsUpdateQuery); 
 		fleetsMergeNewsUpdateStatement = connection.prepareStatement(fleetsMergeNewsUpdateQuery); 
 		fleetsStationNewsUpdateStatement = connection.prepareStatement(fleetsStationNewsUpdateQuery); 
+		fleetsExplorationNewsUpdateStatement = connection.prepareStatement(fleetsExplorationNewsUpdateQuery); 
 		this.tickNumber = tickNumber;
 	}
 	
@@ -100,6 +107,21 @@ public class UpdateNews {
 		
 		fleetsReturnNewsUpdateStatement.setString(5, builtFleets);
 		fleetsReturnNewsUpdateStatement.addBatch();
+	}
+	
+	public void createfleetExplorationNews(int userID, int empireID, boolean type, int planetID) throws Exception{
+		java.util.Date utilDate = new java.util.Date();
+		java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
+		fleetsExplorationNewsUpdateStatement.setInt(1, userID);
+		fleetsExplorationNewsUpdateStatement.setInt(2, empireID);
+		if (type == true)
+			fleetsExplorationNewsUpdateStatement.setString(3, "SE");
+		if (type == false)
+			fleetsExplorationNewsUpdateStatement.setString(3, "UE");
+		fleetsExplorationNewsUpdateStatement.setTimestamp(4, sqlTS);
+		fleetsExplorationNewsUpdateStatement.setInt(5, tickNumber);
+		fleetsExplorationNewsUpdateStatement.setInt(6, planetID);
+		fleetsExplorationNewsUpdateStatement.addBatch();
 	}
 	
 	public void createfleetMergeNews(int userID, int empireId, long [] fleets, String planet) throws Exception{
@@ -162,5 +184,6 @@ public class UpdateNews {
 		fleetsReturnNewsUpdateStatement.executeBatch();
 		fleetsMergeNewsUpdateStatement.executeBatch();
 		fleetsStationNewsUpdateStatement.executeBatch();
+		fleetsExplorationNewsUpdateStatement.executeBatch();
 	}
 }

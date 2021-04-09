@@ -66,34 +66,87 @@ public class ProcessTick
 		// s.scheduleAtFixedRate(scheduledTask, millistoNext, 600*1000, TimeUnit.MILLISECONDS);
 	}	
     
+	private final String userStatusUpdateQuery = "UPDATE app_userstatus SET "+
+	" fleet_readiness  = ? ," +  //1
+	" psychic_readiness  = ? ," + //2
+	" agent_readiness  = ? ," + //3
+	" population   = ? ," + //4
+	" total_solar_collectors  = ? ," + //5
+	" total_fission_reactors  = ? ," + //6
+	" total_mineral_plants  = ? ," + //7
+	" total_crystal_labs  = ? ," + //8
+	" total_refinement_stations   = ? ," + //9
+	" total_cities  = ? ," + //10
+	" total_research_centers   = ? ," + //11
+	" total_defense_sats    = ? ," + //12
+	" total_shield_networks   = ? ," + //13
+	" total_portals  = ? ," + //14
+	" research_points_military   = ? ," + //15
+	" research_points_construction   = ? ," + //16
+	" research_points_tech   = ? ," + //17
+	" research_points_energy    = ? ," + //18
+	" research_points_population   = ? ," + //19
+	" research_points_culture    = ? ," + //20
+	" research_points_operations   = ? ," + //21
+	" research_points_portals    = ? ," + //22
+	" current_research_funding    = ? ," + //23
+	" research_percent_military   = ? ," + //24
+	" research_percent_construction    = ? ," + //25
+	" research_percent_tech            = ? ," + //26
+	" research_percent_energy          = ? ," + //27
+	" research_percent_population      = ? ," + //28
+	" research_percent_culture         = ? ," + //29
+	" research_percent_operations      = ? ," + //30
+	" research_percent_portals         = ? ," + //31
+	" energy_production          = ? ," + //32
+	" energy_decay          = ? ," + //33
+	" buildings_upkeep          = ? ," + //34
+	" units_upkeep          = ? ," + //35
+	" population_upkeep_reduction           = ? ," + //36
+	" portals_upkeep           = ? ," + //37
+	" mineral_production           = ? ," + //38
+	" crystal_production            = ? ," + //39
+	" crystal_decay            = ? ," + //40
+	" ectrolium_production             = ? ," + //41
+	" energy_interest              = ? ," + //42
+	" mineral_interest              = ? ," + //43
+	" crystal_interest              = ? ," + //44
+	" ectrolium_interest              = ? ," + //45
+	" energy_income              = ? ," + //46
+	" mineral_income              = ? ," + //47
+	" crystal_income              = ? ," + //48
+	" ectrolium_income              = ? ," + //49
+	" energy                  = ? ," + //50
+	" minerals                = ? ," + //51
+	" crystals                = ? ," + //52
+	" ectrolium               = ? ," + //53
+	" networth                = ? ," + //54
+	" num_planets = ? ," + //55
+	" construction_flag = ? ," +//56
+	" economy_flag = ? ," + //57
+	" military_flag = ? " +//58
+	" WHERE id = ?" ; //59 wow what a long string :P
+	
 	private void processTick(Connection con){
-		long startTime = 0;
-		long resultTime = 0;
-		long executeBatchTime = 0;
-		long jobsUpdate1= 0, jobsUpdate2 = 0;
-		long planetsUpdate1 = 0, planetsUpdate2 = 0 ;
-		long userUpdate1 = 0, userUpdate2 = 0;
-		long test1 = 0;
-		long test2 = 0;
+		long startTime = 0, resultTime = 0;
 		long postgresProcedureExecTime = 0;
-		long planet_loop = 0;
 		long main_loop1 = 0, main_loop2 = 0;
-		
-		System.out.println("PROCESS TICK STARTED!");
+		long batchTime2 = 0, batchTime1 = 0;
 
 		try {
-		con.setAutoCommit(false);
 	 	startTime = System.nanoTime();
 		Statement statement = con.createStatement();
 		Statement statement2 = con.createStatement();
 		
 		//lock the tables so that users dont interfere with the update
+		con.setAutoCommit(false);
 		statement.execute("LOCK TABLE \"PLANET\", app_roundstatus, app_userstatus, app_construction, app_fleet IN ACCESS EXCLUSIVE MODE;");
 		
 		//update tick number
 		ResultSet resultSet = statement.executeQuery("SELECT tick_number FROM app_roundstatus");
 		resultSet.next();
 		int tick_nr = resultSet.getInt("tick_number");
+		System.out.println("Process of tick #" + tick_nr + " has started!");
 	
 		statement.executeUpdate("UPDATE app_roundstatus SET tick_number = " + (tick_nr + 1) );
 		
@@ -121,66 +174,6 @@ public class ProcessTick
 		String fleetsDeleteUpdateQuery = "DELETE FROM app_fleet WHERE id = ?";
 		PreparedStatement fleetsDeleteUpdateStatement = con.prepareStatement(fleetsDeleteUpdateQuery); 
 
-		 String userStatusUpdateQuery = "UPDATE app_userstatus SET "+
-			" fleet_readiness  = ? ," +  //1
-			" psychic_readiness  = ? ," + //2
-			" agent_readiness  = ? ," + //3
-			" population   = ? ," + //4
-			" total_solar_collectors  = ? ," + //5
-			" total_fission_reactors  = ? ," + //6
-			" total_mineral_plants  = ? ," + //7
-			" total_crystal_labs  = ? ," + //8
-			" total_refinement_stations   = ? ," + //9
-			" total_cities  = ? ," + //10
-			" total_research_centers   = ? ," + //11
-			" total_defense_sats    = ? ," + //12
-			" total_shield_networks   = ? ," + //13
-			" total_portals  = ? ," + //14
-			" research_points_military   = ? ," + //15
-			" research_points_construction   = ? ," + //16
-			" research_points_tech   = ? ," + //17
-			" research_points_energy    = ? ," + //18
-			" research_points_population   = ? ," + //19
-			" research_points_culture    = ? ," + //20
-			" research_points_operations   = ? ," + //21
-			" research_points_portals    = ? ," + //22
-			" current_research_funding    = ? ," + //23
-			" research_percent_military   = ? ," + //24
-			" research_percent_construction    = ? ," + //25
-			" research_percent_tech            = ? ," + //26
-			" research_percent_energy          = ? ," + //27
-			" research_percent_population      = ? ," + //28
-			" research_percent_culture         = ? ," + //29
-			" research_percent_operations      = ? ," + //30
-			" research_percent_portals         = ? ," + //31
-			" energy_production          = ? ," + //32
-			" energy_decay          = ? ," + //33
-			" buildings_upkeep          = ? ," + //34
-			" units_upkeep          = ? ," + //35
-			" population_upkeep_reduction           = ? ," + //36
-			" portals_upkeep           = ? ," + //37
-			" mineral_production           = ? ," + //38
-			" crystal_production            = ? ," + //39
-			" crystal_decay            = ? ," + //40
-			" ectrolium_production             = ? ," + //41
-			" energy_interest              = ? ," + //42
-			" mineral_interest              = ? ," + //43
-			" crystal_interest              = ? ," + //44
-			" ectrolium_interest              = ? ," + //45
-			" energy_income              = ? ," + //46
-			" mineral_income              = ? ," + //47
-			" crystal_income              = ? ," + //48
-			" ectrolium_income              = ? ," + //49
-			" energy                  = ? ," + //50
-			" minerals                = ? ," + //51
-			" crystals                = ? ," + //52
-			" ectrolium               = ? ," + //53
-			" networth                = ? ," + //54
-			" num_planets = ? ," + //55
-			" construction_flag = ? ," +//56
-			" economy_flag = ? ," + //57
-			" military_flag = ? " +//58
-			" WHERE id = ?" ; //59 wow what a long string :P
 		PreparedStatement userStatusUpdateStatement = con.prepareStatement(userStatusUpdateQuery); //mass update, much faster
 		 
 		String planetStatusUpdateQuery2 = "UPDATE \"PLANET\"  SET" +
@@ -189,7 +182,6 @@ public class ProcessTick
 
 		 //loop over users to get their stats
 		while(resultSet.next()){
-
 			if(resultSet.getLong("networth") == 0){
 				//System.out.println("networth was null");
 				continue;
@@ -198,7 +190,6 @@ public class ProcessTick
 			//check if the players empire is null
 			resultSet.getInt("empire_id");
 		 	if (resultSet.wasNull()){
-				//System.out.println("empire was null");
 		   		continue;
 			}
 			int id = resultSet.getInt("id");
@@ -213,8 +204,6 @@ public class ProcessTick
 				else if(col[1].equals("java.lang.Long"))
 			    		userLongValues.put(col[0], resultSet.getLong(col[0]));
 			}
-			//System.out.println(userIntValues);
-			//System.out.println(userLongValues);
 			usersInt.add(userIntValues);
 			usersLong.add(userLongValues);
 		}
@@ -228,8 +217,7 @@ public class ProcessTick
 		//loops over users to uodate their stats and planets --main loop!
 		main_loop1 = System.nanoTime();
 		for(int j = 0; j < usersInt.size(); j++){
-		
-			
+
 			HashMap<String,Integer> userIntValues = usersInt.get(j);
 			HashMap<String,Long> userLongValues  = usersLong.get(j);
 			int userID = userIntValues.get("user_id");
@@ -243,21 +231,12 @@ public class ProcessTick
 			userStatusUpdateStatement.setInt(56, userIntValues.get("construction_flag"));
 			userStatusUpdateStatement.setInt(57, userIntValues.get("economy_flag"));
 			userStatusUpdateStatement.setInt(58, userIntValues.get("military_flag"));
-						
-			HashMap<String, Integer> unitsBuilt = new HashMap<>();
-		
-			String unitsQuery = 
-			" SELECT unit_type, SUM(n) as num_units FROM app_unitconstruction "+
-			" WHERE ticks_remaining = 0 AND user_id = " + userID +
-			" GROUP BY unit_type; ";
 			
-			resultSet = statement.executeQuery(unitsQuery);
-			while (resultSet.next()){
-				unitsBuilt.put(resultSet.getString("unit_type"), resultSet.getInt("num_units"));
-			}
-			
+			//create news updating
 			updateFleets.addNewUser(userID, empireID, tick_nr, userStatusUpdateStatement);
-			updateFleets.updateFleetBuild(unitsBuilt);
+			
+			//update built fleets
+			updateFleets.updateFleetBuild();
 
 			if (updateFleets.getTotalBuiltUnits() > 0)
 				userStatusUpdateStatement.setInt(56, 1);	
@@ -265,7 +244,6 @@ public class ProcessTick
 			int militaryFlag = userIntValues.get("military_flag");
 
 			//update built fleets news 
-			
 			Statement statement3 = con.createStatement();
 			ResultSet portalstSet = statement3.executeQuery("SELECT * FROM \"PLANET\" WHERE portal = TRUE AND owner_id = " + userID );
 			
@@ -277,127 +255,8 @@ public class ProcessTick
 				portals.add(planet);
 			}
 			
-
 			//update mooving fleets
-			//updateMoovingFleets();
-			
-			String fleetsQuery = 
-			" SELECT * FROM app_fleet WHERE main_fleet = false AND ticks_remaining != 0 AND owner_id = " + userID;
-			
-			resultSet = statement.executeQuery(fleetsQuery);
-			
-			String fleetMoveQuery = "UPDATE app_fleet SET " +
-			" current_position_x = ? ," + //1
-			" current_position_y = ? ," + //2
-			" x = ? ," + //3
-			" y = ? ," + //4
-			" ticks_remaining = ? " + //5
-			" WHERE id = ?;";	//6
-
-			PreparedStatement fleetMoveUpdateStatement = con.prepareStatement(fleetMoveQuery); 
-			
-			long [] returnFleets = new long [unit_names.length];
-			long totalReturnedFleets = 0;
-			
-			while (resultSet.next()){
-				double current_position_x = resultSet.getDouble("current_position_x"); //1
-				double current_position_y = resultSet.getDouble("current_position_y"); //2
-				int x = resultSet.getInt("x"); //3
-				int y = resultSet.getInt("y"); //4
-				int fleet_id = resultSet.getInt("id"); //5
-				int ticks_rem = resultSet.getInt("ticks_remaining");  //6
-				double speed = race_info.get("travel_speed");
-				
-				if (resultSet.getInt("command_order") == 5){ //return to main
-					Planet portal = HelperFunctions.find_nearest_portal(current_position_x, current_position_y, portals);
-					if (portal.x != x && portal.y != y)
-						ticks_rem  = HelperFunctions.find_travel_time(portal, current_position_x, current_position_y, speed);
-					x = portal.x;
-					y = portal.y;
-				}
-
-				double cur_x = HelperFunctions.x_move_calc(speed, x, current_position_x, y, current_position_y);
-                double cur_y = HelperFunctions.y_move_calc(speed, x, current_position_x, y, current_position_y);
-				--ticks_rem;
-					
-				if (ticks_rem == 0){
-					//ramake to a batch update
-					if (resultSet.getInt("command_order") == 5){ //return to main fleet
-
-						for(int i = 0; i < unit_names.length; i++){
-							returnFleets[i] += resultSet.getLong(unit_names[i]);
-							totalReturnedFleets += returnFleets[i];
-						}		
-						
-						//delete fleets that have merged main
-						fleetsDeleteUpdateStatement.setInt(1, fleet_id);
-						fleetsDeleteUpdateStatement.addBatch();
-						
-						//news flag
-						if (militaryFlag == 0)
-							militaryFlag = 3;
-						continue;
-					}
-					else if (resultSet.getInt("command_order") == 10){ //explore a planet
-
-						ResultSet exploredPlanet = statement2.executeQuery("SELECT * FROM \"PLANET\" WHERE x = " + resultSet.getInt("x") 
-						+ " AND y = " + resultSet.getInt("y") + " AND i = " + resultSet.getInt("i") + " ;");
-						java.util.Date utilDate = new java.util.Date();
-						java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
-						if(exploredPlanet.next()){
-							int planetID = exploredPlanet.getInt("id");
-							if (exploredPlanet.getInt("owner_id") == 0){
-								statement2.execute("UPDATE \"PLANET\" SET owner_id = " + userID + " WHERE id = "+ planetID + ";");
-								statement2.execute("DELETE FROM app_fleet WHERE id = " + resultSet.getInt("id") + ";");
-								String news = "INSERT INTO app_news ( user1_id, empire1_id, news_type, date_and_time, is_personal_news, " +
-												" is_empire_news, is_read, tick_number, planet_id) " +
-												" SELECT  " + userID +  " , " + userIntValues.get("empire_id") + " , 'SE' , '" + sqlTS + 
-												"' , true, true, false, " + tick_nr + " , " + planetID + " ;" ;
-								statement2.execute(news);
-								String scouting = "INSERT INTO app_scouting ( user_id, planet_id, scout) " +
-												" SELECT  " + userID +  " , " + planetID + " , 1.0;" ;
-								statement2.execute(scouting);
-								if (militaryFlag != 1) //if not attacked - it has highest priority
-									militaryFlag = 2;
-								
-							}
-							else{ //planet is allready taken
-								String news = "INSERT INTO app_news (user1_id, empire1_id, news_type, date_and_time, is_personal_news, "+
-								" is_empire_news, is_read, tick_number, planet_id ) " +
-								" SELECT  " + userID +  " , " + userIntValues.get("empire_id") + " , 'UE' , '" + sqlTS + 
-								"' , true, true, false, " + tick_nr + " , " + planetID + " ;" ;
-								statement2.execute(news);
-								statement2.execute("UPDATE app_fleet SET ticks_remaining = 0 WHERE id = " + resultSet.getInt("id") +  ";");
-								militaryFlag = 1;
-							}
-						}
-						else {
-							//planet doesnt exist for some reason
-							statement2.execute("UPDATE app_fleet SET ticks_remaining = 0 WHERE id = " + resultSet.getInt("id") +  ";");
-						}
-						continue;
-					}
-					else{
-					//merge all fleet later when all are processed
-					fleetMoveUpdateStatement.setDouble(1, x);
-					fleetMoveUpdateStatement.setDouble(2, y);
-					}
-				}
-				else{
-					fleetMoveUpdateStatement.setDouble(1, cur_x);
-					fleetMoveUpdateStatement.setDouble(2, cur_y);
-				}
-					fleetMoveUpdateStatement.setInt(3, x);
-					fleetMoveUpdateStatement.setInt(4, y);
-					fleetMoveUpdateStatement.setInt(5, ticks_rem);
-					fleetMoveUpdateStatement.setInt(6, fleet_id);
-				//System.out.println(fleetMoveUpdateStatement);
-				fleetMoveUpdateStatement.addBatch();
-			}
-			fleetMoveUpdateStatement.executeBatch();
-
-			//update returned fleets
-			updateFleets.updateReturnedFleets(returnFleets);
+			updateFleets.updateMoovingFleets(portals, militaryFlag, race_info);
 			
 			//calculate various stuff for and from users planets
 			userPlanetsUpdate.updateUserPlanets(userID, empireID, userIntValues, race_info, portals, updateNews, userStatusUpdateStatement);
@@ -471,9 +330,6 @@ public class ProcessTick
             userPlanetsUpdate.getTotalBuildings(8) * upkeep_shield_networks);
 			userStatusUpdateStatement.setLong(34, buildings_upkeep);
 			
-			//units upkeep
-			
-			
 			//get unit amounts
 			long [] unitsSums = new long[total_units];
 			statement2 = con.createStatement();		
@@ -484,7 +340,8 @@ public class ProcessTick
 				result.next();
 				unitsSums[z] += result.getLong("sum"); 
 			}
-
+			
+			//units upkeep
 			long units_upkeep = 0;
 			for(int i = 0; i < total_units; i++) {
 				units_upkeep += (long)(units_upkeep_costs[i] * unitsSums[i]);
@@ -573,13 +430,11 @@ public class ProcessTick
 			userStatusUpdateStatement.setInt(14, userPlanetsUpdate.getTotalBuildings(9)); //portals
 			
 			//update networth
-
 			networth += userPlanetsUpdate.getNetworth();
 			networth += userPlanetsUpdate.getPopulation() * 0.005;
 			networth += (0.001 * totalRcPoints);
 			userStatusUpdateStatement.setLong(54, networth);	
-			
-			
+
 			//fleets update
 			updateFleets.updateFleetsMerge();
 			updateFleets.updateStationedFleets();
@@ -589,14 +444,15 @@ public class ProcessTick
 			userStatusUpdateStatement.addBatch();
 		}
 		main_loop2 = System.nanoTime();
+		
+		batchTime1 = System.nanoTime();
 	
 		//execute update planets for all users
 		userPlanetsUpdate.UpdatePlanetsExecute();
 
-		userUpdate1 = System.nanoTime();
+		//update users
 		userStatusUpdateStatement.executeBatch();
-		userUpdate2 = System.nanoTime();
-		
+
 		//update building news	
 		updateNews.executeNews();
 		
@@ -605,7 +461,6 @@ public class ProcessTick
 		
 		//delete returned fleets
 		fleetsDeleteUpdateStatement.executeBatch();
-		
 		
 		//update empire ranks
 		String updateEmpireRanks = 
@@ -618,7 +473,6 @@ public class ProcessTick
 			"FROM app_userstatus GROUP BY empire_id ) AS GroupedUserTable "+
 		"WHERE "+
 			"app_empire.id = GroupedUserTable.empire_id;";
-		
 		statement.execute(updateEmpireRanks);
 		
 		//purge old news
@@ -635,20 +489,20 @@ public class ProcessTick
 		//delete empty fleets
 		updateFleets.deleteEmptyFleets();
 		
+		batchTime2 = System.nanoTime();
+		
 		con.commit();
 		}
 		catch (Exception e) {
-			   try
-				{
-					con.rollback();
-				}
-				catch (SQLException ex)
-				{
-					ex.printStackTrace();
-				}
-				
-				System.out.println("exception " +  e.getMessage());
-				e.printStackTrace();
+		   try{
+				con.rollback();
+			}
+			catch (SQLException ex){
+				ex.printStackTrace();
+			}
+			
+			System.out.println("exception " +  e.getMessage());
+			e.printStackTrace();
 		}
 		 
 		long endTime = System.nanoTime();
@@ -657,10 +511,7 @@ public class ProcessTick
 		Instant instant = clock.instant();
 		System.out.println("Tick completion time: " + instant);	
 		System.out.println("Execute postgres population update procedure: " + (double)(postgresProcedureExecTime)/1_000_000_000.0 + " sec.");
-		System.out.println("planet loop: " + (double)(planet_loop)/1_000_000_000.0 + " sec.");
-		System.out.println("Construction jobs update: " + (double)(jobsUpdate2-jobsUpdate1)/1_000_000_000.0 + " sec.");
-		System.out.println("Planets update: " + (double)(planetsUpdate2-planetsUpdate1)/1_000_000_000.0 + " sec.");
-		System.out.println("Users update: " + (double)(userUpdate2-userUpdate1)/1_000_000_000.0 + " sec.");
+		System.out.println("batch executions: " + (double)(batchTime2 - batchTime1)/1_000_000_000.0 + " sec.");
 		System.out.println("Main loop: " + (double)(main_loop2-main_loop1)/1_000_000_000.0 + " sec.");
 		System.out.println("Total time: " + (double)(endTime-startTime)/1_000_000_000.0 + " sec.");
 		System.out.println("");

@@ -41,7 +41,7 @@ public class UpdateFleets {
 	" , exploration = ? "+ //13
 	" WHERE id = ?"; //14
 	
-	String fleetStationQuery = "UPDATE app_fleet SET" +
+	private final String fleetStationQuery = "UPDATE app_fleet SET" +
 	" bomber = ?" + //1
 	" , fighter = ? "+ //2
 	" , transport = ? "+ //3
@@ -64,17 +64,26 @@ public class UpdateFleets {
 	" phantom = ? " + //1
 	" WHERE id = ?"; //1
 	
-	String fleetsDeleteUpdateQuery = "DELETE FROM app_fleet WHERE id = ?";
+	private final String fleetsDeleteUpdateQuery = "DELETE FROM app_fleet WHERE id = ?";
 	
-	String emptyFleetsDelete = "DELETE FROM app_fleet WHERE " + 
+	private final String emptyFleetsDelete = "DELETE FROM app_fleet WHERE " + 
 	"bomber = 0 AND fighter = 0 AND transport = 0 AND cruiser = 0 AND carrier = 0 AND soldier = 0 AND droid = 0 AND " + 
 	"goliath = 0 AND phantom = 0 AND wizard = 0 AND agent = 0 AND ghost = 0 and exploration = 0 AND main_fleet = false";
 	
+	private final String fleetMoveQuery = "UPDATE app_fleet SET " +
+	" current_position_x = ? ," + //1
+	" current_position_y = ? ," + //2
+	" x = ? ," + //3
+	" y = ? ," + //4
+	" ticks_remaining = ? " + //5
+	" WHERE id = ?;";	//6
+
 	private PreparedStatement fleetsUpdateStatement;
 	private PreparedStatement fleetMergeUpdateStatement;
 	private PreparedStatement fleetStationUpdateStatement; 
 	private PreparedStatement fleetPhantomsUpdateStatement; 
 	private PreparedStatement fleetsDeleteUpdateStatement;
+	private PreparedStatement fleetMoveUpdateStatement;
 	private Connection connection;
 	private Statement statement;
 	private Statement statement2;
@@ -95,6 +104,7 @@ public class UpdateFleets {
 		fleetStationUpdateStatement = connection.prepareStatement(fleetStationQuery); 
 		fleetPhantomsUpdateStatement = connection.prepareStatement(phantomsUpdateQuery); 
 		fleetsDeleteUpdateStatement = connection.prepareStatement(fleetsDeleteUpdateQuery); 
+		fleetMoveUpdateStatement = connection.prepareStatement(fleetMoveQuery); 
 	}
 	
 	public void addNewUser(int userID, int empireID, int tickNumber, PreparedStatement userStatus) throws Exception{
@@ -105,7 +115,18 @@ public class UpdateFleets {
 		this.userStatusUpdateStatement = userStatus;
 	}
 	
-	public void updateFleetBuild(HashMap<String, Integer> unitsBuilt) throws Exception{
+	public void updateFleetBuild() throws Exception{
+		HashMap<String, Integer> unitsBuilt = new HashMap<>();
+
+		String unitsQuery = 
+		" SELECT unit_type, SUM(n) as num_units FROM app_unitconstruction "+
+		" WHERE ticks_remaining = 0 AND user_id = " + userID +
+		" GROUP BY unit_type; ";
+
+		resultSet = statement.executeQuery(unitsQuery);
+		while (resultSet.next()){
+			unitsBuilt.put(resultSet.getString("unit_type"), resultSet.getInt("num_units"));
+		}
 		
 		for(int i = 1; i <= unit_names.length; i++){
 			fleetsUpdateStatement.setLong(i, unitsBuilt.getOrDefault(unit_names[i-1],0));
@@ -119,7 +140,7 @@ public class UpdateFleets {
 		fleetsUpdateStatement.setInt(14, userID);
 		fleetsUpdateStatement.addBatch();
 	}
-
+	
 	public void updateFleetsMerge() throws Exception{
 		ResultSet mergingFleets = statement.executeQuery("SELECT * FROM app_fleet WHERE (command_order = 3 OR command_order = 4) AND owner_id = " + userID + 
 			" AND ticks_remaining = 0;");
@@ -160,7 +181,7 @@ public class UpdateFleets {
 		}
 	}
 
-	public void updateReturnedFleets(long [] returnFleets) throws Exception{
+	public void updateReturnedFleets(long [] returnFleets, int militaryFlag) throws Exception{
 		boolean returnedUnits = false;
 		for(int i = 0; i < unit_names.length; i++){
 			fleetsUpdateStatement.setLong(i+1, returnFleets[i]);
@@ -172,7 +193,111 @@ public class UpdateFleets {
 		
 		if (returnedUnits) {
 			addNews.createfleetReturnNews(userID, empireID, returnFleets);
-			userStatusUpdateStatement.setInt(58, 2);
+			if (militaryFlag == 0)
+				userStatusUpdateStatement.setInt(58, 3);
+		}
+	}
+	
+	public void updateMoovingFleets(LinkedList<Planet> portals, int militaryFlag, HashMap<String, Double> race_info) throws Exception{
+		String fleetsQuery = " SELECT * FROM app_fleet WHERE main_fleet = false AND ticks_remaining != 0 AND owner_id = " + userID;
+		ResultSet resultSet = statement.executeQuery(fleetsQuery);
+		
+		
+		long [] returnFleets = new long [unit_names.length];
+		long totalReturnedFleets = 0;
+		
+		while (resultSet.next()){
+			double current_position_x = resultSet.getDouble("current_position_x"); //1
+			double current_position_y = resultSet.getDouble("current_position_y"); //2
+			int x = resultSet.getInt("x"); //3
+			int y = resultSet.getInt("y"); //4
+			int fleet_id = resultSet.getInt("id"); //5
+			int ticks_rem = resultSet.getInt("ticks_remaining");  //6
+			double speed = race_info.get("travel_speed");
+			
+			if (resultSet.getInt("command_order") == 5){ //return to main
+				Planet portal = HelperFunctions.find_nearest_portal(current_position_x, current_position_y, portals);
+				if (portal.x != x && portal.y != y)
+					ticks_rem  = HelperFunctions.find_travel_time(portal, current_position_x, current_position_y, speed);
+				x = portal.x;
+				y = portal.y;
+			}
+
+			double cur_x = HelperFunctions.x_move_calc(speed, x, current_position_x, y, current_position_y);
+			double cur_y = HelperFunctions.y_move_calc(speed, x, current_position_x, y, current_position_y);
+			--ticks_rem;
+				
+			if (ticks_rem == 0){
+				//ramake to a batch update
+				if (resultSet.getInt("command_order") == 5){ //return to main fleet
+
+					for(int i = 0; i < unit_names.length; i++){
+						returnFleets[i] += resultSet.getLong(unit_names[i]);
+						totalReturnedFleets += returnFleets[i];
+					}		
+					
+					//delete fleets that have merged main
+					fleetsDeleteUpdateStatement.setInt(1, fleet_id);
+					fleetsDeleteUpdateStatement.addBatch();
+					continue;
+				}
+				else if (resultSet.getInt("command_order") == 10){ //explore a planet
+					updateExplorationFleets(resultSet, militaryFlag);
+					continue;
+				}
+				else{
+				//merge all fleet later when all are processed
+				fleetMoveUpdateStatement.setDouble(1, x);
+				fleetMoveUpdateStatement.setDouble(2, y);
+				}
+			}
+			else{
+				fleetMoveUpdateStatement.setDouble(1, cur_x);
+				fleetMoveUpdateStatement.setDouble(2, cur_y);
+			}
+			fleetMoveUpdateStatement.setInt(3, x);
+			fleetMoveUpdateStatement.setInt(4, y);
+			fleetMoveUpdateStatement.setInt(5, ticks_rem);
+			fleetMoveUpdateStatement.setInt(6, fleet_id);
+			fleetMoveUpdateStatement.addBatch();
+		}
+		fleetMoveUpdateStatement.executeBatch();
+		
+		updateReturnedFleets(returnFleets, militaryFlag);
+	}
+	
+	public void updateExplorationFleets(ResultSet fleet, int militaryFlag) throws Exception{
+		ResultSet exploredPlanet = statement2.executeQuery("SELECT * FROM \"PLANET\" WHERE x = " + fleet.getInt("x") 
+		+ " AND y = " + fleet.getInt("y") + " AND i = " + fleet.getInt("i") + " ;");
+		
+		java.util.Date utilDate = new java.util.Date();
+		java.sql.Timestamp sqlTS = new java.sql.Timestamp(utilDate.getTime());
+		
+		if(exploredPlanet.next()){
+			int planetID = exploredPlanet.getInt("id");
+			if (exploredPlanet.getInt("owner_id") == 0){
+				statement2.execute("UPDATE \"PLANET\" SET owner_id = " + userID + " WHERE id = "+ planetID + ";");
+				fleetsDeleteUpdateStatement.setInt(1, fleet.getInt("id"));
+				fleetsDeleteUpdateStatement.addBatch();
+				addNews.createfleetExplorationNews(userID, empireID, true, planetID);
+				
+				
+				String scouting = "INSERT INTO app_scouting ( user_id, planet_id, scout) " +
+								" SELECT  " + userID +  " , " + planetID + " , 1.0;" ;
+								
+				statement2.execute(scouting);
+				if (militaryFlag != 1) //if not attacked - it has highest priority
+					userStatusUpdateStatement.setInt(58, 2);
+			}
+			else{ //planet is allready taken
+				addNews.createfleetExplorationNews(userID, empireID, false, planetID);
+				statement2.execute("UPDATE app_fleet SET ticks_remaining = 0 WHERE id = " + fleet.getInt("id") +  ";");
+				userStatusUpdateStatement.setInt(58, 1);
+			}
+		}
+		else {
+			//planet doesnt exist for some reason
+			statement2.execute("UPDATE app_fleet SET ticks_remaining = 0 WHERE id = " + fleet.getInt("id") +  ";");
 		}
 	}
 	
@@ -284,6 +409,7 @@ public class UpdateFleets {
 		fleetMergeUpdateStatement.executeBatch();
 		fleetStationUpdateStatement.executeBatch();
 		fleetPhantomsUpdateStatement.executeBatch();
+		fleetsDeleteUpdateStatement.executeBatch();
 	}
 
 }
