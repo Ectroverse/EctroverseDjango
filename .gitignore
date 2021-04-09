@@ -148,6 +148,7 @@ dmypy.json
 
 # End of https://www.toptal.com/developers/gitignore/api/django
 
-# java log
+# java log, settings and class files
 /java/log.txt
-/java/Main.class
+/java/Settings.java
+/java/org
