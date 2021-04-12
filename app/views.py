@@ -294,7 +294,7 @@ def map_settings(request):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def famnews(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    empire_news = News.objects.filter(Q(empire1 = status.empire) | Q(empire2 = status.empire), is_empire_news = True).order_by('-date_and_time')
+    empire_news = News.objects.filter(empire1 = status.empire, is_empire_news = True).order_by('-date_and_time')
 
     current_empire = status.empire
     context = {"status": status,
@@ -1066,8 +1066,6 @@ def fleets(request):
                     print(unit, num)
                     display_fleet_inner[unit_info[unit]["label"]] = num
                     display_fleet[fleet] = display_fleet_inner
-
-    print("display_fleet", display_fleet)
 
     context = {"status": status,
                "page_title": "Fleets",

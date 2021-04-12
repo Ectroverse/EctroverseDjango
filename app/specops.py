@@ -189,7 +189,6 @@ def perform_spell(spell, psychics, status, *args):
         fleet2 = Fleet.objects.get(owner=user2.id, main_fleet=True)
         psychics2 = Fleet.objects.filter(owner=user2.id).aggregate(Sum('wizard'))
         psychics2 = psychics2['wizard__sum']
-        print(psychics2)
         defence = race_info_list[user2.get_race_display()].get("psychics_coeff", 1.0) * psychics2 * \
                   (1.0 + 0.005 * user2.research_percent_culture)
         success = attack / (defence + 1)
@@ -248,7 +247,6 @@ def perform_spell(spell, psychics, status, *args):
                   " planets, reducing solar collectors efficiency by " + str(effect)
 
     if spell == "Psychic Assault":
-        print("teest2")
         refdef = pow(attack / (attack + defence), 1.1)
         refatt = pow(defence / (attack + defence), 1.1)
         tlosses = 0.2
@@ -367,7 +365,7 @@ def perform_operation(agent_fleet):
     defense = 50
     agents2 = 0
     user2 = None
-    stealth = True
+    stealth = agentop_specs[operation][3]
     empire2 = None
 
     if target_planet.owner is not None:
@@ -395,15 +393,15 @@ def perform_operation(agent_fleet):
         agent_fleet.save()
         fleet2.agent -= loss2
         fleet2.save()
-        news_message = "Attacker lost" + str(loss1) + "agents. Defender lost:" + str(loss2) + "agents."
-        news_message2 = "Attacker lost" + str(loss1) + "agents. Defender lost:" + str(loss2) + "agents."
+        news_message = "Attacker lost: " + str(loss1) + "agents. Defender lost: " + str(loss2) + "agents. "
+        news_message2 = "Attacker lost: " + str(loss1) + "agents. Defender lost: " + str(loss2) + "agents. "
 
 
     if operation == "Observe Planet":
         if success < 0.4:
-            news_message += "no information was gathered about this planet!"
+            news_message += "No information was gathered about this planet!"
         if success >= 0.4:
-            news_message += "planet size: " + str(target_planet.size)
+            news_message += "Planet information: planet size: " + str(target_planet.size)
         # if success >= 1.0:
         #     news_message += "artefact: " + target_planet.artefact
         if success >= 0.9:
@@ -448,7 +446,46 @@ def perform_operation(agent_fleet):
             if scouting.scout < success:
                 scouting.scout = success
                 scouting.save()
-
+    if operation == "Spy Target":
+        if success < 0.4:
+            news_message += "No information was gathered about this faction!"
+        if success >= 0.5:
+            news_message += "Fleet readiness: " + str(user2.fleet_readiness)
+        if success >= 0.7:
+            news_message += "\nPsychic readiness: " + str(user2.psychic_readiness)
+        if success >= 0.9:
+            news_message += "\nAgent readiness: " + str(user2.agent_readiness)
+        if success >= 1.0:
+            news_message += "\nEnergy: " + str(user2.energy)
+        if success >= 0.6:
+            news_message += "\nMinerals: " + str(user2.minerals)
+        if success >= 0.4:
+            news_message += "\nCrystals: " + str(user2.crystals)
+        if success >= 0.8:
+            news_message += "\nEctrolium: " + str(user2.ectrolium)
+        if success >= 0.9:
+            news_message += "\nPopulation: " + str(user2.population)
+    if operation == "Network Infiltration":
+        lost_research_pct = 3
+        if success < 1.0:
+            lost_research_pct = round((3.0 / 0.6) * (success - 0.4), 2)
+        if lost_research_pct > 0:
+            fa = 0.3 + (0.7 / 255.0) * (np.random.randint(0, 2147483647) & 255)
+            gained_research_pct = round(lost_research_pct * fa, 2)
+            for research in researchNames:
+                lost_research_points = int(getattr(user2, research) * (0.01 * lost_research_pct))
+                research_points_new2 = getattr(user2, research) - lost_research_points
+                setattr(user2, research, research_points_new2)
+                research_points_new1 = getattr(user1, research) + int(lost_research_points * fa)
+                setattr(user1, research, research_points_new1)
+            news_message += "\n" + str(lost_research_pct) + " research % was lost by the defender! " + \
+                                   str(gained_research_pct) + "research % was stolen for our faction!"
+            news_message2 += "\n" + str(lost_research_pct) + " research % was lost!"
+            user2.save()
+            user1.save()
+        else:
+            news_message += "\nNo research was stolen!"
+            news_message2 += "\nNo research was lost!"
     if empire2 is None:
         News.objects.create(user1=User.objects.get(id=user1.id),
                         user2=None,
