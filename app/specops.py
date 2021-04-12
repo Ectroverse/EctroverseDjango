@@ -245,10 +245,9 @@ def perform_spell(spell, psychics, status, *args):
                                name="Black Mist",
                                specop_strength=effect,
                                ticks_left=time)
-        news_message = " solar power deduced by " + str(effect) + "%!"
+        news_message = " solar power reduced by " + str(effect) + "%!"
         message = "A black mist is spreading over " + str(user2.user_name) + \
-                  " planetes, reducing solar collectors efficiency by " + str(effect)
-
+                  " planets, reducing solar collectors efficiency by " + str(effect)
 
     if spell == "Psychic Assault":
         print("teest2")
@@ -286,11 +285,11 @@ def perform_spell(spell, psychics, status, *args):
     if spell =="Grow Planet's Size":
         planet = random.choice(Planet.objects.filter(owner=status.user))
         grow = (attack * 1.3)
-        growth = np.clip(round(200 * grow / status.networth / 2 / status.num_planets),0,300)
+        growth = np.clip(round(200 * grow / status.networth / 2 * (status.num_planets/10)),0,300)
         planet.size += growth
         planet.save()
 
-        news_message = status.user_name + " planet " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown " + str(growth)
+        news_message = status.user_name + "'s planet " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown by " + str(growth)
         message = "Your planet  " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown by " + str(growth)
 
         status.psychic_readiness -= specopPsychicsReadiness(spell, status)
