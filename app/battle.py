@@ -61,6 +61,11 @@ def battleReadinessLoss(user1, user2):
     if nap:
         fa = max(50, fa)
 
+    spec_ops = Specops.objects.filter(user_to=user2, name="Dark Webs")
+
+    for specops in spec_ops:
+        fa *= spec_ops.specop_strength
+
     # add personal and fam news
     # dont forget to delete anempty fleet!
     # deparate losses for main fleet and stationed! grr
