@@ -211,6 +211,23 @@ def perform_spell(spell, psychics, status, *args):
         news_message = str(cry_converted) + " crystals were converted into " + str(energy) + " energy!"
         message = "Your " + str(cry_converted) + " crystals were converted into " + str(energy) + " energy!"
 
+    if spell == 'Dark Web':
+        web = 100 * (attack / status.networth)
+        effect = round(web * 3.5)
+        time = random.randint(1,31)+24
+        Specops.objects.create(user_to=status.user,
+                               user_from=status.user,
+                               specop_type='S',
+                               name="Dark Web",
+                               specop_strength=effect,
+                               ticks_left=time)
+
+        news_message = status.user_name + "'s' psychics have given them " + str(effect) + "% extra protection for " + str(time) + " weeks!"
+        message = "Your psychics have given you " + str(effect) + "% extra protection for " + str (time) + " weeks!"
+
+        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status)
+        status.save() 
+        
     if spell == "Irradiate Ectrolium":
         destroyed_ectro = 0
         if success > 1:
@@ -246,6 +263,28 @@ def perform_spell(spell, psychics, status, *args):
         message = "A black mist is spreading over " + str(user2.user_name) + \
                   " planets, reducing solar collectors efficiency by " + str(effect)
 
+        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status)
+        status.save()
+
+    if spell == 'War Illusions':
+        Specops.objects.filter(user_to=status.user, name="War Illusions").delete()
+        illusion = 100 * (attack / status.networth)
+        illusions = illusion * 4.5
+        effect = round(illusions * (random.randint(1,20)/100))
+        time = random.randint(1,31)+32
+        Specops.objects.create(user_to=status.user,
+                               user_from=status.user,
+                               specop_type='S',
+                               name="War Illusions",
+                               specop_strength=effect,
+                               ticks_left=time)
+
+        news_message = status.user_name + "'s' psychics have given them " + str(effect) + "% extra protection for " + str(time) + " weeks!"
+        message = "Your psychics have given you " + str(effect) + "% extra protection for " + str (time) + " weeks!"
+
+        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status)
+        status.save()
+        
     if spell == "Psychic Assault":
         refdef = pow(attack / (attack + defence), 1.1)
         refatt = pow(defence / (attack + defence), 1.1)
