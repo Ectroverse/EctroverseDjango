@@ -469,9 +469,10 @@ def planets(request):
 def planet(request, planet_id):
     status = get_object_or_404(UserStatus, user=request.user)
     planet = get_object_or_404(Planet, pk=planet_id)
-
+    attack_cost = None
     if planet.owner:  # if planet is owned by someone, grab that owner's status, in order to get faction and other info of owner
         planet_owner_status = UserStatus.objects.get(user=planet.owner)
+        attack_cost = attack_cost = battleReadinessLoss(status, planet_owner_status)
     else:
         planet_owner_status = None
 
@@ -479,6 +480,7 @@ def planet(request, planet_id):
 
     context = {"status": status,
                "planet": planet,
+               "attack_cost":attack_cost,
                "planet_owner_status": planet_owner_status,
                "page_title": "Planet " + str(planet.x) + ',' + str(planet.y) + ':' + str(planet.i),
                "exploration_cost": exploration_cost}
