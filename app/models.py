@@ -329,7 +329,7 @@ class Construction(models.Model): # a single type of building under construction
 class Fleet(models.Model):
     owner = models.ForeignKey(User, null=True, blank=True, default=None, on_delete=models.SET_NULL) # if owner is removed from game set back to null
     main_fleet = models.BooleanField(default=False) # should only be 1 per user, assigned only at user creation
-    on_planet = models.ForeignKey(Planet, null=True, blank=True, default=None, on_delete=models.SET_NULL) # planet object if stationed, or None
+    on_planet = models.ForeignKey(Planet, related_name="stationed", null=True, blank=True, default=None, on_delete=models.SET_NULL) # planet object if stationed, or None
     ticks_remaining = models.IntegerField(default=0) # for traveling
 
     current_position_x = models.FloatField(default=0.0)  # for traveling
@@ -354,6 +354,9 @@ class Fleet(models.Model):
     y = models.IntegerField(null=True, blank=True, default=None)
     i = models.IntegerField(null=True, blank=True, default=None)
 
+    # got sick of having to search for it everytime actually, so decided to add it
+    target_planet = models.ForeignKey(Planet, related_name="target",on_delete=models.SET_DEFAULT, blank=True, null=True, default=None)
+
     # Number of each type of unit
     bomber      = models.BigIntegerField(default=0, verbose_name="Bombers")
     fighter     = models.BigIntegerField(default=0, verbose_name="Fighters")
@@ -371,7 +374,8 @@ class Fleet(models.Model):
 
     specop = models.CharField(max_length=50, blank=True, null=True, default=None)
 
-
+    def __str__(self):
+        return self.owner
 
 class UnitConstruction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

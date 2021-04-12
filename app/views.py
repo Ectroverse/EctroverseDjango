@@ -956,7 +956,7 @@ def fleets_orders_process(request):
     if order == 5:
         portal_planets = Planet.objects.filter(owner=request.user,
                                                portal=True)  # should always have at least the home planet, unless razed!!!
-        print(portal_planets)
+        # print(portal_planets)
         if not portal_planets:
             request.session['error'] = "You need at least one portal for fleet to returnto main fleet!"
             return fleets(request)

@@ -64,12 +64,17 @@ def generate_fleet_order(fleet, target_x, target_y, speed, order_type, *args):
     fleet.y = target_y
     if args:
         fleet.i = args[0]
-    # print(fleet.current_position_x,fleet.current_position_y)
+        planet = Planet.objects.filter(x=target_x, y=target_y, i=args[0]).first()
+        if planet is not None:
+            fleet.target_planet = planet
+        # print(fleet.current_position_x,fleet.current_position_y)
     min_dist = np.sqrt((fleet.current_position_x - float(target_x)) ** 2 +
                        (fleet.current_position_y - float(target_y)) ** 2)
     fleet.ticks_remaining = int(np.ceil((min_dist / speed) - 0.001))  # due to rounding and
     # floating points the fleet travel time becomes more than it should, hence the subtraction
     fleet.command_order = order_type
+
+
     fleet.save()
 
 def merge_fleets(fleets):
@@ -254,6 +259,9 @@ def send_agents_ghosts(status, agents, ghosts, x, y, i, specop):
     x = int(x)
     y = int(y)
     i = int(i)
+    planet = Planet.objects.filter(x=x, y=y, i=i).first()
+    if planet is None:
+        return "This planet doesn't exist!"
     portal_planets = Planet.objects.filter(owner=status.user, portal=True)
     if not portal_planets:
         return "You need at least one portal to send the fleet from!"
@@ -263,6 +271,7 @@ def send_agents_ghosts(status, agents, ghosts, x, y, i, specop):
     fleet_time = int(np.ceil(min_dist / speed))
     fleet = Fleet.objects.create(owner=status.user,
                          command_order=6,
+                         target_planet=planet,
                          x=x,
                          y=y,
                          i=i,

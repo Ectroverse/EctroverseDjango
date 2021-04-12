@@ -345,5 +345,6 @@ def perform_spell(spell, psychics, status, *args):
     # if news_message2_empire2:
 
 
-def perform_operation():
+def perform_operation(operation, agents, user1, planet):
+
     pass

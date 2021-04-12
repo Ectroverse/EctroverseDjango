@@ -1,5 +1,6 @@
 package org.ectroverse.processtick;
 
+import java.io.*;
 import java.sql.*;
 import java.util.*;
 import java.time.Clock; 
@@ -504,7 +505,60 @@ public class ProcessTick
 			System.out.println("exception " +  e.getMessage());
 			e.printStackTrace();
 		}
-		 
+		
+		//process ops
+		
+		long python_script1 = 0;
+		long python_script2 = 0;
+		try{
+			//ProcessBuilder pb = new ProcessBuilder("python", "/code/manage.py", "process_ops");
+			ProcessBuilder pb = new ProcessBuilder("python", "/code/manage.py");
+			Process p = pb.start();
+			BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+			python_script1 = System.nanoTime();
+			p.waitFor();
+			python_script2 = System.nanoTime();
+			String s = null;
+			s = stdError.readLine();
+			if (s != null){
+				System.out.println("Here is the standard error of the process_ops");
+				while (s != null) {
+					System.out.println(s);
+					s = stdError.readLine();
+				}
+			}
+		}
+		catch (Exception e){
+			System.out.println("Exception: " +  e.getMessage());
+		}
+		
+		/*
+		try{
+			Process p = Runtime.getRuntime().exec("python /code/manage.py process_ops");
+			BufferedReader stdInput = new BufferedReader(new 
+			InputStreamReader(p.getInputStream()));
+			BufferedReader stdError = new BufferedReader(new 
+			InputStreamReader(p.getErrorStream()));
+
+			// Read the output from the command
+			//System.out.println("Here is the standard output of the command:\n");
+			String s = null;
+			while (stdInput.readLine() != null) {
+				//System.out.println(s);
+			}
+			
+			// Read any errors from the attempted command
+			//System.out.println("Here is the standard error of the command (if any):\n");
+			while ((s = stdError.readLine()) != null) {
+				System.out.println(s);
+			}
+		}
+		catch (Exception e){
+			System.out.println("Exception: " +  e.getMessage());
+		}
+		long python_script2 =  System.nanoTime();*/
+		
+		
 		long endTime = System.nanoTime();
 		
 		Clock clock = Clock.systemDefaultZone();
@@ -513,7 +567,10 @@ public class ProcessTick
 		System.out.println("Execute postgres population update procedure: " + (double)(postgresProcedureExecTime)/1_000_000_000.0 + " sec.");
 		System.out.println("batch executions: " + (double)(batchTime2 - batchTime1)/1_000_000_000.0 + " sec.");
 		System.out.println("Main loop: " + (double)(main_loop2-main_loop1)/1_000_000_000.0 + " sec.");
+		System.out.println("Python script process_ops time: " + (double)(python_script2-python_script1)/1_000_000_000.0 + " sec.");
 		System.out.println("Total time: " + (double)(endTime-startTime)/1_000_000_000.0 + " sec.");
 		System.out.println("");
+		
+
 	}
 }
