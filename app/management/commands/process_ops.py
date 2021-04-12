@@ -16,7 +16,7 @@ class Command(BaseCommand): # must be called command, use file name to name the 
                 agent_fleet.save()
                 continue
 
-            perform_operation(agent_fleet.specop, agent_fleet.agent, agent_fleet.owner,  agent_fleet.target_planet)
+            perform_operation(agent_fleet)
             # (operation, agents, user1, planet):
             status = UserStatus.objects.get(id=agent_fleet.owner.id)
             speed = race_info_list[status.get_race_display()]["travel_speed"]

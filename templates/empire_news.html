@@ -223,11 +223,45 @@
 				<div class="left_news"><img src="{% static '/news/outgoing_operation.gif' %}"></div>
 				<div class="right_news">
 				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
-				{{n.user1.userstatus.user_name}}'s psychics have casted a {{ n.fleet1 }} spell on {{n.user2}}!
+				{{n.user1.userstatus.user_name}}'s psychics have casted a {{ n.fleet1 }} spell on {{n.user2.userstatus.user_name}}!
 				<br>
 				The results: {{n.extra_info}}
 				</div>
 			</div>
+		{% endif %}
+		{% if n.news_type == 'AA' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/outgoing_operation.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{{n.user1.userstatus.user_name}}'s agents have performed a {{ n.fleet1 }} operation on planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}
+				{% if n.user2 is not None %}
+				owned by {{n.user2.userstatus.user_name}}
+				{% else %}
+				currently uninhabited.
+				{% endif %}
+				<br>
+				The results: {{n.extra_info}}
+				</div>
+			</div>
+		{% endif %}
+		{% if n.news_type == 'AD' %}
+			<div class="news_parent_container">
+				<div class="left_news"><img src="{% static '/news/outgoing_operation.gif' %}"></div>
+				<div class="right_news">
+				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
+				{{n.user1.userstatus.user_name}}'s agents have intercepted some enemy agents from
+				{% if user2 in not None %}
+				 n.user2.userstatus.user_name of n.empire2.name_with_id
+				{% else %}
+				an unknown faction 
+				{% endif %}
+				performing a {{ n.fleet1 }} operation
+				on planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}
+				<br>
+				The results: {{n.extra_info}}
+				</div>
+			</div>	
 		{% endif %}
 		{% if n.news_type == 'SA' %}
 			<div class="news_parent_container">

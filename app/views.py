@@ -1660,12 +1660,15 @@ def specops(request):
             elif int(request.POST['unit_ammount']) > main_fleet.wizard:
                 msg = "You don't have that many psychics!"
             else:
-                if psychicop_specs[request.POST['spell']][3] == False and request.POST['user_id2'] == "" :
+                if psychicop_specs[request.POST['spell']][3] is False and request.POST['user_id2'] == "" :
                     msg = "You must specify a target player for this spell!"
                 else:
-                    faction, err_msg = get_userstatus_from_id_or_name(request.POST['user_id2'])
+                    if psychicop_specs[request.POST['spell']][3] is False:
+                        faction, err_msg = get_userstatus_from_id_or_name(request.POST['user_id2'])
+                    else:
+                        faction = None
                     # if second faction not found and not self spell
-                    if faction == None and psychicop_specs[request.POST['spell']][3] == False:
+                    if faction is None and psychicop_specs[request.POST['spell']][3] is False:
                         msg = err_msg
                     else:
                         msg = perform_spell(request.POST['spell'], int(request.POST['unit_ammount']), status, faction)

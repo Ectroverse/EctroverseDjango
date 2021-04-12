@@ -508,16 +508,12 @@ public class ProcessTick
 		
 		//process ops
 		
-		long python_script1 = 0;
-		long python_script2 = 0;
+		long python_script1 = System.nanoTime();
 		try{
-			//ProcessBuilder pb = new ProcessBuilder("python", "/code/manage.py", "process_ops");
-			ProcessBuilder pb = new ProcessBuilder("python", "/code/manage.py");
+			ProcessBuilder pb = new ProcessBuilder("python", "/code/manage.py", "process_ops");
 			Process p = pb.start();
 			BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-			python_script1 = System.nanoTime();
 			p.waitFor();
-			python_script2 = System.nanoTime();
 			String s = null;
 			s = stdError.readLine();
 			if (s != null){
@@ -531,7 +527,7 @@ public class ProcessTick
 		catch (Exception e){
 			System.out.println("Exception: " +  e.getMessage());
 		}
-		
+		long python_script2 = System.nanoTime();
 		/*
 		try{
 			Process p = Runtime.getRuntime().exec("python /code/manage.py process_ops");

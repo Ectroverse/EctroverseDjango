@@ -86,18 +86,18 @@ agentop_specs = {
 
 
 
-def specopPsychicsReadiness(spell, user1, *args):
+def specopReadiness(specop, user1, *args):
     if args:
         user2 = args[0]
 
-    if psychicop_specs[spell][3] is False and not user2:
+    if specop[3] is False and not user2:
         return -1
 
-    penalty = get_op_penalty(user1.research_percent_culture, psychicop_specs[spell][0])
+    penalty = get_op_penalty(user1.research_percent_culture, specop[0])
     if penalty == -1:
         return -1
-    elif psychicop_specs[spell][3]:
-        return int((1.0 + 0.01 * penalty) * psychicop_specs[spell][1])
+    elif specop[3]:
+        return int((1.0 + 0.01 * penalty) * specop[1])
 
     empire1 = user1.empire
     empire2 = user2.empire
@@ -111,7 +111,7 @@ def specopPsychicsReadiness(spell, user1, *args):
     if fa < 0.75:
         fa = 0.75
 
-    fa = (1.0 + 0.01 * penalty) * psychicop_specs[spell][1] * fa
+    fa = (1.0 + 0.01 * penalty) * specop[1] * fa
 
     relations_from_empire = Relations.objects.filter(empire1=empire1)
     relations_to_empire = Relations.objects.filter(empire2=empire2)
@@ -177,8 +177,6 @@ def perform_spell(spell, psychics, status, *args):
 
     fleet1 = Fleet.objects.get(owner=status.id, main_fleet=True)
 
-    print(spell, psychics, status, args)
-
     news_message = ""
     message = ""
 
@@ -209,7 +207,7 @@ def perform_spell(spell, psychics, status, *args):
 
         energy = int(cry_converted * 24.0 * (1.0 + 0.01 * status.research_percent_culture))
         status.energy += energy
-        status.psychic_readiness -= specopPsychicsReadiness(spell, status)
+        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status)
         status.save()
         news_message = str(cry_converted) + " crystals were converted into " + str(energy) + " energy!"
         message = "Your " + str(cry_converted) + " crystals were converted into " + str(energy) + " energy!"
@@ -227,7 +225,7 @@ def perform_spell(spell, psychics, status, *args):
             user2.military_flag = 1
             user2.save()
 
-        status.psychic_readiness -= specopPsychicsReadiness(spell, status, user2)
+        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status, user2)
         status.save()
 
         news_message = str(destroyed_ectro) + " ectrolium was destroyed!"
@@ -263,7 +261,7 @@ def perform_spell(spell, psychics, status, *args):
         fleet2.wizard -= psychics_loss2
         fleet2.save()
 
-        status.psychic_readiness -= specopPsychicsReadiness(spell, status, user2)
+        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status, user2)
         status.save()
 
         news_message = str(psychics_loss1) + " psychics were lost by " + status.user_name + \
@@ -279,7 +277,7 @@ def perform_spell(spell, psychics, status, *args):
         news_message = status.user_name + " has summoned " + str(phantom_cast) + " Phantoms to fight in their army!"
         message = "You have summoned " + str(phantom_cast) + " Phantoms to join your army!"
 
-        status.psychic_readiness -= specopPsychicsReadiness(spell, status)
+        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status)
         status.save()
 
     if spell =="Grow Planet's Size":
@@ -292,7 +290,7 @@ def perform_spell(spell, psychics, status, *args):
         news_message = status.user_name + "'s planet " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown by " + str(growth)
         message = "Your planet  " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown by " + str(growth)
 
-        status.psychic_readiness -= specopPsychicsReadiness(spell, status)
+        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status)
         status.save()
 
 
@@ -344,6 +342,154 @@ def perform_spell(spell, psychics, status, *args):
     # if news_message2_empire2:
 
 
-def perform_operation():
-    pass
+def perform_operation(agent_fleet):
+    operation = agent_fleet.specop
+    agents = agent_fleet.agent
+    user = agent_fleet.owner
+    target_planet = agent_fleet.target_planet
+    user1 = UserStatus.objects.get(id=user.id)
+    if operation not in agentop_specs:
+        return "This operation is broken/doesnt exist!"
 
+    fa = 0.6 + (0.8/ 255.0) * (np.random.randint(0, 2147483647) & 255)
+
+    attack = fa * race_info_list[user1.get_race_display()].get("agents_coeff", 1.0) * \
+             agents * (1.0 + 0.01 * user1.research_percent_operations / agentop_specs[operation][2])
+
+    penalty = get_op_penalty(user1.research_percent_operations, agentop_specs[operation][0])
+
+    if penalty == -1:
+        return "You don't have enough operations research to perform this spell!"
+
+    if penalty > 0:
+        attack /= 1.0 + 0.01 * penalty
+
+    defense = 50
+    agents2 = 0
+    user2 = None
+    stealth = True
+    empire2 = None
+
+    if target_planet.owner is not None:
+        user2 = UserStatus.objects.get(id=target_planet.owner.id)
+        empire2 = user2.empire
+        fleet2 = Fleet.objects.get(owner=user2.id, main_fleet=True)
+        agents2 = fleet2.agent
+        defense = agents2 * race_info_list[user2.get_race_display()].get("agents_coeff", 1.0) * \
+                  (1.0 + 0.01 * user2.research_percent_operations)
+
+    success = attack / (defense + 1)
+    news_message = ""
+    news_message2 = ""
+
+    if success < 2.0 and target_planet.owner is not None:
+        stealth = False
+        refdef = 0.5 * pow((0.5 * success), 1.1)
+        refatt = 1.0 - refdef
+        tlosses = 1.0 - pow((0.5 * success), 0.2)
+        fc = 0.75 + (0.5 / 255.0) * (np.random.randint(0, 2147483647) & 255)
+        loss1 = round(fc * refatt * tlosses *agents)
+        fc = 0.75 + (0.5 / 255.0) * (np.random.randint(0, 2147483647) & 255)
+        loss2 = round(fc * refdef * tlosses * agents)
+        agent_fleet.agent -= loss1
+        agent_fleet.save()
+        fleet2.agent -= loss2
+        fleet2.save()
+        news_message = "Attacker lost" + str(loss1) + "agents. Defender lost:" + str(loss2) + "agents."
+        news_message2 = "Attacker lost" + str(loss1) + "agents. Defender lost:" + str(loss2) + "agents."
+
+
+    if operation == "Observe Planet":
+        if success < 0.4:
+            news_message += "no information was gathered about this planet!"
+        if success >= 0.4:
+            news_message += "planet size: " + str(target_planet.size)
+        # if success >= 1.0:
+        #     news_message += "artefact: " + target_planet.artefact
+        if success >= 0.9:
+            if target_planet.bonus_solar > 0:
+                news_message += "\nsolar bonus: " + str(target_planet.bonus_solar)
+            if target_planet.bonus_fission > 0:
+                news_message += "\nfission bonus: " + str(target_planet.bonus_fission)
+            if target_planet.bonus_mineral > 0:
+                news_message += "\nmineral bonus: " + str(target_planet.bonus_mineral)
+            if target_planet.bonus_crystal > 0:
+                news_message += "\ncrystal bonus: " + str(target_planet.bonus_crystal)
+            if target_planet.bonus_ectrolium > 0:
+                news_message += "\nectrolium bonus: " + str(target_planet.bonus_ectrolium)
+        if target_planet.owner is not None:
+            if success >= 0.5:
+                news_message += "\ncurrent population: " + str(target_planet.current_population)
+            if success >= 0.6:
+                news_message += "\nmax population: " + str(target_planet.max_population)
+            if success >= 0.7:
+                news_message += "\nprotection: " + str(target_planet.protection)
+            if success >= 0.8:
+                news_message += "\nsolar collectors: " + str(target_planet.solar_collectors)
+                news_message += "\nfission_reactors: " + str(target_planet.fission_reactors)
+                news_message += "\nmineral_plants: " + str(target_planet.mineral_plants)
+                news_message += "\ncrystal_labs: " + str(target_planet.crystal_labs)
+                news_message += "\nrefinement_stations: " + str(target_planet.refinement_stations)
+                news_message += "\ncities: " + str(target_planet.cities)
+                news_message += "\nresearch_centers: " + str(target_planet.research_centers)
+                news_message += "\ndefense_sats: " + str(target_planet.defense_sats)
+                news_message += "\nshield_networks: " + str(target_planet.shield_networks)
+            if success >= 1.0:
+                if target_planet.portal:
+                    news_message += "\nportal: present"
+                elif target_planet.portal_under_construction:
+                    news_message += "\nportal: under construction"
+                else:
+                    news_message += "\nportal: absent"
+        scouting = Scouting.objects.filter(planet=target_planet).first()
+        if scouting is None:
+            Scouting.objects.create(user=user, planet=target_planet, scout=success)
+        else:
+            if scouting.scout < success:
+                scouting.scout = success
+                scouting.save()
+
+    if empire2 is None:
+        News.objects.create(user1=User.objects.get(id=user1.id),
+                        user2=None,
+                        empire1=user1.empire,
+                        fleet1=operation,
+                        news_type='AA',
+                        date_and_time=datetime.now(),
+                        is_personal_news=True,
+                        is_empire_news=True,
+                        extra_info=news_message,
+                        tick_number=RoundStatus.objects.get().tick_number,
+                        planet=target_planet
+                        )
+    else:
+        News.objects.create(user1=User.objects.get(id=user1.id),
+                        user2=User.objects.get(id=user2.id),
+                        empire1=user1.empire,
+                        empire2=empire2,
+                        fleet1=operation,
+                        news_type='AA',
+                        date_and_time=datetime.now(),
+                        is_personal_news=True,
+                        is_empire_news=True,
+                        extra_info=news_message,
+                        tick_number=RoundStatus.objects.get().tick_number,
+                        planet=target_planet
+                        )
+        if not stealth:
+            user2.military_flag = 1
+            News.objects.create(user1=User.objects.get(id=user2.id),
+                        user2=User.objects.get(id=user1.id),
+                        empire1=empire2,
+                        empire2=user1.empire,
+                        fleet1=operation,
+                        news_type='AD',
+                        date_and_time=datetime.now(),
+                        is_personal_news=True,
+                        is_empire_news=True,
+                        extra_info=news_message2,
+                        tick_number=RoundStatus.objects.get().tick_number,
+                        planet=target_planet
+
+                        )
+    return news_message

@@ -60,6 +60,26 @@
 			Your psychics have casted a {{n.fleet1}} spell on {{n.user2}} with the following results: {{ n.extra_info|linebreaksbr}}
 			<br><br>
 		{% endif %}
+		{% if n.news_type == 'AA' %}
+			Your agents have performed a {{n.fleet1}} operation on planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}
+				{% if n.user2 %}
+				owned by n.user2.userstatus.user_name 
+				{% else %}
+				currently uninhabited.
+				{% endif %} with the following results: {{ n.extra_info|linebreaksbr}}
+			<br><br>
+		{% endif %}
+		{% if n.news_type == 'AD' %}
+			Your were a target of {{n.fleet1}} operation on planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}
+			from
+			{% if user2 in not None %}
+			n.user2.userstatus.user_name of n.empire2.name_with_id
+			{% else %}
+			an unknown faction
+			{% endif %}
+			with the following results: {{ n.extra_info|linebreaksbr}}
+			<br><br>
+		{% endif %}
 		{% if n.news_type == 'SA' %}
 			You have attacked and took control of the planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}} 
 				previously owned by {{n.user2.userstatus.user_name}} from {{n.empire2.name_with_id}}!
