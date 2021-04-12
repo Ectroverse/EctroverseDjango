@@ -4,21 +4,39 @@
 
 {% block content %}
 
+<style>
+.dropbtn {  background-color: #4CAF50;  color: white;  font-size: 12px;  border: none;  padding: 0px;}
+.dropdown {  position: relative;  display: inline-block;}
+.dropdown-content {  display: none;  position: absolute;  background-color: #f1f1f1;  min-width: 160px;  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);  z-index: 1;}
+.dropdown-content a {  color: black;  padding: 12px 16px;  text-decoration: none;  display: block;}
+.dropdown-content a:hover {background-color: #ddd;}.dropdown:hover .dropdown-content {display: block;}
+.dropdown:hover .dropbtn {background-color: #3e8e41;}
+</style>
+
 <table style="width:100%">
 <tbody>
 <tr>
-<td style="width:20%">Planet:</td>
-<td style="width:20%">Size:</td>
-<td style="width:20%">Bonus:</td>
-<td style="width:40%">Status:</td>
+<td style="width:20%"><a href="?order_by=planet">Planet:</a></td>
+<td style="width:20%"><a href="?order_by=size">Size:</a></td>
+<td style="width:20%"><div class="dropdown"><button class="dropbtn" disabled>Bonus</button>
+<div class="dropdown-content">
+<a href="?order_by=-bonus_solar">Solar</a>
+<a href="?order_by=-bonus_mineral">Mineral</a>
+<a href="?order_by=-bonus_crystal">Crystal</a>
+<a href="?order_by=-bonus_ectrolium">Ectrolium</a>
+<a href="?order_by=fission">Fission</a>
+<a href="?order_by=ancient">Ancient</a>
+<a href="?order_by=bonus_all">All</a>
+<a href="?order_by=bonus_none">None</a></div></div></td>
+<td style="width:40%"><a href="?order_by=owner">Status:</a></td>
 </tr>
 <tr>
 {% for scouting in scouted %}
 {% if scouting.scout >= 1 %}
-<td><a href="/scouting.planet{{scouting.planet.id}}">{{scouting.planet.x}},{{scouting.planet.y}}:{{scouting.planet.i}}</a></td>
+<td><a href="/planet{{scouting.planet.id}}">{{scouting.planet.x}},{{scouting.planet.y}}:{{scouting.planet.i}}</a></td>
 <td>{{scouting.planet.size}}</td>
 <td>{% if scouting.planet.bonus_solar %}
-<img src="{% static 'pr0.gif' %}" alt="Solar" title="Solar">+{{scouting.scouting.planet.bonus_solar}}%</td>
+<img src="{% static 'pr0.gif' %}" alt="Solar" title="Solar">+{{scouting.planet.bonus_solar}}%</td>
 {% endif %}
 
 {% if scouting.scouting.planet.bonus_mineral %}

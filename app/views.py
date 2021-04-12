@@ -154,6 +154,19 @@ def btn(request):
 def scouting(request):
     status = get_object_or_404(UserStatus, user=request.user)
     scouted = Scouting.objects.filter(user=status.id)
+    order_by = request.GET.get('order_by', 'planet')
+    print("order by-", order_by)
+
+    if order_by == 'planet':
+        planets = Planet.objects.order_by('x', 'y', 'i')
+    elif order_by in ['ancient', 'bonus_all', 'bonus_none', 'fission']:
+        print("Havent implemented that sort yet")
+        planets = Planet.objects.order_by('x', 'y', 'i')
+    elif order_by == 'size':
+        planets = Planet.objects.order_by('-size')
+    else:
+        planets = Planet.objects.order_by(order_by)
+
     context = {"status": status,
                    "page_title": "Planatery Scouting",
                    "scouted": scouted,

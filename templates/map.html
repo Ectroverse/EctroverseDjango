@@ -702,7 +702,7 @@ g.append("a")
 
 {% for system in systems %}
 
-{% if system.0|mod:10 == 1 %}
+{% if system.0|addition:system.1|mod:10 == 1 %}
 
   g.append("image")
     .attr("xlink:href", "/static/map/s1.png")
@@ -713,7 +713,7 @@ g.append("a")
     .append("title") // hover-over text
     .text("{{system.0}},{{system.1}}");
 
-    {% elif system.0|mod:10 == 2 %}
+    {% elif system.0|addition:system.1|mod:10 == 2 %}
 
       g.append("image")
         .attr("xlink:href", "/static/map/s2.png")
@@ -724,7 +724,7 @@ g.append("a")
         .append("title") // hover-over text
         .text("{{system.0}},{{system.1}}");
 
-        {% elif system.0|mod:10 == 3 %}
+        {% elif system.0|addition:system.1|mod:10 == 3 %}
 
           g.append("image")
             .attr("xlink:href", "/static/map/s3.png")
@@ -735,7 +735,7 @@ g.append("a")
             .append("title") // hover-over text
             .text("{{system.0}},{{system.1}}");
 
-            {% elif system.0|mod:10 == 4 %}
+            {% elif system.0|addition:system.1|mod:10 == 4 %}
 
               g.append("image")
                 .attr("xlink:href", "/static/map/s4.png")
@@ -746,7 +746,7 @@ g.append("a")
                 .append("title") // hover-over text
                 .text("{{system.0}},{{system.1}}");
 
-                {% elif system.0|mod:10 == 5 %}
+                {% elif system.0|addition:system.1|mod:10 == 5 %}
 
                   g.append("image")
                     .attr("xlink:href", "/static/map/s5.png")
@@ -757,7 +757,7 @@ g.append("a")
                     .append("title") // hover-over text
                     .text("{{system.0}},{{system.1}}");
 
-                    {% elif system.0|mod:10 == 6 %}
+                    {% elif system.0|addition:system.1|mod:10 == 6 %}
 
                       g.append("image")
                         .attr("xlink:href", "/static/map/s1.png")
@@ -768,7 +768,7 @@ g.append("a")
                         .append("title") // hover-over text
                         .text("{{system.0}},{{system.1}}");
 
-                        {% elif system.0|mod:10 == 7 %}
+                        {% elif system.0|addition:system.1|mod:10 == 7 %}
 
                           g.append("image")
                             .attr("xlink:href", "/static/map/s2.png")
@@ -779,7 +779,7 @@ g.append("a")
                             .append("title") // hover-over text
                             .text("{{system.0}},{{system.1}}");
 
-                            {% elif system.0|mod:10 == 8 %}
+                            {% elif system.0|addition:system.1|mod:10 == 8 %}
 
                               g.append("image")
                                 .attr("xlink:href", "/static/map/s3.png")
@@ -790,7 +790,7 @@ g.append("a")
                                 .append("title") // hover-over text
                                 .text("{{system.0}},{{system.1}}");
 
-                                {% elif system.0|mod:10 == 9 %}
+                                {% elif system.0|addition:system.1|mod:10 == 9 %}
 
                                   g.append("image")
                                     .attr("xlink:href", "/static/map/s4.png")
@@ -801,7 +801,7 @@ g.append("a")
                                     .append("title") // hover-over text
                                     .text("{{system.0}},{{system.1}}");
 
-                                    {% elif system.0|mod:10 == 0 %}
+                                    {% elif system.0|addition:system.1|mod:10 == 0 %}
 
                                       g.append("image")
                                         .attr("xlink:href", "/static/map/s5.png")
