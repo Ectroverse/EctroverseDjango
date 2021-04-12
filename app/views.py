@@ -472,7 +472,7 @@ def planet(request, planet_id):
     attack_cost = None
     if planet.owner:  # if planet is owned by someone, grab that owner's status, in order to get faction and other info of owner
         planet_owner_status = UserStatus.objects.get(user=planet.owner)
-        attack_cost = attack_cost = battleReadinessLoss(status, planet_owner_status)
+        attack_cost = battleReadinessLoss(status, planet_owner_status)
     else:
         planet_owner_status = None
 

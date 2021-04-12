@@ -9,7 +9,7 @@ import math
 
 
 def battleReadinessLoss(user1, user2):
-    print(user1, user2)
+    # print(user1, user2)
     fa = (1 + user1.num_planets) / (1 + user2.num_planets)
     empire1 = user1.empire
     empire2 = user2.empire
@@ -61,10 +61,10 @@ def battleReadinessLoss(user1, user2):
     if nap:
         fa = max(50, fa)
 
-    spec_ops = Specops.objects.filter(user_to=user2, name="Dark Webs")
+    spec_ops = Specops.objects.filter(user_to=user2.user, name="Dark Webs")
 
     for specops in spec_ops:
-        fa *= spec_ops.specop_strength
+        fa *= specops.specop_strength / 100
 
     # add personal and fam news
     # dont forget to delete anempty fleet!
