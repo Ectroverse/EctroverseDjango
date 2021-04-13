@@ -109,7 +109,7 @@ function agentsCheck() {
 
 
 
-<div  class ="border_agent"  >
+<div class ="border_agent"  >
 <div class="centered2"><h3>Covert Operations</h3></div>
 	<div class="ops_box spaceUnder">
 	<b>Agents ammount: {{main_fleet.agent}}</b>
@@ -127,9 +127,9 @@ function agentsCheck() {
 			<input class="spaceUnder" type="number"  min="0" max="{{main_fleet.agent}}" name="unit_ammount" size="12" />
 			<div class="spaceUnder" id="target_planet">
 				Target coordinates:
-				X:<input class="spaceUnder" pattern="[0-9]+" type="text" name="X" size="4" value ="{{planet_to_agent_op.x}}">
-				Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4" value ="{{planet_to_agent_op.y}}">
-				Planet:<input class="spaceUnder" pattern="[0-9]+" type="text" name="I" size="4" value ="{{planet_to_agent_op.i}}">
+				X:<input class="spaceUnder" pattern="[0-9]+" type="text" name="X" size="4" value ="{{planet_to_template_specop.x}}">
+				Y:<input class="spaceUnder" pattern="[0-9]+" type="text" name="Y" size="4" value ="{{planet_to_template_specop.y}}">
+				Planet:<input class="spaceUnder" pattern="[0-9]+" type="text" name="I" size="4" value ="{{planet_to_template_specop.i}}">
 			</div>
 			<input type="submit" value="Perform">
 		</form> 
@@ -139,7 +139,15 @@ function agentsCheck() {
 				<div id="ops_{{values.4}}" class="hidden" > 
 				Covert operation name: {{name}}<br>
 				Technology required: {{values.0}}<br>
-				Agents readiness cost: {{values.1}}<br>
+				{% if values.7 == -1 %}
+				<span style="color:red">Technological penalty too high! Operation unavailible!</span><br>
+				{% elif values.7 > 0 %}
+				<span style="color:red">Technological penalty: {{values.7}}</span><br>
+				{% endif %}
+				Base agents readiness cost: {{values.1}}<br>
+				{%if values.6 > 0 %}
+				<span style="color:green">Current cost: {{values.6}}</span><br>
+				{% endif %}
 				Difficulty: {{values.2}}<br>
 				Stealth: {{values.3}}<br>
 				Description: {{values.5}}
@@ -149,7 +157,7 @@ function agentsCheck() {
 {% if agent_fleets %}
 	<div style="width:100%; float:left;">
 		Agents out:	
-		<form action="/specops" method="POST" name="cancelAgents" >
+		<form action="/specops" method="POST" name="cancelAgents" style="margin-bottom: 25px" >
 		{% csrf_token %}
 		<table style="margin: 0 auto;">
 		<tr>
@@ -173,21 +181,33 @@ function agentsCheck() {
 		{% endfor %}
 		</table>
 		<input type="submit" value="Cancel operations">
+		<br>
 		</form>
 	</div>
 {% endif %}
-
+	<div class="ops_box spaceUnder">
+	<b>Operations affecting your faction:</b><br>
+		{% for o in ops_in%}
+			{{o.name}} of {{o.specop_strength}}% from {{o.user_from.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
+		{% endfor %}
+	</div>
+	<div id="dvtext2" class="ops_box2">
+		<b>Your operations on other factions:</b><br>
+		{% for o in ops_out%}
+			{{o.name}} of {{o.specop_strength}}% on {{o.user_to.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
+		{% endfor %}
+	</div>
 </div>
 <br><br>
 
 
 
 <div class="border_psyhic" >
-<div class="centered2"><h3>Spells</h3></div>
-	<div class="ops_box spaceUnder">
+<div class="centered2 spaceUnder"><h3>Spells</h3></div>
+	<div class="ops_box ">
 	<b>Psychics ammount: {{main_fleet.wizard}}</b>
 	<br><br>
-		<form action="/specops" method="POST">
+		<form action="/specops" method="POST" style="margin-bottom: 25px">
 		{% csrf_token %}
 			{% for name, values in spells.items  %}
 			<input class="spaceUnder" type="radio" id="{{ values.4 }}" name="spell" value="{{ name }}" onclick="psychicCheck()">
@@ -200,7 +220,7 @@ function agentsCheck() {
 			<input class="spaceUnder" type="number"  min="0" max="{{main_fleet.wizard}}" name="unit_ammount" size="12" />
 			<div class="spaceUnder" id="target_user_psy">
 				user name/id:
-				<input type="text" name="user_id2" size="12"  />
+				<input type="text" name="user_id2" size="12" value="{{user_to_template_specop}}" />
 			</div>
 			<input type="submit" value="Perform">
 		</form> 
@@ -210,33 +230,71 @@ function agentsCheck() {
 				<div id="spell_{{values.4}}" class="hidden" > 
 				Spell name: {{name}}<br>
 				Technology required: {{values.0}}<br>
-				Psychics readiness cost: {{values.1}}<br>
+				{% if values.7 == -1 %}
+				<span style="color:red">Technological penalty too high! Spell unavailible!</span><br>
+				{% elif values.7 > 0 %}
+				<span style="color:red">Technological penalty: {{values.7}}</span><br>
+				{% endif %}
+				Base psychics readiness cost: {{values.1}}<br>
+				{%if values.6 > 0 %}
+				<span style="color:green">Current cost: {{values.6}}</span><br>
+				{% endif %}
 				Difficulty: {{values.2}}<br>
 				Self-spell: {{values.3}}<br>
 				Description: {{values.5}}
 				</div>
 			{% endfor %}
 	</div>
+	<div style="width:100%; float:left;">
+		<div class="ops_box spaceUnder">
+		<b>Spells affecting your faction:</b><br>
+			{% for o in spells_in%}
+				{{o.name}} of {{o.specop_strength}}% from {{o.user_from.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
+			{% endfor %}
+		</div>
+		<div id="dvtext2" class="ops_box2">
+			<b>Your spells on other factions:</b><br>
+			{% for o in spells_out%}
+				{{o.name}} of {{o.specop_strength}}% on {{o.user_to.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
+			{% endfor %}
+		</div>
+	</div>
 </div>
+
 <br><br>
 
 <div class="border_ghost" >
 <div class="centered2"><h3>Incantations</h3></div>
-	<div class="ops_box">
+	<div class="ops_box spaceUnder">
 	Ghost ships ammount: {{main_fleet.ghost}}
 	<br>
-		<form action="/specops" method="POST">
+		<form action="/specops" method="POST" style="margin-bottom: 25px">
 		{% csrf_token %}
 			{% for i in incantations %}
 			<input type="radio" id="{{ i }}" name="inca" value="{{ i }}">
 			<label class="remove-all-styles" >{{ i }}</label>
 			<br>
 			{% endfor %}
-			<input type="submit" value="Perform">
+			<input type="submit" value="Perform" >
 		</form> 
 	</div>
-	<div class="ops_box2">
+	<div class="ops_box2 spaceUnder">
 		planet coords
+	</div>
+	
+	<div style="width:100%; float:left;">
+		<div class="ops_box spaceUnder">
+		<b>Incantations affecting your faction:</b><br>
+			{% for o in inca_in%}
+				{{o.name}} of {{o.specop_strength}}% from {{o.user_from.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
+			{% endfor %}
+		</div>
+		<div id="dvtext2" class="ops_box2">
+			<b>Your incantations on other factions:</b><br>
+			{% for o in inca_out%}
+				{{o.name}} of {{o.specop_strength}}% on {{o.user_to.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
+			{% endfor %}
+		</div>
 	</div>
 </div>
 <br><br>

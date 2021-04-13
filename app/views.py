@@ -1638,16 +1638,42 @@ def specops(request):
     race_spells = race_info_list[status.get_race_display()]["spell_list"]
     race_inca = race_info_list[status.get_race_display()]["incantation_list"]
 
+    planet_to_template_specop = None
+    if request.method == 'POST' and 'specop_planet' in request.POST:
+        try:
+            pl_id = request.POST.get('specop_planet')
+            planet_to_template_specop = Planet.objects.get(id=pl_id)
+        except Planet.DoesNotExist:
+            planet_to_template_specop = None
+
+    user_to_template_specop = None
+    if planet_to_template_specop is not None:
+        if planet_to_template_specop.owner is not None:
+            user_to_template_specop = (UserStatus.objects.get(id=planet_to_template_specop.owner.id))
+
     ops = {}
     for o in agentop_specs:
         if o in race_ops:
             ops[o] = agentop_specs[o]
-    print(ops)
+            if user_to_template_specop:
+                ops[o].append(specopReadiness(agentop_specs[o], "Op", status, user_to_template_specop))
+            else:
+                ops[o].append(None)
+            ops[o].append(get_op_penalty(status.research_percent_operations, agentop_specs[o][0]))
 
     spells = {}
     for s in psychicop_specs:
         if s in race_spells:
             spells[s] = psychicop_specs[s]
+            if user_to_template_specop:
+                spells[s].append(specopReadiness(psychicop_specs[s], "Spell", status, user_to_template_specop))
+            else:
+                spells[s].append(None)
+            spells[s].append(get_op_penalty(status.research_percent_culture, psychicop_specs[s][0]))
+
+
+
+
 
     inca = list(set(race_inca) & set(all_incantations))
     msg = ""
@@ -1693,6 +1719,17 @@ def specops(request):
 
     agent_fleets = Fleet.objects.filter(owner=status.user, agent__gt=1, main_fleet=False)
 
+    ops_in = Specops.objects.filter(user_to=status.user, specop_type='O', stealth=False)
+    ops_out = Specops.objects.filter(user_from=status.user, specop_type='O')
+    spells_in = Specops.objects.filter(user_to=status.user, specop_type='S', stealth=False)
+    spells_out = Specops.objects.filter(user_from=status.user, specop_type='S')
+    inca_in = Specops.objects.filter(user_to=status.user, specop_type='G', stealth=False)
+    inca_out = Specops.objects.filter(user_from=status.user, specop_type='G')
+
+    template_name = None
+    if user_to_template_specop is not None:
+        template_name = user_to_template_specop.user_name
+
     context = {"status": status,
                 "page_title": "Special Operations",
                 "operations": ops,
@@ -1701,6 +1738,14 @@ def specops(request):
                 "msg": msg,
                 "main_fleet": main_fleet,
                 "agent_fleets": agent_fleets,
+                "ops_out": ops_out,
+                "ops_in": ops_in,
+                "spells_in": spells_in,
+                "spells_out": spells_out,
+                "inca_out": inca_out,
+                "inca_in": inca_in,
+                "planet_to_template_specop": planet_to_template_specop,
+                "user_to_template_specop": template_name,
                }
     return render(request, "specops.html", context)
 

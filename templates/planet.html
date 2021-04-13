@@ -63,13 +63,17 @@ Planet {{planet.x}},{{planet.y}}:{{planet.i}}
     This planet is owned by <a href="/player{{planet.owner.id}}">{{planet_owner_status.user_name}}</a> of
     <a href="/empire{{planet_owner_status.empire.id}}">{{planet_owner_status.empire.name_with_id}}</a>, networth {{planet_owner_status.networth}}<br><br>
 	It will cost {{attack_cost}}% fleet readiness to attack this planet!<br><br>
-			<form action="/fleets" id="explore_form" action="showMessage.jsp" method="post">
+			<form action="/fleets" id="attack_form" action="showMessage.jsp" method="post">
 			{% csrf_token %}
 			<input type="submit" value="Attack this planet">
 			<input type="hidden" name="attack_planet" value="{{planet.id}}">
 			</form>
 			<br> 
-    <a href="/specops">Special operation</a>
+			<form action="/specops" id="specops_form" action="showMessage.jsp" method="post">
+			{% csrf_token %}
+			<input type="submit" value="Special operation">
+			<input type="hidden" name="specop_planet" value="{{planet.id}}">
+			</form>
 <!--if( planetd.surrender == id )
 	httpPrintf( cnt, "<br><br>%s offered you this planet <a href="%s&amp;id=%d">accept offer?</a>", main2d.faction, URLAppend( cnt, "pltake" ), plnid );
 -->

@@ -14,6 +14,7 @@ all_spells = ["Irradiate Ectrolium",
               "Phantoms",
               "Enlightenment",
               "Grow Planet's Size"]
+
 all_incantations = ["Survey System"]
 
 # tech, readiness, difficulty, self-spell
@@ -84,20 +85,31 @@ agentop_specs = {
                       "Performing this operation will provide you with detailled information about an faction for several weeks."],
 }
 
+inca_specs= {}
 
 
-def specopReadiness(specop, user1, *args):
+def specopReadiness(specop, type, user1, *args):
+    user2 = None
     if args:
         user2 = args[0]
 
-    if specop[3] is False and not user2:
-        return -1
+    if type == "Spell":
+        penalty = get_op_penalty(user1.research_percent_culture, specop[0])
+        if user2 == None and specop[3] == False:
+            return -1
+        if specop[3]: #if self op
+            return int((1.0 + 0.01 * penalty) * specop[1])
+    elif type == "Inca":
+        penalty = get_op_penalty(user1.research_percent_culture, specop[0])
+        if specop[3]: #if self op
+            return int((1.0 + 0.01 * penalty) * specop[1])
+    else:
+        penalty = get_op_penalty(user1.research_percent_operations, specop[0])
 
-    penalty = get_op_penalty(user1.research_percent_culture, specop[0])
+
     if penalty == -1:
         return -1
-    elif specop[3]:
-        return int((1.0 + 0.01 * penalty) * specop[1])
+
 
     empire1 = user1.empire
     empire2 = user2.empire
@@ -145,7 +157,7 @@ def specopReadiness(specop, user1, *args):
     if fa > 300:
         fa = 300
 
-    return fa
+    return round(fa)
 
 
 def get_op_penalty(research, requirement):
@@ -155,7 +167,7 @@ def get_op_penalty(research, requirement):
     da = pow(a, 1.20)
     if da >= 150.0:
         return -1
-    return da
+    return round(da)
 
 
 def perform_spell(spell, psychics, status, *args):
@@ -189,6 +201,7 @@ def perform_spell(spell, psychics, status, *args):
         fleet2 = Fleet.objects.get(owner=user2.id, main_fleet=True)
         psychics2 = Fleet.objects.filter(owner=user2.id).aggregate(Sum('wizard'))
         psychics2 = psychics2['wizard__sum']
+        print(psychics2)
         defence = race_info_list[user2.get_race_display()].get("psychics_coeff", 1.0) * psychics2 * \
                   (1.0 + 0.005 * user2.research_percent_culture)
         success = attack / (defence + 1)
@@ -197,7 +210,6 @@ def perform_spell(spell, psychics, status, *args):
         attack = attack / (1.0 + 0.01 * penalty)
 
     if spell == "Incandescence":
-        status.crystals
         cry_converted = attack * 5
         if cry_converted > status.crystals:
             cry_converted = status.crystals
@@ -206,28 +218,9 @@ def perform_spell(spell, psychics, status, *args):
 
         energy = int(cry_converted * 24.0 * (1.0 + 0.01 * status.research_percent_culture))
         status.energy += energy
-        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status)
-        status.save()
         news_message = str(cry_converted) + " crystals were converted into " + str(energy) + " energy!"
         message = "Your " + str(cry_converted) + " crystals were converted into " + str(energy) + " energy!"
 
-    if spell == 'Dark Web':
-        web = 100 * (attack / status.networth)
-        effect = round(web * 3.5)
-        time = random.randint(1,31)+24
-        Specops.objects.create(user_to=status.user,
-                               user_from=status.user,
-                               specop_type='S',
-                               name="Dark Web",
-                               specop_strength=effect,
-                               ticks_left=time)
-
-        news_message = status.user_name + "'s' psychics have given them " + str(effect) + "% extra protection for " + str(time) + " weeks!"
-        message = "Your psychics have given you " + str(effect) + "% extra protection for " + str (time) + " weeks!"
-
-        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status)
-        status.save() 
-        
     if spell == "Irradiate Ectrolium":
         destroyed_ectro = 0
         if success > 1:
@@ -241,9 +234,6 @@ def perform_spell(spell, psychics, status, *args):
             user2.military_flag = 1
             user2.save()
 
-        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status, user2)
-        status.save()
-
         news_message = str(destroyed_ectro) + " ectrolium was destroyed!"
         message = "You have irradiated " + str(destroyed_ectro) + " ectrolium!"
 
@@ -252,39 +242,21 @@ def perform_spell(spell, psychics, status, *args):
             effect = 25
         else:
             effect = int((25.0 / 0.6) * (success - 0.4))
-        time = random.randint(26, 57)
-        Specops.objects.create(user_to=user2.user,
-                               user_from=status.user,
-                               specop_type='S',
-                               name="Black Mist",
-                               specop_strength=effect,
-                               ticks_left=time)
-        news_message = " solar power reduced by " + str(effect) + "%!"
-        message = "A black mist is spreading over " + str(user2.user_name) + \
-                  " planets, reducing solar collectors efficiency by " + str(effect)
+        if effect > 0:
+            time = random.randint(26, 57)
+            Specops.objects.create(user_to=user2.user,
+                                   user_from=status.user,
+                                   specop_type='S',
+                                   name="Black Mist",
+                                   specop_strength=effect,
+                                   ticks_left=time)
+            news_message = " solar power reduced by " + str(effect) + "%!"
+            message = "A black mist is spreading over " + str(user2.user_name) + \
+                      " planets, reducing solar collectors efficiency by " + str(effect)
+        else:
+            news_message = " solar power wasn't reduced!"
+            message = "Your psychic power wasn't enough to cast a black mist!"
 
-        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status)
-        status.save()
-
-    if spell == 'War Illusions':
-        Specops.objects.filter(user_to=status.user, name="War Illusions").delete()
-        illusion = 100 * (attack / status.networth)
-        illusions = illusion * 4.5
-        effect = round(illusions * (random.randint(1,20)/100))
-        time = random.randint(1,31)+32
-        Specops.objects.create(user_to=status.user,
-                               user_from=status.user,
-                               specop_type='S',
-                               name="War Illusions",
-                               specop_strength=effect,
-                               ticks_left=time)
-
-        news_message = status.user_name + "'s' psychics have given them " + str(effect) + "% extra protection for " + str(time) + " weeks!"
-        message = "Your psychics have given you " + str(effect) + "% extra protection for " + str (time) + " weeks!"
-
-        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status)
-        status.save()
-        
     if spell == "Psychic Assault":
         refdef = pow(attack / (attack + defence), 1.1)
         refatt = pow(defence / (attack + defence), 1.1)
@@ -297,9 +269,6 @@ def perform_spell(spell, psychics, status, *args):
         psychics_loss2 = min(int(refdef * tlosses * psychics2), psychics2)
         fleet2.wizard -= psychics_loss2
         fleet2.save()
-
-        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status, user2)
-        status.save()
 
         news_message = str(psychics_loss1) + " psychics were lost by " + status.user_name + \
                        " and " + str(psychics_loss2) + " were lost by " + user2.user_name + "!"
@@ -314,9 +283,6 @@ def perform_spell(spell, psychics, status, *args):
         news_message = status.user_name + " has summoned " + str(phantom_cast) + " Phantoms to fight in their army!"
         message = "You have summoned " + str(phantom_cast) + " Phantoms to join your army!"
 
-        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status)
-        status.save()
-
     if spell =="Grow Planet's Size":
         planet = random.choice(Planet.objects.filter(owner=status.user))
         grow = (attack * 1.3)
@@ -327,10 +293,9 @@ def perform_spell(spell, psychics, status, *args):
         news_message = status.user_name + "'s planet " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown by " + str(growth)
         message = "Your planet  " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown by " + str(growth)
 
-        status.psychic_readiness -= specopReadiness(psychicop_specs[spell], status)
-        status.save()
 
-
+    status.psychic_readiness -= specopReadiness(psychicop_specs[spell],"Spell", status, user2)
+    status.save()
 
     if psychicop_specs[spell][3] == True:
         News.objects.create(user1=User.objects.get(id=status.id),
@@ -402,9 +367,8 @@ def perform_operation(agent_fleet):
         attack /= 1.0 + 0.01 * penalty
 
     defense = 50
-    agents2 = 0
     user2 = None
-    stealth = agentop_specs[operation][3]
+    stealth = True
     empire2 = None
 
     if target_planet.owner is not None:
@@ -432,15 +396,15 @@ def perform_operation(agent_fleet):
         agent_fleet.save()
         fleet2.agent -= loss2
         fleet2.save()
-        news_message = "Attacker lost: " + str(loss1) + "agents. Defender lost: " + str(loss2) + "agents. "
-        news_message2 = "Attacker lost: " + str(loss1) + "agents. Defender lost: " + str(loss2) + "agents. "
+        news_message = "Attacker lost" + str(loss1) + "agents. Defender lost:" + str(loss2) + "agents."
+        news_message2 = "Attacker lost" + str(loss1) + "agents. Defender lost:" + str(loss2) + "agents."
 
 
     if operation == "Observe Planet":
         if success < 0.4:
-            news_message += "No information was gathered about this planet!"
+            news_message += "no information was gathered about this planet!"
         if success >= 0.4:
-            news_message += "Planet information: planet size: " + str(target_planet.size)
+            news_message += "planet size: " + str(target_planet.size)
         # if success >= 1.0:
         #     news_message += "artefact: " + target_planet.artefact
         if success >= 0.9:
@@ -485,6 +449,7 @@ def perform_operation(agent_fleet):
             if scouting.scout < success:
                 scouting.scout = success
                 scouting.save()
+
     if operation == "Spy Target":
         if success < 0.4:
             news_message += "No information was gathered about this faction!"
@@ -504,6 +469,7 @@ def perform_operation(agent_fleet):
             news_message += "\nEctrolium: " + str(user2.ectrolium)
         if success >= 0.9:
             news_message += "\nPopulation: " + str(user2.population)
+
     if operation == "Network Infiltration":
         lost_research_pct = 3
         if success < 1.0:
@@ -525,6 +491,22 @@ def perform_operation(agent_fleet):
         else:
             news_message += "\nNo research was stolen!"
             news_message2 += "\nNo research was lost!"
+
+    if operation == "Diplomatic Espionage":
+        if success >= 1.0:
+            if success >= 2:
+                time = 50
+            else:
+                time = pow(7, success)
+            Specops.objects.create(user_to=user2.user,
+                                   user_from=status.user,
+                                   specop_type='A',
+                                   name="Diplomatic Espionage",
+                                   ticks_left=time)
+
+    status.agent_readiness -= specopReadiness(agentop_specs[operation],"Operation", user1, user2)
+    user1.save()
+
     if empire2 is None:
         News.objects.create(user1=User.objects.get(id=user1.id),
                         user2=None,
