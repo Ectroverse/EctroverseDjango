@@ -499,12 +499,14 @@ def perform_operation(agent_fleet):
             else:
                 time = pow(7, success)
             Specops.objects.create(user_to=user2.user,
-                                   user_from=status.user,
-                                   specop_type='A',
+                                   user_from=user1.user,
+                                   specop_type='O',
                                    name="Diplomatic Espionage",
                                    ticks_left=time)
+        else:
+            news_message = "Your agents couldn't gather any information!"
 
-    status.agent_readiness -= specopReadiness(agentop_specs[operation],"Operation", user1, user2)
+    user1.agent_readiness -= specopReadiness(agentop_specs[operation],"Operation", user1, user2)
     user1.save()
 
     if empire2 is None:

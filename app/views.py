@@ -1654,26 +1654,28 @@ def specops(request):
     ops = {}
     for o in agentop_specs:
         if o in race_ops:
-            ops[o] = agentop_specs[o]
+            specs = [None]*8
+            for j in range(len(agentop_specs[o])):
+                specs[j] = agentop_specs[o][j]
             if user_to_template_specop:
-                ops[o].append(specopReadiness(agentop_specs[o], "Op", status, user_to_template_specop))
+                specs[6] = specopReadiness(agentop_specs[o], "Op", status, user_to_template_specop)
             else:
-                ops[o].append(None)
-            ops[o].append(get_op_penalty(status.research_percent_operations, agentop_specs[o][0]))
+                specs[6] = None
+            specs[7] = get_op_penalty(status.research_percent_operations, agentop_specs[o][0])
+            ops[o] = specs
 
     spells = {}
     for s in psychicop_specs:
         if s in race_spells:
-            spells[s] = psychicop_specs[s]
+            specs = [None] * 8
+            for j in range(len(psychicop_specs[s])):
+                specs[j] = psychicop_specs[s][j]
             if user_to_template_specop:
-                spells[s].append(specopReadiness(psychicop_specs[s], "Spell", status, user_to_template_specop))
+                specs[6] = specopReadiness(psychicop_specs[s], "Spell", status, user_to_template_specop)
             else:
-                spells[s].append(None)
-            spells[s].append(get_op_penalty(status.research_percent_culture, psychicop_specs[s][0]))
-
-
-
-
+                specs[6] = None
+            specs[7] = get_op_penalty(status.research_percent_culture, psychicop_specs[s][0])
+            spells[s] = specs
 
     inca = list(set(race_inca) & set(all_incantations))
     msg = ""

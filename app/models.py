@@ -370,7 +370,9 @@ class Fleet(models.Model):
 
     specop = models.CharField(max_length=50, blank=True, null=True, default=None)
 
-
+    # got sick of having to search for it everytime actually, so decided to add it
+    target_planet = models.ForeignKey(Planet, related_name="target", on_delete=models.SET_DEFAULT, blank=True,
+                                      null=True, default=None)
 
 class UnitConstruction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
