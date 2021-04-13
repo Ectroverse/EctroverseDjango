@@ -73,8 +73,6 @@ def generate_fleet_order(fleet, target_x, target_y, speed, order_type, *args):
     fleet.ticks_remaining = int(np.ceil((min_dist / speed) - 0.001))  # due to rounding and
     # floating points the fleet travel time becomes more than it should, hence the subtraction
     fleet.command_order = order_type
-
-
     fleet.save()
 
 def merge_fleets(fleets):
@@ -269,7 +267,7 @@ def send_agents_ghosts(status, agents, ghosts, x, y, i, specop):
     min_dist = np.sqrt((best_portal_planet.x - x) ** 2 + (best_portal_planet.y - y) ** 2)
     speed = race_info_list[status.get_race_display()]["travel_speed"]  # * specopEnlightemntCalc(id,CMD_ENLIGHT_SPEED);
     fleet_time = int(np.ceil(min_dist / speed))
-    fleet = Fleet.objects.create(owner=status.user,
+    agent_fleet = Fleet.objects.create(owner=status.user,
                          command_order=6,
                          target_planet=planet,
                          x=x,
@@ -287,7 +285,13 @@ def send_agents_ghosts(status, agents, ghosts, x, y, i, specop):
     main_fleet.save()
     if fleet_time == 0:
         if agents > 0:
-            perform_operation()
+            perform_operation(agent_fleet)
+            main_fleet.agent += agent_fleet.agent
+            main_fleet.save()
+            agent_fleet.delete()
         if ghosts > 0:
-            perform_incantation()
+            perform_incantation(agent_fleet)
+            main_fleet.ghost += agent_fleet.ghost
+            main_fleet.save()
+            agent_fleet.delete()
 

@@ -175,8 +175,8 @@ function agentsCheck() {
 		<td>{{agents.x}},{{agents.y}}:{{agents.i}}</td>
 		<td>{% if agents.command_order == 6 %} perform covert operation {% else %} return to main fleet {% endif %}</td>
 		<td>{{agents.ticks_remaining}}</td>
-		<td>			<input type="hidden" name="fleet_select" value="0" />
-						<input type="checkbox" name="fleet_select" value="1" /></td>
+		<td>			
+			<input type="checkbox" name="agent_select" value="{{agents.id}}"" /></td>
 		</tr>
 		{% endfor %}
 		</table>
@@ -185,17 +185,19 @@ function agentsCheck() {
 		</form>
 	</div>
 {% endif %}
-	<div class="ops_box spaceUnder">
-	<b>Operations affecting your faction:</b><br>
-		{% for o in ops_in%}
-			{{o.name}} of {{o.specop_strength}}% from {{o.user_from.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
-		{% endfor %}
-	</div>
-	<div id="dvtext2" class="ops_box2">
-		<b>Your operations on other factions:</b><br>
-		{% for o in ops_out%}
-			{{o.name}} of {{o.specop_strength}}% on {{o.user_to.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
-		{% endfor %}
+	<div style="width:100%; float:left;">
+		<div class="ops_box spaceUnder">
+		<b>Operations affecting your faction:</b><br>
+			{% for o in ops_in%}
+				{{o.name}} of {{o.specop_strength}}% from {{o.user_from.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
+			{% endfor %}
+		</div>
+		<div id="dvtext2" class="ops_box2">
+			<b>Your operations on other factions:</b><br>
+			{% for o in ops_out%}
+				{{o.name}} of {{o.specop_strength}}% on {{o.user_to.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
+			{% endfor %}
+		</div>
 	</div>
 </div>
 <br><br>

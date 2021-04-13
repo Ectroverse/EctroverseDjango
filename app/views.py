@@ -1718,6 +1718,18 @@ def specops(request):
                 if planet:
                     msg = send_agents_ghosts(status, int(request.POST['unit_ammount']), 0,
                         request.POST['X'], request.POST['Y'], request.POST['I'], request.POST['operation'])
+        if 'agent_select' in request.POST:
+            agent_select = request.POST.getlist('agent_select')
+            for agent_id in agent_select:
+                # TODO remake later to 1 function
+                speed = race_info_list[status.get_race_display()]["travel_speed"]
+                agent_fleet = Fleet.objects.get(id=agent_id)
+                portal_planets = Planet.objects.filter(owner=request.user, portal=True)
+                portal = find_nearest_portal(agent_fleet.current_position_x, agent_fleet.current_position_y, portal_planets)
+                generate_fleet_order(agent_fleet, portal.x, portal.y, speed, 5, portal.i)
+                main_fleet = Fleet.objects.get(owner=request.user, main_fleet=True)
+                fleets_id3 = Fleet.objects.filter(id=agent_id, ticks_remaining=0)
+                join_main_fleet(main_fleet, fleets_id3)
 
     agent_fleets = Fleet.objects.filter(owner=status.user, agent__gt=1, main_fleet=False)
 
