@@ -237,6 +237,20 @@ def perform_spell(spell, psychics, status, *args):
         news_message = str(destroyed_ectro) + " ectrolium was destroyed!"
         message = "You have irradiated " + str(destroyed_ectro) + " ectrolium!"
 
+    if spell == 'Dark Web':
+        web = 100 * (attack / status.networth)
+        effect = round(web * 3.5)
+        time = random.randint(1,31)+24
+        Specops.objects.create(user_to=status.user,
+                               user_from=status.user,
+                               specop_type='S',
+                               name="Dark Web",
+                               specop_strength=effect,
+                               ticks_left=time)
+
+        news_message = status.user_name + "'s' psychics have given them " + str(effect) + "% extra protection for " + str(time) + " weeks!"
+        message = "Your psychics have given you " + str(effect) + "% extra protection for " + str (time) + " weeks!"
+
     if spell == "Black Mist":
         if success >= 1.0:
             effect = 25
@@ -256,6 +270,22 @@ def perform_spell(spell, psychics, status, *args):
         else:
             news_message = " solar power wasn't reduced!"
             message = "Your psychic power wasn't enough to cast a black mist!"
+
+    if spell == 'War Illusions':
+        Specops.objects.filter(user_to=status.user, name="War Illusions").delete()
+        illusion = 100 * (attack / status.networth)
+        illusions = illusion * 4.5
+        effect = round(illusions * (random.randint(1,20)/100))
+        time = random.randint(1,31)+32
+        Specops.objects.create(user_to=status.user,
+                               user_from=status.user,
+                               specop_type='S',
+                               name="War Illusions",
+                               specop_strength=effect,
+                               ticks_left=time)
+
+        news_message = status.user_name + "'s' psychics powerful illusions have given their forces " + str(effect) + "% extra strength for " + str(time) + " weeks!"
+        message = "Your psychics have given your forces " + str(effect) + "% extra strength for " + str (time) + " weeks!"
 
     if spell == "Psychic Assault":
         refdef = pow(attack / (attack + defence), 1.1)
@@ -293,8 +323,7 @@ def perform_spell(spell, psychics, status, *args):
         news_message = status.user_name + "'s planet " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown by " + str(growth)
         message = "Your planet  " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown by " + str(growth)
 
-
-    status.psychic_readiness -= specopReadiness(psychicop_specs[spell],"Spell", status, user2)
+    status.psychic_readiness -= specopReadiness(psychicop_specs[spell],"Spell", status)
     status.save()
 
     if psychicop_specs[spell][3] == True:

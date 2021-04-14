@@ -61,7 +61,7 @@ def battleReadinessLoss(user1, user2):
     if nap:
         fa = max(50, fa)
 
-    spec_ops = Specops.objects.filter(user_to=user2.user, name="Dark Webs")
+    spec_ops = Specops.objects.filter(user_to=user2.user, name="Dark Web")
 
     for specop in spec_ops:
         fa *= 1 + specop.specop_strength / 100
