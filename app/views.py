@@ -584,86 +584,20 @@ def build(request, planet_id):
 
     status = get_object_or_404(UserStatus, user=request.user)
     planet = get_object_or_404(Planet, pk=planet_id)
-
-    # Make sure its owned by user
-    if planet.owner != request.user:
-        return HttpResponse("This is not your planet!")
-
-    # Create list of building classes, it's making 1 object of each
+    msg = ""
     building_list = [SolarCollectors(), FissionReactors(), MineralPlants(), CrystalLabs(), RefinementStations(),
                      Cities(), ResearchCenters(), DefenseSats(), ShieldNetworks(), Portal()]
 
     if request.method == 'POST':
-        # Might be a cleaner way to do it that ties it more directly with the model
+        if planet.owner != request.user:
+            return "This is not your planet!"
+        building_list_dict = {}
 
-        # Following is a rewrite of cmdExecAddBuild in cmd.c, a function that got called for each building type
-        msg = ''
         for building in building_list:
-            num = request.POST.get(str(building.building_index), None)
-            if num == 'on':
-                num = 1
-            if num == '':
-                num = None
-            if num:
-                num = int(num)
-                # calc_building_cost was designed to give the View what it needed, so pull out just the values and multiply by num
-                total_resource_cost, penalty = building.calc_cost(num, status.research_percent_construction,
-                                                                  status.research_percent_tech)
+            building_list_dict[building] = request.POST.get(str(building.building_index), None)
 
-                if not total_resource_cost:
-                    msg += 'Not enough tech research to build ' + building.label + '<br>'
-                    continue
-
-                total_resource_cost = ResourceSet(total_resource_cost)  # convert to more usable object
-                ob_factor = calc_overbuild_multi(planet.size,
-                                                 planet.total_buildings + planet.buildings_under_construction, num)
-                total_resource_cost.apply_overbuild(
-                    ob_factor)  # can't just use planet.overbuilt, need to take into account how many buildings we are making
-
-                if not total_resource_cost.is_enough(status):
-                    msg += 'Not enough resources to build ' + building.label + '<br>'
-                    continue
-
-                if isinstance(building, Portal) and planet.portal:
-                    msg += 'A portal is already on this planet!'
-                    continue
-
-                if isinstance(building, Portal) and planet.portal_under_construction:
-                    msg += 'A portal is already under construction on this planet!'
-                    continue
-
-                # Deduct resources
-                status.energy -= total_resource_cost.ene
-                status.minerals -= total_resource_cost.min
-                status.crystals -= total_resource_cost.cry
-                status.ectrolium -= total_resource_cost.ect
-
-                ticks = total_resource_cost.time  # calculated ticks
-
-                # Create new construction job
-                msg += 'Building ' + str(num) + ' ' + building.label + '<br>'
-                msg += 'Total costs: <br>'
-                msg += 'Energy: ' + str(total_resource_cost.ene) + '<br>'
-                msg += 'Minerals: ' + str(total_resource_cost.min) + '<br>'
-                msg += 'Crystals: ' + str(total_resource_cost.cry) + '<br>'
-                msg += 'Ectrolium: ' + str(total_resource_cost.ect) + '<br>'
-
-                Construction.objects.create(user=request.user,
-                                            planet=planet,
-                                            n=num,
-                                            building_type=building.short_label,
-                                            ticks_remaining=ticks)
-                planet.buildings_under_construction += num
-                if isinstance(building, Portal):
-                    planet.portal_under_construction = True
-
-        # Any time we add buildings we need to update planet's overbuild factor
-        planet.overbuilt = calc_overbuild(planet.size, planet.total_buildings + planet.buildings_under_construction)
-        planet.overbuilt_percent = (planet.overbuilt - 1.0) * 100
-        planet.save()
-        status.save()  # update user's resources
-    else:
-        msg = None  # msg that gets displayed at the top after you build something
+        msg = "building on planet " + str(planet.x) + ":" + str(planet.y) + "," +str(planet.i) + "\n"
+        msg += build_on_planet(status, planet, building_list_dict)
 
     # Build up list of dicts, designed to be used easily by template
     costs = []
@@ -695,6 +629,56 @@ def build(request, planet_id):
                "page_title": "Build on Planet " + str(planet.x) + ',' + str(planet.y) + ':' + str(planet.i)}
     return render(request, "build.html", context)
 
+
+@login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
+def mass_build(request):
+    status = get_object_or_404(UserStatus, user=request.user)
+    if request.method == 'POST':
+
+        building_list = [SolarCollectors(), FissionReactors(), MineralPlants(), CrystalLabs(), RefinementStations(),
+                         Cities(), ResearchCenters(), DefenseSats(), ShieldNetworks(), Portal()]
+
+        building_list_dict = {}
+
+        for key in request.POST:
+            print(key)
+            planet_id = request.POST[key]['m4298']
+            print(planet_id)
+            # for building in building_list:
+            #     building_list_dict[building] = request.POST.get(str(building.building_index), None)
+            #
+            # msg = "building on planet " + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) + "\n"
+            # msg += build_on_planet(planet, building_list_dict)
+
+    costs = []
+    for building in building_list:
+        # Below doesn't include overbuild, it gets added below
+        cost_list, penalty = building.calc_cost(1, status.research_percent_construction, status.research_percent_tech)
+        # Add resource names to the cost_list, for the sake of the for loop in the view
+        if cost_list:  # Remember that cost_list will be None if the tech is too low
+            cost_list_labeled = []
+            for i in range(5):  # 4 types of resources plus time
+                cost_list_labeled.append({"value": int(np.ceil(cost_list[i] * max(1, planet.overbuilt))),
+                                          "name": resource_names[i]})
+        else:
+            cost_list_labeled = None  # Tech was too low
+
+        cost = {"cost": cost_list_labeled,
+                "penalty": penalty,
+                "owned": getattr(status, 'total_' + building.model_name),
+                "name": building.label}
+        costs.append(cost)
+
+    # Build context
+    context = {"status": status,
+               "planet": planet,
+               "costs": costs,
+               "portal": planet.portal,
+               "portal_under_construction": planet.portal_under_construction,
+               "msg": msg,
+               "page_title": "Mass build"}
+    return render(request, "mass_build.html", context)
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")

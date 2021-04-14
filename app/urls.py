@@ -56,6 +56,7 @@ urlpatterns = [
     path('scouting', views.scouting, name='scouting'),
     path('halloffame', views.hall_of_fame, name='hall_of_fame'),
     url(r'^specop_show(?P<specop_id>[0-9]+)/$', views.specop_show, name='specop_show'),
+    path('mass_build', views.mass_build, name='mass_build'),
 ]
 
 if settings.DEBUG:

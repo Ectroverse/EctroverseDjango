@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+
+Building Information
+<br>
+{% if msg %}
+    {{msg|safe}}
+    <br>
+    <br>
+{% endif %}
+
+
+<div class="content-desktop">
+
+<form action="" method="POST">
+{% csrf_token %}
+<table cellspacing="6" align="center">
+<tr>
+	<td><b></b></td>
+    <td><b>Building</b></td>
+    <td><b>Cost</b></td>
+    <td><b>&nbsp;&nbsp;Owned&nbsp;&nbsp;</b></td>
+    <td><b>Build</b></td>
+</tr>
+
+
+
+{% for cost in costs %}
+<tr style="line-height: 1;">
+	<td><img src="{% static '/buildings/'|add:cost.name|add:'.png' %}" width="70" height="70" title ="{{cost.name}}"></td>
+    <td valign="top"><font color="#FFFFFF">{{cost.name}}</font><br></td>
+    {% if cost.cost == None %}
+        <td valign="top" nowrap><font color="#FF0000">Unavailable<br>Tech too low</font></td>
+        <td valign="top" align="center">{{cost.owned}}</td>
+        <td>&nbsp;</td></tr>
+    {% elif cost.name == "Portal" and portal %}
+        <td valign="top" nowrap>Already present</td>
+        <td valign="top" align="center">{{cost.owned}}</td>
+        <td>&nbsp;</td></tr>
+    {% elif cost.name == "Portal" and portal_under_construction %}
+        <td valign="top" nowrap>Under construction</td>
+        <td valign="top" align="center">{{cost.owned}}</td>
+        <td>&nbsp;</td></tr>
+    {% else %}
+        <td valign="top"" nowrap>
+        {% for resource_cost in cost.cost %}
+            {% if resource_cost.value > 0 %}
+                {{resource_cost.value}} {{resource_cost.name}}<br>
+            {% endif %}
+        {% endfor %}
+        {% if cost.penalty > 0 %}
+            <font color="#FF2020">Tech : +{{cost.penalty}}% costs</font><br>
+        {% endif %}
+        </td>
+        <td valign="top" align="center">{{cost.owned}}</td>
+        {% if cost.name == "Portal" %}
+            <td valign="top"><input type="checkbox" name="{{forloop.counter0}}">Build a portal</td>
+        {% else %}
+            <td valign="top"><input type="text" pattern="[0-9]+" maxlength="9" size ="10" name="{{forloop.counter0}}"></td>
+        {% endif %}
+    {% endif %}
+</tr>
+<tr><td>&nbsp;</td><td></td><td></td><td></td></tr>
+{% endfor %}
+</td></tr>
+</table>
+
+
+<input type="submit" value="Build"></form>
+</div>
+
+<div class="content-mobile">
+  <form action="" method="POST">
+  {% csrf_token %}
+  <table cellspacing="6" align="center">
+  <tr>
+      <td><b>Building</b></td>
+      <td><b>Cost</b></td>
+      <td><b>&nbsp;&nbsp;Owned&nbsp;&nbsp;</b></td>
+      <td><b>Build</b></td>
+  </tr>
+
+
+
+  {% for cost in costs %}
+  <tr style="line-height: 1;">
+  	<td><font color="#FFFFFF">{{cost.name}}</font><br><img src="{% static '/buildings/'|add:cost.name|add:'.png' %}" width="50" height="50" title ="{{cost.name}}"></td>
+      {% if cost.cost == None %}
+          <td valign="top" nowrap><font color="#FF0000">Unavailable<br>Tech too low</font></td>
+          <td valign="top" align="center">{{cost.owned}}</td>
+          <td>&nbsp;</td></tr>
+      {% elif cost.name == "Portal" and portal %}
+          <td valign="top" nowrap>Already present</td>
+          <td valign="top" align="center">{{cost.owned}}</td>
+          <td>&nbsp;</td></tr>
+      {% elif cost.name == "Portal" and portal_under_construction %}
+          <td valign="top" nowrap>Under construction</td>
+          <td valign="top" align="center">{{cost.owned}}</td>
+          <td>&nbsp;</td></tr>
+      {% else %}
+          <td valign="top"" nowrap>
+          {% for resource_cost in cost.cost %}
+              {% if resource_cost.value > 0 %}
+                  {{resource_cost.value}} {{resource_cost.name}}<br>
+              {% endif %}
+          {% endfor %}
+          {% if cost.penalty > 0 %}
+              <font color="#FF2020">Tech : +{{cost.penalty}}% costs</font><br>
+          {% endif %}
+          </td>
+          <td valign="top" align="center">{{cost.owned}}</td>
+          {% if cost.name == "Portal" %}
+              <td valign="top"><input type="checkbox" name="{{forloop.counter0}}">Build a portal</td>
+          {% else %}
+              <td valign="top"><input type="text" pattern="[0-9]+" maxlength="9" size ="5" name="{{forloop.counter0}}"></td>
+          {% endif %}
+      {% endif %}
+  </tr>
+  <tr><td>&nbsp;</td><td></td><td></td><td></td></tr>
+  {% endfor %}
+  </td></tr>
+  </table>
+
+
+  <input type="submit" value="Build"></form>
+</div>
+
+
+<br><br><a href="/planet{{planet.id}}">View planet</a>
+<br><br>
+
+
+{% endblock %}

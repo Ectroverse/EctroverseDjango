@@ -8,6 +8,8 @@ from .specops import *
 from datetime import datetime
 from datetime import timedelta
 from django.template import RequestContext
+from .helper_classes import *
+from .calculations import *
 
 def give_first_planet(user, status, planet):
     planet.solar_collectors = staring_solars
@@ -295,3 +297,80 @@ def send_agents_ghosts(status, agents, ghosts, x, y, i, specop):
             main_fleet.save()
             agent_fleet.delete()
 
+
+def build_on_planet(status, planet, building_list_dict):
+    # Make sure its owned by user
+
+    # Create list of building classes, it's making 1 object of each
+    building_list = [SolarCollectors(), FissionReactors(), MineralPlants(), CrystalLabs(), RefinementStations(),
+                     Cities(), ResearchCenters(), DefenseSats(), ShieldNetworks(), Portal()]
+
+    # Might be a cleaner way to do it that ties it more directly with the model
+
+    # Following is a rewrite of cmdExecAddBuild in cmd.c, a function that got called for each building type
+    msg = ''
+    for building, num in building_list_dict.items():
+        if num == 'on':
+            num = 1
+        if num == '':
+            num = None
+        if num:
+            num = int(num)
+            # calc_building_cost was designed to give the View what it needed, so pull out just the values and multiply by num
+            total_resource_cost, penalty = building.calc_cost(num, status.research_percent_construction,
+                                                              status.research_percent_tech)
+
+            if not total_resource_cost:
+                msg += 'Not enough tech research to build ' + building.label + '<br>'
+                continue
+
+            total_resource_cost = ResourceSet(total_resource_cost)  # convert to more usable object
+            ob_factor = calc_overbuild_multi(planet.size,
+                                             planet.total_buildings + planet.buildings_under_construction, num)
+            total_resource_cost.apply_overbuild(
+                ob_factor)  # can't just use planet.overbuilt, need to take into account how many buildings we are making
+
+            if not total_resource_cost.is_enough(status):
+                msg += 'Not enough resources to build ' + building.label + '<br>'
+                continue
+
+            if isinstance(building, Portal) and planet.portal:
+                msg += 'A portal is already on this planet!'
+                continue
+
+            if isinstance(building, Portal) and planet.portal_under_construction:
+                msg += 'A portal is already under construction on this planet!'
+                continue
+
+            # Deduct resources
+            status.energy -= total_resource_cost.ene
+            status.minerals -= total_resource_cost.min
+            status.crystals -= total_resource_cost.cry
+            status.ectrolium -= total_resource_cost.ect
+
+            ticks = total_resource_cost.time  # calculated ticks
+
+            # Create new construction job
+            msg += 'Building ' + str(num) + ' ' + building.label + '<br>'
+            msg += 'Total costs: <br>'
+            msg += 'Energy: ' + str(total_resource_cost.ene) + '<br>'
+            msg += 'Minerals: ' + str(total_resource_cost.min) + '<br>'
+            msg += 'Crystals: ' + str(total_resource_cost.cry) + '<br>'
+            msg += 'Ectrolium: ' + str(total_resource_cost.ect) + '<br>'
+
+            Construction.objects.create(user=status.user,
+                                        planet=planet,
+                                        n=num,
+                                        building_type=building.short_label,
+                                        ticks_remaining=ticks)
+            planet.buildings_under_construction += num
+            if isinstance(building, Portal):
+                planet.portal_under_construction = True
+
+    # Any time we add buildings we need to update planet's overbuild factor
+    planet.overbuilt = calc_overbuild(planet.size, planet.total_buildings + planet.buildings_under_construction)
+    planet.overbuilt_percent = (planet.overbuilt - 1.0) * 100
+    planet.save()
+    status.save()  # update user's resources
+
+    return msg
