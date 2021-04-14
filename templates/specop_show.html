@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+
+
+{% if msg != '' %}
+	{{msg}}
+	<br>
+	<br>
+{% endif %}
+
+
+
+
+<div style="width:100%; float:left;">
+	{{specop_info|linebreaksbr }}
+</div>
+
+{% endblock %}

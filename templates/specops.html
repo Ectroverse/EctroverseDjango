@@ -195,7 +195,13 @@ function agentsCheck() {
 		<div id="dvtext2" class="ops_box2">
 			<b>Your operations on other factions:</b><br>
 			{% for o in ops_out%}
-				{{o.name}} of {{o.specop_strength}}% on {{o.user_to.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
+				{{o.name}} 
+				{% if o.extra_effect is not None %}
+					<a href="/specop_show{{o.id}}">{{o.extra_effect}}</a>
+				{% else %}
+				of {{o.specop_strength}}% 
+					{% endif %}
+				on {{o.user_to.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
 			{% endfor %}
 		</div>
 	</div>

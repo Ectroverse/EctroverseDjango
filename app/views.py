@@ -1730,6 +1730,7 @@ def specops(request):
                 main_fleet = Fleet.objects.get(owner=request.user, main_fleet=True)
                 fleets_id3 = Fleet.objects.filter(id=agent_id, ticks_remaining=0)
                 join_main_fleet(main_fleet, fleets_id3)
+                msg = "Agents sent!"
 
     agent_fleets = Fleet.objects.filter(owner=status.user, agent__gt=1, main_fleet=False)
 
@@ -1763,6 +1764,29 @@ def specops(request):
                }
     return render(request, "specops.html", context)
 
+@login_required
+@user_passes_test(race_check, login_url="/choose_empire_race")
+def specop_show(request, specop_id):
+    status = get_object_or_404(UserStatus, user=request.user)
+    specop = Specops.objects.get(id=specop_id)
+    specop_info = ""
+    if specop.name == "Diplomatic Espionage":
+        specops_affecting_target = Specops.objects.filter(user_to=specop.user_to)
+        for s in specops_affecting_target:
+            specop_info += "Specop: " + str(s.name)
+            specop_info += " Time remaining: " + str(s.ticks_left)
+            if s.specop_strength > 0 :
+                specop_info += " Strength: " + str(s.ticks_left)
+            if s.extra_effect is not None:
+                specop_info += " Extra effect: " + str(s.extra_effect)
+            specop_info += "\n"
+
+
+    context = {"status": status,
+               "page_title": specop.name,
+               "specop_info": specop_info
+               }
+    return render(request, "specop_show.html", context)
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")

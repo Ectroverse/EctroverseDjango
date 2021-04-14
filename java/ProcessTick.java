@@ -153,7 +153,11 @@ public class ProcessTick
 		
 		//update fleet construction time
 		statement.execute("UPDATE app_unitconstruction SET ticks_remaining = ticks_remaining - 1;");
-
+		
+		//update specops time
+		statement.execute("UPDATE app_specops SET ticks_left = ticks_left - 1;");
+		statement.execute("DELETE FROM app_specops WHERE ticks_left = 0;");
+		
 		resultSet = statement.executeQuery("SELECT * FROM app_userstatus");
 	   	ResultSetMetaData rsmd = resultSet.getMetaData();
 	   	ArrayList<String []> columns = new ArrayList<>(rsmd.getColumnCount());

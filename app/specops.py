@@ -501,10 +501,13 @@ def perform_operation(agent_fleet):
             Specops.objects.create(user_to=user2.user,
                                    user_from=user1.user,
                                    specop_type='O',
+                                   extra_effect="show special operations affecting target",
                                    name="Diplomatic Espionage",
                                    ticks_left=time)
+            news_message += "Your agents gathered information about all special operations affecting" \
+                           " the target faction currently!"
         else:
-            news_message = "Your agents couldn't gather any information!"
+            news_message += "Your agents couldn't gather any information!"
 
     user1.agent_readiness -= specopReadiness(agentop_specs[operation],"Operation", user1, user2)
     user1.save()

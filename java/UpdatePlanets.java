@@ -41,12 +41,14 @@ public class UpdatePlanets{
 
 	private Connection connection;
 	private Statement statement;
+	private Statement statement2;
 	private HashMap<Integer, HashMap<String, Integer>> jobs;
 	
 	public UpdatePlanets(Connection connection) throws Exception{   
 		//we call the class constructor only once in process tick because we wasnt to keep the planetsUpdateStatement while iterating users
 		this.connection = connection;
 		statement = connection.createStatement();
+		statement2 = connection.createStatement();
 		planetsUpdateStatement = connection.prepareStatement(planetStatusUpdateQuery);
 		//update construction jobs on all planets
 		jobs = execute_jobs(connection);
@@ -216,6 +218,17 @@ public class UpdatePlanets{
 			cmdTickProduction_ectrolium += (building_production_ectrolium    * refinement_stations) * (1 + (int)rowValues[colLocation[25]]/100.0);
 			//cmdTickProduction_cities += building_production_cities * cities;
 			cmdTickProduction_research += building_production_research * research_centers;
+			
+			//ops modifier to incomes:
+			ResultSet darkMistSet = statement2.executeQuery("SELECT specop_strength FROM app_specops WHERE (name = 'Black Mist' or name = 'Dark Web') "+
+			"and user_to_id = " + userID + ";");
+			double darkMist = 1.0;
+			while(darkMistSet.next()){
+				int str = darkMistSet.getInt("specop_strength");
+				darkMist /= (1.0 + darkMistSet.getInt("specop_strength")/100.0);
+				System.out.println("user: " + userID + " darkMist" + darkMist + " str " + str);
+			}
+			cmdTickProduction_solar *= darkMist;
 			
 			double overbuilt = (double)(HelperFunctions.calc_overbuild((int)rowValues[colLocation[19]], total_buildings + buildingsUnderConstr));
 			double overbuilt_percent = (double)((overbuilt-1.0)*100); 

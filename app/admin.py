@@ -4,7 +4,7 @@ from app.models import *
 from django.forms import TextInput, Textarea
 from django.db import models
 
-admin.site.register(UserStatus)
+# admin.site.register(UserStatus)
 # admin.site.register(Planet)
 admin.site.register(Construction)
 # admin.site.register(Fleet)
@@ -37,9 +37,9 @@ class SpecopsAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Specops._meta.get_fields()]
 admin.site.register(Specops, SpecopsAdmin)
 
-# class UserStatusAdmin(admin.ModelAdmin):
-#     list_display = [field.name for field in UserStatus._meta.get_fields()]
-# admin.site.register(UserStatus, UserStatusAdmin)
+class UserStatusAdmin(admin.ModelAdmin):
+    list_display = ["user","user_name"]
+admin.site.register(UserStatus, UserStatusAdmin)
 
 
 class PlanetAdmin(admin.ModelAdmin):
