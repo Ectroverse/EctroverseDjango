@@ -6,7 +6,7 @@ from django_tables2 import SingleTableView
 # User rank table
 class UserRankTable(tables.Table):
     user_name = tables.Column(verbose_name='Player')
-    empire_number  = tables.TemplateColumn('<a href="/empire{{record.empire_id}}/">{{record.empire_id}}</a>',accessor='empire.number', verbose_name='Empire')
+    empire_number  = tables.TemplateColumn('<a href="/empire{{record.empire_id}}/">{{record.empire.number}}</a>',accessor='empire.number', verbose_name='Empire')
     num_planets = tables.Column(verbose_name='Planets')
     networth = tables.Column(verbose_name='Networth')
     race = tables.Column(verbose_name='Race')

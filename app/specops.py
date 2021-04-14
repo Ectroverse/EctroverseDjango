@@ -4,6 +4,7 @@ from app.models import *
 from datetime import datetime
 from django.db.models import Sum
 import random
+import secrets
 
 all_spells = ["Irradiate Ectrolium",
               "Dark Web",
@@ -323,6 +324,32 @@ def perform_spell(spell, psychics, status, *args):
         news_message = status.user_name + "'s planet " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown by " + str(growth)
         message = "Your planet  " + str(planet.x) + "," + str(planet.y) + ":" + str(planet.i) + " has grown by " + str(growth)
 
+    if spell =="Enlightenment":
+        Specops.objects.filter(user_to=status.user, name="Enlightenment").delete()
+        time= 52
+        power = (100 * (attack / status.networth)/10)
+        boost = round(power * 3.5)
+        element = ['Energy', 'Mineral', 'Crystal', 'Ectrolium', 'Research', 'Speed']
+        chosen = secrets.choice(element)
+        if chosen== "Energy" or "Crystal":
+            bonus = np.clip(boost,0,15)
+        if chosen== "Ectrolium" or "Research":
+            bonus = np.clip(boost,0,10)
+        if chosen== "Mineral":
+            bonus = np.clip(boost,0,20)
+        if chosen== "Speed":
+            bonus = np.clip((boost*2.5),0,50)
+        Specops.objects.create(user_to=status.user,
+                               user_from=status.user,
+                               specop_type='S',
+                               name="Enlightenment",
+                               specop_strength=bonus,
+                               extra_effect=chosen,
+                               ticks_left=time)
+
+        news_message = status.user_name + "'s Psychics have blessed them with " + str(bonus) + "% extra " + str(chosen) + " for 52 weeks!"
+        message = "Your Psychics have blessed you with " + str(bonus) + "% extra " + str(chosen) + " for 52 weeks!"
+
     status.psychic_readiness -= specopReadiness(psychicop_specs[spell],"Spell", status)
     status.save()
 
@@ -537,6 +564,53 @@ def perform_operation(agent_fleet):
                            " the target faction currently!"
         else:
             news_message += "Your agents couldn't gather any information!"
+
+    if operation == "Infiltration":
+        if success < 0.4:
+            news_message += "No information was gathered about this faction!"
+        if success >= 0.5:
+            news_message += "Energy: " + str(user2.energy)
+        if success >= 0.6:
+            news_message += "\nMinerals: " + str(user2.minerals)
+        if success >= 0.4:
+            news_message += "\nCrystals: " + str(user2.crystals)
+        if success >= 0.8:
+            news_message += "\nEctrolium: " + str(user2.ectrolium)
+        if success >= 0.7:
+            news_message += "\nSolar Collectors: " + str(user2.total_solar_collectors)
+        if success >= 1.0:
+            news_message += "\nFission Reactors: " + str(user2.total_fission_reactors)
+        if success >= 0.7:
+            news_message += "\nMineral Plants: " + str(user2.total_mineral_plants)
+        if success >= 0.6:
+            news_message += "\nCrystal Laboratories: " + str(user2.total_crystal_labs)
+        if success >= 0.9:
+            news_message += "\nRefinement Stations: " + str(user2.total_refinement_stations)
+        if success >= 0.5:
+            news_message += "\nCities: " + str(user2.total_cities)
+        if success >= 0.6:
+            news_message += "\nResearch Centers: " + str(user2.total_research_centers)
+        if success >= 0.4:
+            news_message += "\nDefense Satellites: " + str(user2.total_defense_sats)
+        if success >= 0.9:
+            news_message += "\nShield Network: " + str(user2.total_shield_networks)
+        if success >= 1.0:
+            news_message += "\nMilitary Research: " + str(user2.research_percent_military) + "%"
+        if success >= 0.9:
+            news_message += "\nContruction Research: " + str(user2.research_percent_construction) + "%"
+        if success >= 0.8:
+            news_message += "\nTechnology Research: " + str(user2.research_percent_tech) + "%"
+        if success >= 0.6:
+            news_message += "\nEnergy Research: " + str(user2.research_percent_energy) + "%"
+        if success >= 0.7:
+            news_message += "\nPopulation Research: " + str(user2.research_percent_population) + "%"
+        if success >= 0.8:
+            news_message += "\nCulture Research: " + str(user2.research_percent_culture) + "%"
+        if success >= 1.0:
+            news_message += "\nTOperations Research: " + str(user2.research_percent_operations) + "%"
+        if success >= 1.0:
+            news_message += "\nPortals Research: " + str(user2.research_percent_portals) + "%"
+
 
     user1.agent_readiness -= specopReadiness(agentop_specs[operation],"Operation", user1, user2)
     user1.save()

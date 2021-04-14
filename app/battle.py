@@ -487,11 +487,14 @@ def phase1(attacking_fleet,
              defending_fleets["phantom"] * defstats["Phantoms"][0] + \
              sats_attack * attacked_planet.defense_sats
 
-    attdam = attdam * attfactor * ((1.0 + 0.005 * attacker.research_percent_military) / \
-                                   (1.0 + 0.005 * defender.research_percent_military))
+    attackillusions = Specops.objects.filter(user_to=user1, name="War Illusions")
+    defenceillusions = Specops.objects.filter(user_to=user2, name="War Illusions")
 
-    defdam = defdam * deffactor * ((1.0 + 0.005 * defender.research_percent_military) / \
-                                   (1.0 + 0.005 * attacker.research_percent_military))
+    attdam = attdam * attfactor * ((1.0 + 0.005 * attacker.research_percent_military *(attackillusions.specop_strength / 100)) / \
+                                   (1.0 + 0.005 * defender.research_percent_military *(defenceillusions.specop_strength / 100)))
+
+    defdam = defdam * deffactor * ((1.0 + 0.005 * defender.research_percent_military *(defenceillusions.specop_strength / 100)) / \
+                                   (1.0 + 0.005 * attacker.research_percent_military *(attackillusions.specop_strength / 100)))
 
     if attdam >= 1.0:
         attdam -= attdam * (1.0 - pow(2.5, -(shields / attdam)))
