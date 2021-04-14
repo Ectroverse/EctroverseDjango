@@ -35,6 +35,7 @@
 </tr>
 
 <form action="/mass_build" method="POST" name="massbuild">
+{% csrf_token %}
 {% for planet in planets %}
 <tr>
 
@@ -83,7 +84,7 @@
 <img src="{% static 'pr3.gif' %}" alt="Solar" title="Solar">+{{planet.bonus_ectrolium}}%</td>
 {% endif %}
 
-<td align="center"><input type="checkbox" name="m4298"></td>
+<td align="center"><input type="checkbox" name="planets_id_mass_build" value="{{planet.id}}"></td>
 </tr>
 
 {% endfor %}

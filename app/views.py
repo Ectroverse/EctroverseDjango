@@ -446,6 +446,7 @@ def map(request):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def planets(request):
     status = get_object_or_404(UserStatus, user=request.user)
+    request.session['mass_build'] = None
     order_by = request.GET.get('order_by', 'planet')
     print("order by-", order_by)
 
@@ -634,22 +635,27 @@ def build(request, planet_id):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def mass_build(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    if request.method == 'POST':
+    if request.method != 'POST':
+        return planets(request)
 
-        building_list = [SolarCollectors(), FissionReactors(), MineralPlants(), CrystalLabs(), RefinementStations(),
-                         Cities(), ResearchCenters(), DefenseSats(), ShieldNetworks(), Portal()]
+    building_list = [SolarCollectors(), FissionReactors(), MineralPlants(), CrystalLabs(), RefinementStations(),
+                     Cities(), ResearchCenters(), DefenseSats(), ShieldNetworks(), Portal()]
 
-        building_list_dict = {}
+    average_ob = 1
+    msg = ""
+    building_list_dict = {}
 
-        for key in request.POST:
-            print(key)
-            planet_id = request.POST[key]['m4298']
-            print(planet_id)
-            # for building in building_list:
-            #     building_list_dict[building] = request.POST.get(str(building.building_index), None)
-            #
-            # msg = "building on planet " + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) + "\n"
-            # msg += build_on_planet(planet, building_list_dict)
+    if 'planets_id_mass_build' in request.POST:
+        request.session['mass_build'] = request.POST.getlist('planets_id_mass_build')
+    elif 'mass_build' in request.session and request.session['mass_build'] is not None:
+        planets_id = request.session['mass_build']
+        for pid in planets_id:
+            planet = Planet.objects.get(id=pid)
+            for building in building_list:
+                building_list_dict[building] = request.POST.get(str(building.building_index), None)
+            msg += "building on planet " + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) + "\n"
+            msg += build_on_planet(status, planet, building_list_dict)
+            request.session['mass_build'] = None
 
     costs = []
     for building in building_list:
@@ -659,7 +665,7 @@ def mass_build(request):
         if cost_list:  # Remember that cost_list will be None if the tech is too low
             cost_list_labeled = []
             for i in range(5):  # 4 types of resources plus time
-                cost_list_labeled.append({"value": int(np.ceil(cost_list[i] * max(1, planet.overbuilt))),
+                cost_list_labeled.append({"value": int(np.ceil(cost_list[i] * max(1, average_ob))),
                                           "name": resource_names[i]})
         else:
             cost_list_labeled = None  # Tech was too low
@@ -672,10 +678,7 @@ def mass_build(request):
 
     # Build context
     context = {"status": status,
-               "planet": planet,
                "costs": costs,
-               "portal": planet.portal,
-               "portal_under_construction": planet.portal_under_construction,
                "msg": msg,
                "page_title": "Mass build"}
     return render(request, "mass_build.html", context)

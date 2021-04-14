@@ -18,6 +18,7 @@ Building Information
 
 <form action="" method="POST">
 {% csrf_token %}
+<input type="hidden" name="planets_passed_id_mass_build">
 <table cellspacing="6" align="center">
 <tr>
 	<td><b></b></td>
@@ -69,13 +70,15 @@ Building Information
 </td></tr>
 </table>
 
-
 <input type="submit" value="Build"></form>
 </div>
 
 <div class="content-mobile">
   <form action="" method="POST">
+  
+  
   {% csrf_token %}
+  <input type="hidden" name="planets_passed_id_mass_build">
   <table cellspacing="6" align="center">
   <tr>
       <td><b>Building</b></td>
@@ -129,9 +132,6 @@ Building Information
   <input type="submit" value="Build"></form>
 </div>
 
-
-<br><br><a href="/planet{{planet.id}}">View planet</a>
-<br><br>
 
 
 {% endblock %}
