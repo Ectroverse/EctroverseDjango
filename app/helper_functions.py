@@ -298,8 +298,11 @@ def send_agents_ghosts(status, agents, ghosts, x, y, i, specop):
             agent_fleet.delete()
 
 
-def build_on_planet(status, planet, building_list_dict):
+def build_on_planet(status, planet, building_list_dict, *args):
     # Make sure its owned by user
+    maxOB = None
+    if args:
+        maxOB = args[0]
 
     # Create list of building classes, it's making 1 object of each
     building_list = [SolarCollectors(), FissionReactors(), MineralPlants(), CrystalLabs(), RefinementStations(),
@@ -316,6 +319,14 @@ def build_on_planet(status, planet, building_list_dict):
             num = None
         if num:
             num = int(num)
+
+            # calc ammount of buildings that we can do before going over OB
+            if maxOB is not None:
+                num = min(num, calc_max_build_from_ob(planet.size, planet.total_buildings + planet.buildings_under_construction,
+                                             planet.overbuilt, maxOB))
+            if num == 0:
+                continue
+            msg += "building on planet " + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) + "\n"
             # calc_building_cost was designed to give the View what it needed, so pull out just the values and multiply by num
             total_resource_cost, penalty = building.calc_cost(num, status.research_percent_construction,
                                                               status.research_percent_tech)

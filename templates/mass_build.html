@@ -14,11 +14,17 @@ Building Information
 {% endif %}
 
 
+
 <div class="content-desktop">
 
 <form action="" method="POST">
 {% csrf_token %}
 <input type="hidden" name="planets_passed_id_mass_build">
+
+<td><input type="checkbox" name="obcheck"> build between overbuilding penalty from 
+<input type="text" pattern="[0-9]+" maxlength="9" name="oblimitlow" size="4"> to 
+<input type="text" pattern="[0-9]+" maxlength="9" name="oblimit" size="4"> %</td>
+
 <table cellspacing="6" align="center">
 <tr>
 	<td><b></b></td>

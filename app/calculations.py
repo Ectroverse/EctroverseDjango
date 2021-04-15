@@ -92,7 +92,10 @@ def unit_cost_multiplier(research_construction, research_tech, required_unit_tec
         penalty = 0
     return multiplier, np.round(penalty,2)
 
-
+# Return the max number of buildings that can still be made with a set ob
+def calc_max_build_from_ob(planet_size, total_built, current_ob, max_ob_percent):
+    max_ob = max_ob_percent / 100 +1
+    return max(0, int(np.sqrt(max_ob) * planet_size - total_built))
 
 # Return overbuild multiplier, comes from cmdGetBuildOvercost()
 def calc_overbuild(planet_size, total_buildings): # include buildings under construction
@@ -108,7 +111,6 @@ def calc_overbuild_multi(planet_size, planet_buildings, new_buildings): # planet
     ob = min(max(0, planet_size - planet_buildings), new_buildings) # number of slots left on the planet, or N, whichever one is smaller
     built = new_buildings - ob # remove it from N to find what's left to build
     ob += (sum_of_squares(built + max(planet_buildings,planet_size)) - sum_of_squares(max(planet_buildings,planet_size))) / (planet_size**2)
-    print("ob", ob, " new_buildings" , new_buildings)
     return ob / new_buildings
 
 # The original C code did a for loop for this calc =)

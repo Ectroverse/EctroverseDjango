@@ -6,7 +6,9 @@
 
 {% load mathfilters %}
 
-
+{% if top_msg %}
+	{{top_msg}}<br>
+{% endif %}
 
 {% if planet.id|mod:10 == 1 %}
 <img src= "/static/map/p00.png">

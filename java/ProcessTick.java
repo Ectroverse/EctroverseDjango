@@ -125,8 +125,9 @@ public class ProcessTick
 	" num_planets = ? ," + //55
 	" construction_flag = ? ," +//56
 	" economy_flag = ? ," + //57
-	" military_flag = ? " +//58
-	" WHERE id = ?" ; //59 wow what a long string :P
+	" military_flag = ? ," +//58
+	" total_buildings  = ? " + //59
+	" WHERE id = ?" ; //60 wow what a long string :P
 	
 	private void processTick(Connection con){
 		long startTime = 0, resultTime = 0;
@@ -227,7 +228,7 @@ public class ProcessTick
 			HashMap<String,Long> userLongValues  = usersLong.get(j);
 			int userID = userIntValues.get("user_id");
 			int empireID = userIntValues.get("empire_id");
-			userStatusUpdateStatement.setInt(59, userID);
+			userStatusUpdateStatement.setInt(60, userID);
 			String race = usersRace.get(userID);
 			HashMap<String, Double> race_info = race_info_list.get(race);
 			long networth = 1;
@@ -423,16 +424,14 @@ public class ProcessTick
 			//update research funding
 			userStatusUpdateStatement.setLong(23, (long) Math.max(0, userLongValues.get("current_research_funding") * 0.9 ) );	
 			//update total buildings
-			userStatusUpdateStatement.setInt(5, userPlanetsUpdate.getTotalBuildings(0)); //solar
-			userStatusUpdateStatement.setInt(6, userPlanetsUpdate.getTotalBuildings(1)); //fission
-			userStatusUpdateStatement.setInt(7, userPlanetsUpdate.getTotalBuildings(2)); //mineral
-			userStatusUpdateStatement.setInt(8, userPlanetsUpdate.getTotalBuildings(3)); //crystal
-			userStatusUpdateStatement.setInt(9, userPlanetsUpdate.getTotalBuildings(4)); //refirement
-			userStatusUpdateStatement.setInt(10, userPlanetsUpdate.getTotalBuildings(5)); //cities
-			userStatusUpdateStatement.setInt(11, userPlanetsUpdate.getTotalBuildings(6)); //research centers
-			userStatusUpdateStatement.setInt(12, userPlanetsUpdate.getTotalBuildings(7)); //def sats
-			userStatusUpdateStatement.setInt(13, userPlanetsUpdate.getTotalBuildings(8)); //shield network
-			userStatusUpdateStatement.setInt(14, userPlanetsUpdate.getTotalBuildings(9)); //portals
+			int total_buildings = 0;
+			for(int i = 5, k = 0; i < 15; i++, k++){
+				userStatusUpdateStatement.setInt(i, userPlanetsUpdate.getTotalBuildings(k));
+				total_buildings += userPlanetsUpdate.getTotalBuildings(k);
+			}
+			
+			userStatusUpdateStatement.setInt(59, total_buildings);
+			userStatusUpdateStatement.setInt(60, userID);
 			
 			//update networth
 			networth += userPlanetsUpdate.getNetworth();

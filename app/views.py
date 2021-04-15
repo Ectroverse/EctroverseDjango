@@ -573,7 +573,12 @@ def razeall(request, planet_id):  # TODO still need an html template for this pa
         planet.overbuilt_percent = (planet.overbuilt - 1.0) * 100
         planet.save()
         status.save()
-        return HttpResponse("Razed all buildings on this planet!")
+        context = {"status": status,
+                   "planet": planet,
+                   "top_msg": "Razed all buildings on this planet!",
+                   "page_title": "Planet " + str(planet.x) + ',' + str(planet.y) + ':' + str(
+                       planet.i)}
+        return render(request, "planet.html", context)
     else:
         return HttpResponse("CAN ONLY GET HERE BY CLICKING RAZE ALL BUTTON")
 
@@ -649,13 +654,22 @@ def mass_build(request):
         request.session['mass_build'] = request.POST.getlist('planets_id_mass_build')
     elif 'mass_build' in request.session and request.session['mass_build'] is not None:
         planets_id = request.session['mass_build']
+        minOB = 0
+        maxOB = None
+        if 'obcheck' in request.POST:
+            if request.POST['oblimitlow']:
+                minOB = int(request.POST['oblimitlow'])
+            if request.POST['oblimit']:
+                maxOB = int(request.POST['oblimit'])
         for pid in planets_id:
             planet = Planet.objects.get(id=pid)
+            if planet.overbuilt_percent < minOB:
+                continue
             for building in building_list:
+                print(request.POST)
                 building_list_dict[building] = request.POST.get(str(building.building_index), None)
-            msg += "building on planet " + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) + "\n"
-            msg += build_on_planet(status, planet, building_list_dict)
-            request.session['mass_build'] = None
+                print(building_list_dict)
+            msg += build_on_planet(status, planet, building_list_dict, maxOB)
 
     costs = []
     for building in building_list:
