@@ -87,11 +87,12 @@
 			</tr></table></form>
 
 			<br><i>Summary</i><br>
-			{% if not constructions %}
+
+			{% if not construction_sum %}
 			No buildings under construction
 			{% else %}
-			    {% for building, num in build_list.items %}
-			    {{num}} {{building.get_building_type_display}}<br>
+			    {% for building in construction_sum %}
+					{{building.building_type}} - {{building.buildings_sum}}<br>
 			    {% endfor %}
 			{% endif %}
 			</span></td>
@@ -128,11 +129,11 @@
 
 
 			<br><i>Summary</i><br>
-			{% if not total_fleet_built %}
+			{% if not fleets_sum %}
 			No units under construction
 			{% else %}
-				{% for unit, num in total_fleet_built.items %}
-				{{num}} {{unit}}<br>
+				{% for unit in fleets_sum %}
+					{{unit.unit_type}} - {{unit.units_sum}}
 				{% endfor %}
 			{% endif %}
 

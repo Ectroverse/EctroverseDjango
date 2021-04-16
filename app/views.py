@@ -18,7 +18,7 @@ from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.template import RequestContext
-from django.db.models import Q, Max
+from django.db.models import Q, Max, Sum
 from django.contrib.auth.decorators import user_passes_test
 from app.map_settings import *
 from app.helper_functions import *
@@ -417,12 +417,21 @@ def council(request):
     constructions = Construction.objects.filter(user=request.user)
     built_fleet = UnitConstruction.objects.filter(user=request.user)
 
+    construction_sum = Construction.objects.filter(user=request.user).\
+        values("building_type").annotate(buildings_sum=Sum("n"))
+    fleets_sum = UnitConstruction.objects.filter(user=request.user).\
+        values("unit_type").annotate(units_sum=Sum("n"))
+
+
+    # fleets_sum = UnitConstruction.objects.filter(user=request.user).aggregate(Sum('unit_type'))
     context = {"status": status,
                "constructions": constructions,
                "built_fleet": built_fleet,
                "main_fleet": main_fleet_list,
                "unit_total": unit_total,
                "page_title": "Council",
+               "construction_sum": construction_sum,
+               "fleets_sum": fleets_sum,
                "msg": msg}
     return render(request, "council.html", context)
 
