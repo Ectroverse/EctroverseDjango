@@ -153,24 +153,28 @@ def btn(request):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def scouting(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    scouted = Scouting.objects.filter(user=status.id)
+    scouted = Scouting.objects.filter(user=request.user)
     order_by = request.GET.get('order_by', 'planet')
-    print("order by-", order_by)
 
     if order_by == 'planet':
-        planets = Planet.objects.order_by('x', 'y', 'i')
-    elif order_by in ['ancient', 'bonus_all', 'bonus_none', 'fission']:
-        print("Havent implemented that sort yet")
-        planets = Planet.objects.order_by('x', 'y', 'i')
+        # scouted = Scouting.objects.filter(planet__owner=request.user).\
+        #     values('planet__size','scout','planet__x','planet__y','planet__i','planet__x').\
+        #     order_by('planet__x','planet__y','planet__i')
+        scouted = Scouting.objects.select_related('planet').filter(user=request.user).\
+            order_by('planet__x','planet__y','planet__i')
+
     elif order_by == 'size':
-        planets = Planet.objects.order_by('-size')
+        scouted = Scouting.objects.select_related('planet').filter(user=request.user).order_by('planet__size')
     else:
-        planets = Planet.objects.order_by(order_by)
+        scouted = Scouting.objects.select_related('planet').filter(user=request.user). \
+            order_by('planet__'+order_by)
+
 
     context = {"status": status,
-                   "page_title": "Planatery Scouting",
-                   "scouted": scouted,
-                   "planets": Planet.objects.all(),
+               "page_title": "Planatery Scouting",
+               "scouted": scouted,
+               "planets": planets,
+               "sql": scouted.query
                    }
     return render(request, "scouting.html", context)
 
@@ -573,12 +577,7 @@ def razeall(request, planet_id):  # TODO still need an html template for this pa
         planet.overbuilt_percent = (planet.overbuilt - 1.0) * 100
         planet.save()
         status.save()
-        context = {"status": status,
-                   "planet": planet,
-                   "top_msg": "Razed all buildings on this planet!",
-                   "page_title": "Planet " + str(planet.x) + ',' + str(planet.y) + ':' + str(
-                       planet.i)}
-        return render(request, "planet.html", context)
+        return HttpResponse("Razed all buildings on this planet!")
     else:
         return HttpResponse("CAN ONLY GET HERE BY CLICKING RAZE ALL BUTTON")
 
@@ -654,22 +653,13 @@ def mass_build(request):
         request.session['mass_build'] = request.POST.getlist('planets_id_mass_build')
     elif 'mass_build' in request.session and request.session['mass_build'] is not None:
         planets_id = request.session['mass_build']
-        minOB = 0
-        maxOB = None
-        if 'obcheck' in request.POST:
-            if request.POST['oblimitlow']:
-                minOB = int(request.POST['oblimitlow'])
-            if request.POST['oblimit']:
-                maxOB = int(request.POST['oblimit'])
         for pid in planets_id:
             planet = Planet.objects.get(id=pid)
-            if planet.overbuilt_percent < minOB:
-                continue
             for building in building_list:
-                print(request.POST)
                 building_list_dict[building] = request.POST.get(str(building.building_index), None)
-                print(building_list_dict)
-            msg += build_on_planet(status, planet, building_list_dict, maxOB)
+            msg += "building on planet " + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) + "\n"
+            msg += build_on_planet(status, planet, building_list_dict)
+            request.session['mass_build'] = None
 
     costs = []
     for building in building_list:
