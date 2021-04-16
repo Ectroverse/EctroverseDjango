@@ -417,10 +417,23 @@ def council(request):
     constructions = Construction.objects.filter(user=request.user)
     built_fleet = UnitConstruction.objects.filter(user=request.user)
 
-    construction_sum = Construction.objects.filter(user=request.user).\
+    construction_sum_filter = Construction.objects.filter(user=request.user).\
         values("building_type").annotate(buildings_sum=Sum("n"))
-    fleets_sum = UnitConstruction.objects.filter(user=request.user).\
+    fleets_sum_filter = UnitConstruction.objects.filter(user=request.user).\
         values("unit_type").annotate(units_sum=Sum("n"))
+    print("fleets_sum_filter",fleets_sum_filter)
+
+    fleets_sum = {}
+    for unit_query in fleets_sum_filter:
+        unit = unit_query['unit_type']
+        num = unit_query['units_sum']
+        fleets_sum[unit_info[unit]["label"]] = num
+
+    construction_sum = {}
+    for build_query in construction_sum_filter:
+        building = build_query['building_type']
+        num = build_query['buildings_sum']
+        construction_sum[building_labels[building]] = num
 
 
     # fleets_sum = UnitConstruction.objects.filter(user=request.user).aggregate(Sum('unit_type'))
