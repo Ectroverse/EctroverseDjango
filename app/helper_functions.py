@@ -373,7 +373,12 @@ def build_on_planet(status, planet, building_list_dict, *args):
                                         planet=planet,
                                         n=num,
                                         building_type=building.short_label,
-                                        ticks_remaining=ticks)
+                                        ticks_remaining=ticks,
+                                        energy_cost=total_resource_cost.ene,
+                                        mineral_cost=total_resource_cost.min,
+                                        crystal_cost=total_resource_cost.cry,
+                                        ectrolium_cost=total_resource_cost.ect
+                                        )
             planet.buildings_under_construction += num
             if isinstance(building, Portal):
                 planet.portal_under_construction = True

@@ -324,6 +324,11 @@ class Construction(models.Model): # a single type of building under construction
         SN = 'SN', _('Shield Networks')
         PL = 'PL', _('Portal')
     building_type = models.CharField(max_length=2, choices=BuildingTypes.choices)
+    # so we know how much to refund if needed
+    energy_cost = models.BigIntegerField(default=0)
+    mineral_cost = models.BigIntegerField(default=0)
+    crystal_cost = models.BigIntegerField(default=0)
+    ectrolium_cost = models.BigIntegerField(default=0)
 
 
 class Fleet(models.Model):
@@ -378,8 +383,29 @@ class UnitConstruction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     n = models.IntegerField() # number of them
     ticks_remaining = models.IntegerField()
-    unit_type = models.CharField(max_length=11) # exploration is longest name, so 11 chars is enough
 
+    class UnitTypes(models.TextChoices):
+        bomber = 'bomber', _('Bombers')
+        fighter = 'fighter', _('Fighters')
+        transport = 'transport', _('Transports')
+        cruiser = 'cruiser', _('Cruisers')
+        carrier = 'carrier', _('Carriers')
+        soldier = 'soldier', _('Soldiers')
+        droid = 'droid', _('Droids')
+        goliath = 'goliath', _('Goliaths')
+        phantom = 'phantom', _('Phantoms')
+        wizard = 'wizard', _('Psychics')
+        agent = 'agent', _('Agents')
+        ghost = 'ghost', _('Ghost Ships')
+        exploration = 'exploration', _('Exploration Ships')
+
+    unit_type = models.CharField(max_length=11, choices=UnitTypes.choices) # exploration is longest name, so 11 chars is enough
+
+    # so we know how much to refund if needed
+    energy_cost = models.BigIntegerField(default=0)
+    mineral_cost = models.BigIntegerField(default=0)
+    crystal_cost = models.BigIntegerField(default=0)
+    ectrolium_cost = models.BigIntegerField(default=0)
 
 
 class RoundStatus(models.Model):

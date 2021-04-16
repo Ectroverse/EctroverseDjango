@@ -371,7 +371,39 @@ def choose_empire_race(request):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def council(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    constructions = Construction.objects.filter(user=request.user)
+
+    msg = ""
+    refund = [0, 0, 0, 0]
+    if 'cancel_unit' in request.POST:
+        cancelled_units = request.POST.getlist('cancel_unit')
+        for cu in cancelled_units:
+            cf = UnitConstruction.objects.get(id=cu)
+            refund[0] += int(cf.energy_cost/2)
+            refund[1] += int(cf.mineral_cost/2)
+            refund[2] += int(cf.crystal_cost/2)
+            refund[3] += int(cf.ectrolium_cost/2)
+            cf.delete()
+        msg += "You were refunded with" + str(refund[0]) + " energy, " + str(refund[1]) + " minerals, " +\
+            str(refund[2]) + " crystals, " + str(refund[3]) + " ectrolium! "
+
+    if 'cancel_build' in request.POST:
+        cancelled_buildings = request.POST.getlist('cancel_build')
+        for cb in cancelled_buildings:
+            cf = Construction.objects.get(id=cb)
+            refund[0] += int(cf.energy_cost/2)
+            refund[1] += int(cf.mineral_cost/2)
+            refund[2] += int(cf.crystal_cost/2)
+            refund[3] += int(cf.ectrolium_cost/2)
+            cf.delete()
+        msg += "You were refunded with" + str(refund[0]) + " energy, " + str(refund[1]) + " minerals, " +\
+            str(refund[2]) + " crystals, " + str(refund[3]) + " ectrolium! "
+
+    status.energy += refund[0]
+    status.minerals += refund[1]
+    status.crystals += refund[2]
+    status.ectrolium += refund[3]
+    status.save()
+
     # Make list of total buildings under construction for each building type
     main_fleet_list = []
     main_fleet = Fleet.objects.get(owner=request.user, main_fleet=True)
@@ -382,32 +414,16 @@ def council(request):
             main_fleet_list.append({"name": unit_info[unit]["label"], "value": num})
             unit_total += num
 
-    built_fleet_list = []
-    total_fleet_built = {}
+    constructions = Construction.objects.filter(user=request.user)
     built_fleet = UnitConstruction.objects.filter(user=request.user)
-    for fl in built_fleet:
-        built_fleet_list.append({"name": unit_info[fl.unit_type]['label'], "number": fl.n, "ticks_remaining": fl.ticks_remaining})
-        if unit_info[fl.unit_type]['label'] not in total_fleet_built:
-            total_fleet_built[unit_info[fl.unit_type]['label']] = fl.n
-        else:
-            total_fleet_built[unit_info[fl.unit_type]['label']] += fl.n
 
-    # unit_total_built = 0
-    # for bf in built_fleet:
-    #     main_fleet_list.append({"name": built_fleet, "value": num})
-    #     unit_total_built += num
-    build_list = {}
-    for construction in constructions:
-        label = construction.get_building_type_display()  # get_X_display() is the trick for getting the full label of the textchoice
-        build_list[label] = build_list.get(label, 0) + construction.n
     context = {"status": status,
                "constructions": constructions,
-               "build_list": build_list,
-               "main_fleet" : main_fleet_list,
-               "unit_total" : unit_total,
-               "built_fleet" : built_fleet_list,
-               "total_fleet_built": total_fleet_built,
-               "page_title": "Council"}
+               "built_fleet": built_fleet,
+               "main_fleet": main_fleet_list,
+               "unit_total": unit_total,
+               "page_title": "Council",
+               "msg": msg}
     return render(request, "council.html", context)
 
 
@@ -785,7 +801,12 @@ def units(request):
                 UnitConstruction.objects.create(user=request.user,
                                                 n=num,
                                                 unit_type=unit,
-                                                ticks_remaining=total_resource_cost.time)  # calculated ticks
+                                                ticks_remaining=total_resource_cost.time,
+                                                energy_cost=total_resource_cost.ene,
+                                                mineral_cost=total_resource_cost.min,
+                                                crystal_cost=total_resource_cost.cry,
+                                                ectrolium_cost=total_resource_cost.ect
+                                                )  # calculated ticks
 
         status.save()  # update user's resources
     else:

@@ -3,7 +3,8 @@
 {% block content %}
 
 
-<br>
+{{msg}}<br>
+
 
 <div style="width:100%; float:left; ">
 	<div class ="left_box" >
@@ -67,13 +68,14 @@
 
 
 			<b>Buildings under construction</b><br><span id="council_build_que">
-			<form name="cancelbuild" id="cancel_build" action="/cancelbuild"><table>
+			<form name="cancelbuild" id="cancel_builds" action="/council"  method="POST"><table>
+			{% csrf_token %}
 			{% for construction in constructions %}
 			    <tr><td>
 			    {{construction.n}} {{construction.get_building_type_display}}
 			    in {{construction.ticks_remaining}} weeks
 			    at <a href="/planet{{construction.planet.id}}">{{construction.planet.x}},{{construction.planet.y}}:{{construction.planet.i}}</a>
-			    </td><td><input type="checkbox" name="{{construction.id}}"></td></tr>
+			    </td><td><input type="checkbox" name="cancel_build" value="{{construction.id}}"></td></tr>
 			{% endfor %}
 			<tr>
 			    <td></td>
@@ -89,7 +91,7 @@
 			No buildings under construction
 			{% else %}
 			    {% for building, num in build_list.items %}
-			    {{num}} {{building}}<br>
+			    {{num}} {{building.get_building_type_display}}<br>
 			    {% endfor %}
 			{% endif %}
 			</span></td>
@@ -108,14 +110,15 @@
 			{% endfor %}
 
 			<tr><td><b>Total</b></td><td id="untnum">{{unit_total}}</td></tr></table><br><br>
-			<b>Units under construction</b><br><span id="council_unit_que"><form name="cancelunit" id="cancel_units" action="cancelbuild"><table>
-
+			<b>Units under construction</b><br><span id="council_unit_que">
+			<form name="cancelunit" id="cancel_units" action="/council" method="POST"><table>
+			{% csrf_token %}
 			{% for unit in built_fleet %}
 			    <tr>
-				<td>{{unit.number}}</td>
-			    <td>{{unit.name}}</td>
+				<td>{{unit.n}}</td>
+			    <td>{{unit.get_unit_type_display}}</td>
 				<td>in {{unit.ticks_remaining}} weeks</td>
-				</td><td><input type="checkbox" name="{{construction.id}}"></td></tr>
+				</td><td><input type="checkbox" name="cancel_unit" value="{{unit.id}}"></td></tr>
 				</tr>
 			{% endfor %}
 
