@@ -1743,6 +1743,8 @@ def specops(request):
                 msg = "You don't have that many agents!"
             elif request.POST['X'] == "" or request.POST['Y'] == "" or request.POST['I'] == "":
                 msg = "You must specify a planet!"
+            elif get_op_penalty(status.research_percent_operations, agentop_specs[request.POST['operation']][0])  == -1:
+                msg = "You don't have enough operations research to perform this covert operation!"
             else:
                 planet = None
                 try:

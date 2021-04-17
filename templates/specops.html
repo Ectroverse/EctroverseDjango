@@ -118,7 +118,6 @@ function agentsCheck() {
 		{% csrf_token %}
 			{% for name, values in operations.items  %}
 			<input class="spaceUnder" type="radio" id="{{ values.4 }}" name="operation" value="{{ name }}" onclick="agentsCheck()">
-			<input class="spaceUnder" type="hidden" id="hidden_values{{ values.4 }}" value="{{ values.3 }}">
 			<label class="remove-all-styles " >{{ name }}</label>
 			<br>
 			{% endfor %}

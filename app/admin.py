@@ -15,7 +15,7 @@ admin.site.register(Relations)
 admin.site.register(Messages)
 admin.site.register(News)
 admin.site.register(MapSettings)
-admin.site.register(Scouting)
+# admin.site.register(Scouting)
 admin.site.register(HallOfFame)
 # admin.site.register(Specops)
 
@@ -45,3 +45,7 @@ admin.site.register(UserStatus, UserStatusAdmin)
 class PlanetAdmin(admin.ModelAdmin):
     list_display = ["x","y","i","owner"]
 admin.site.register(Planet, PlanetAdmin)
+
+class ScoutingAdmin(admin.ModelAdmin):
+    list_display = ["user"]
+admin.site.register(Scouting, ScoutingAdmin)

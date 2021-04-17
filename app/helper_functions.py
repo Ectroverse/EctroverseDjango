@@ -259,6 +259,7 @@ def send_agents_ghosts(status, agents, ghosts, x, y, i, specop):
     x = int(x)
     y = int(y)
     i = int(i)
+
     planet = Planet.objects.filter(x=x, y=y, i=i).first()
     if planet is None:
         return "This planet doesn't exist!"
@@ -285,24 +286,22 @@ def send_agents_ghosts(status, agents, ghosts, x, y, i, specop):
     main_fleet.agent -= agents
     main_fleet.ghost -= ghosts
     main_fleet.save()
+    msg = ""
     if fleet_time == 0:
         if agents > 0:
-            perform_operation(agent_fleet)
+            msg = perform_operation(agent_fleet)
             main_fleet.agent += agent_fleet.agent
             main_fleet.save()
             agent_fleet.delete()
         if ghosts > 0:
-            perform_incantation(agent_fleet)
+            msg =perform_incantation(agent_fleet)
             main_fleet.ghost += agent_fleet.ghost
             main_fleet.save()
             agent_fleet.delete()
+    return msg
 
-
-def build_on_planet(status, planet, building_list_dict, *args):
+def build_on_planet(status, planet, building_list_dict):
     # Make sure its owned by user
-    maxOB = None
-    if args:
-        maxOB = args[0]
 
     # Create list of building classes, it's making 1 object of each
     building_list = [SolarCollectors(), FissionReactors(), MineralPlants(), CrystalLabs(), RefinementStations(),
@@ -319,14 +318,6 @@ def build_on_planet(status, planet, building_list_dict, *args):
             num = None
         if num:
             num = int(num)
-
-            # calc ammount of buildings that we can do before going over OB
-            if maxOB is not None:
-                num = min(num, calc_max_build_from_ob(planet.size, planet.total_buildings + planet.buildings_under_construction,
-                                             planet.overbuilt, maxOB))
-            if num == 0:
-                continue
-            msg += "building on planet " + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) + "\n"
             # calc_building_cost was designed to give the View what it needed, so pull out just the values and multiply by num
             total_resource_cost, penalty = building.calc_cost(num, status.research_percent_construction,
                                                               status.research_percent_tech)
@@ -373,12 +364,7 @@ def build_on_planet(status, planet, building_list_dict, *args):
                                         planet=planet,
                                         n=num,
                                         building_type=building.short_label,
-                                        ticks_remaining=ticks,
-                                        energy_cost=total_resource_cost.ene,
-                                        mineral_cost=total_resource_cost.min,
-                                        crystal_cost=total_resource_cost.cry,
-                                        ectrolium_cost=total_resource_cost.ect
-                                        )
+                                        ticks_remaining=ticks)
             planet.buildings_under_construction += num
             if isinstance(building, Portal):
                 planet.portal_under_construction = True
