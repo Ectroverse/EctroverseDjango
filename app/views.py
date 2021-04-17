@@ -298,7 +298,11 @@ def map_settings(request):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def famnews(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    empire_news = News.objects.filter(empire1 = status.empire, is_empire_news = True).order_by('-date_and_time')
+    current_tick_number = RoundStatus.objects.get().tick_number
+    empire_news = News.objects.filter(empire1=status.empire,
+                                      is_empire_news = True,
+                                      tick_number__gte=current_tick_number-news_show).\
+                                        order_by('-date_and_time')
 
     current_empire = status.empire
     context = {"status": status,
