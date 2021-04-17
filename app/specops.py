@@ -72,7 +72,7 @@ agentop_specs = {
                       "Your agents will attempt to spread a dangerous infection which will kill most of the population and spread in nearby planets."],
     "Energy Transfer": [80, 22, 2.5, False, 'ET',
                         "Your agents will infiltrate the enemy energy storage facilities and transfer energy to your own energy storage."],
-    "Military Sabotage": [100, 30, 3.5, False, 'MT',
+    "Military Sabotage": [100, 30, 3.5, False, 'MS',
                  "Through an enemy portal, your agents will attempt to reach the enemy fleet and destroy military units."],
     "Planetary Beacon": [100, 7, 1.0, False, 'PB',
                          "Your agents will attempt to place a beacon on target planet, if successful it will remove any dark webs present."],
