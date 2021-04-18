@@ -47,10 +47,10 @@ all_operations = ["Spy Target",
                 "Infiltration",
                 "Diplomatic Espionage",
                 "Bio Infection",
-                "Energy Transfer",
+                "Hack mainframe",
                 "Military Sabotage",
                 "Planetary Beacon",
-                "Computer virus",
+                "Bribe officials",
                 "Nuke Planet",
                 "Maps theft",
                 "High Infiltration",
@@ -70,14 +70,14 @@ agentop_specs = {
                              "Your diplomats will try to gather information regarding operations and spells, currently affecting the target faction."],
     "Bio Infection": [60, 25, 3.0, False, 'BI',
                       "Your agents will attempt to spread a dangerous infection which will kill most of the population and spread in nearby planets."],
-    "Energy Transfer": [80, 22, 2.5, False, 'ET',
-                        "Your agents will infiltrate the enemy energy storage facilities and transfer energy to your own energy storage."],
+    "Hack mainframe": [80, 22, 3.0, False, 'HM',
+                        "Your agents will infiltrate the enemy energy storage facilities and temporarily divert income to your empire."],
     "Military Sabotage": [100, 30, 3.5, False, 'MS',
                  "Through an enemy portal, your agents will attempt to reach the enemy fleet and destroy military units."],
     "Planetary Beacon": [100, 7, 1.0, False, 'PB',
                          "Your agents will attempt to place a beacon on target planet, if successful it will remove any dark webs present."],
-    "Computer virus": [120, 22, 2.5, False, 'CV',
-                       "Your hackers will try to plant a nasty computer virus that will increase targets resources decay rate!"],
+    "Bribe officials": [120, 50, 4.0, False, 'BO',
+                       "Your spies will try to bribe officials of target faction causing great inneficiencies!"],
     "Nuke Planet": [120, 20, 5.0, False, 'NP',
                            "Your agents will place powerful nuclear devices on the surface of the planet, destroying all buildings and units, leaving in uninhabited."],
     "Maps theft": [140, 40, 4.5, False, 'MT',
@@ -528,7 +528,7 @@ def perform_operation(agent_fleet):
             if success >= 2:
                 time = 50
             else:
-                time = pow(7, success)
+                time = int(pow(7, success))
             Specops.objects.create(user_to=user2.user,
                                    user_from=user1.user,
                                    specop_type='O',
@@ -573,6 +573,73 @@ def perform_operation(agent_fleet):
                     Scouting.objects.create(user=user1.user,
                                             planet=s2.planet,
                                             scout=s2.scout)
+
+    if operation == "Planetary Beacon":
+        if success >= 1:
+            Specops.objects.create(user_to=user2.user,
+                                   user_from=user1.user,
+                                   specop_type='O',
+                                   name="Planetary Beacon",
+                                   ticks_left=24,
+                                   planet=target_planet)
+            news_message += "All dark web effects were removed from the planet, however the planet defenders gained +10% military bonus!"
+            news_message2 += "All dark web effects were removed from the planet, however the planet defenders gained +10% military bonus!"
+
+
+    if operation == "Hack mainframe":
+        if success >= 1.0:
+            energy_pct1 = 20;
+        else:
+            energy_pct1 = (20.0 / 0.6) * (success - 0.4)
+
+        if energy_pct1 > 0:
+            fa = min(1, success**2 * 25 / 100)
+            energy_pct2 = energy_pct1 * fa
+            length = min(48, round(pow(6,success+0.6)))
+            Specops.objects.create(user_to=user2.user,
+                                   user_from=user1.user,
+                                   specop_type='O',
+                                   specop_strength=energy_pct1,
+                                   specop_strength2=energy_pct2,
+                                   name="Hack mainframe",
+                                   ticks_left=length)
+            news_message += "Mainframe computer network was successfully hacked, energy flows transferred to our empire!"
+            news_message += "\nTarget income lost: " + str(energy_pct1) +"%"
+            news_message += "\nOur income increase: " + str(energy_pct2)  +"%"
+            news_message2 += "Our mainframe computers were hacked, energy production channelled away from our grid!"
+            news_message2 += "\nOur income lost: " + str(energy_pct1) +"%"
+        else:
+            news_message += "Your agents didn't succeed!"
+            news_message2 += "Your agents managed to defend!"
+
+    if operation == "Bribe officials":
+        if success >= 0.6:
+            r = random.randint(0,1)
+            news_message += "Your agents managed to successfully bribe certain officials!\n"
+            news_message2 += "Your corrupt officials are slowing down our economy!\n"
+            if r == 1: #increase resource cost
+                fa = round(success**2 * 33)
+                news_message += "Building costs increased by " + str(fa) + "%!"
+                news_message2 += "Building costs increased by " + str(fa) + "%!"
+                fa = fa + 100 /100
+                extra = "resource_cost"
+            else: #increase building time
+                fa = round(success ** 2 * 100)
+                news_message += "Building time increased by " + str(fa) + "%!"
+                news_message2 += "Building time increased by " + str(fa) + "%!"
+                fa = fa + 100 / 100
+                extra = "building_time"
+            length = min(72, round(success *24))
+            Specops.objects.create(user_to=user2.user,
+                                   user_from=user1.user,
+                                   specop_type='O',
+                                   specop_strength=fa,
+                                   extra_effect=extra,
+                                   name="Bribe officials",
+                                   ticks_left=length)
+        else:
+            news_message += "Your agents didn't succeed!"
+            news_message2 += "Your politicians seem to live the life of saints!"
 
     if empire2 is None:
         News.objects.create(user1=User.objects.get(id=user1.id),

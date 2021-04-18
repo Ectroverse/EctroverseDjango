@@ -54,6 +54,7 @@ class Planet(models.Model):
 
 
 
+
 class Empire(models.Model):
     '''
   int id;
@@ -210,6 +211,8 @@ class UserStatus(models.Model):
     energy_decay = models.BigIntegerField(default=0)
     energy_interest = models.BigIntegerField(default=0) # wookies only
     energy_income = models.BigIntegerField(default=0)
+    energy_specop_effect = models.BigIntegerField(default=0)
+
     mineral_production = models.IntegerField(default=0)
     mineral_decay = models.IntegerField(default=0)
     mineral_interest = models.IntegerField(default=0) # wookies only
@@ -498,7 +501,9 @@ class Specops(models.Model):
     specop_type = models.CharField(max_length=1, choices=SpecopType.choices, default='O')
     name = models.CharField(max_length=50, blank=True, null=True, default=None)
     specop_strength = models.FloatField(default=0)
+    specop_strength2 = models.FloatField(default=0)
     # for spells like enlightment
     extra_effect = models.CharField(max_length=50, blank=True, null=True, default=None)
     ticks_left = models.IntegerField(default=0)
     stealth = models.BooleanField(default=False)
+    planet = models.ForeignKey(Planet, on_delete=models.SET_NULL, blank=True, null=True, default=None)

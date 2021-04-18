@@ -519,7 +519,7 @@ def planet(request, planet_id):
     attack_cost = None
     if planet.owner:  # if planet is owned by someone, grab that owner's status, in order to get faction and other info of owner
         planet_owner_status = UserStatus.objects.get(user=planet.owner)
-        attack_cost = battleReadinessLoss(status, planet_owner_status)
+        attack_cost = battleReadinessLoss(status, planet_owner_status, planet)
     else:
         planet_owner_status = None
 
@@ -1073,7 +1073,7 @@ def fleets(request):
     status2 = None
     if planet_to_template_attack:
         status2 = UserStatus.objects.get(id=planet_to_template_attack.owner.id)
-        attack_cost = battleReadinessLoss(status, status2)
+        attack_cost = battleReadinessLoss(status, status2,planet_to_template_attack)
 
     # If user changed order after attack or percentages
     if request.method == 'POST' and 'attack' in request.POST:

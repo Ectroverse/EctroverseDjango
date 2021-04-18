@@ -158,7 +158,7 @@ race_info_list = {
         "crystal_production": 1.25,
         "race_special": None,  # TODO paste list somewhere of possible specials
         "op_list": ["Observe Planet", "Network Infiltration", "Infiltration", "Bio Infection", "Military Sabotage",
-                    "Nuke Planet", "Diplomatic Espionage", "Computer virus"],
+                    "Nuke Planet", "Diplomatic Espionage", "Bribe officials"],
         "spell_list": ["Irradiate Ectrolium", "Incandescence", "Black Mist", "War Illusions"],
         "incantation_list": ["Portal Force Field", "Vortex Portal", "Energy Surge", "Call to Arms"]},
     "Manticarias": {
@@ -178,7 +178,7 @@ race_info_list = {
         "ghost_ships_coeff": 1.2,
         "energy_production": 1.4,
         "race_special": 'RACE_SPECIAL_SOLARP15',
-        "op_list": ["Spy Target", "Observe Planet", "Energy Transfer"],
+        "op_list": ["Spy Target", "Observe Planet", "Hack mainframe"],
         "spell_list": ["Dark Web", "Black Mist", "War Illusions", "Psychic Assault", "Phantoms", "Enlightenment",
                        "Grow Planet's Size"],
         "incantation_list": ["Planetary Shielding", "Mind Control"]},
@@ -224,8 +224,8 @@ race_info_list = {
         "energy_production": 1.3,
         "race_special": None,
         "op_list": ["Observe Planet", "Spy Target", "Observe Planet", "Network Infiltration", "Bio Infection",
-                    "Energy Transfer", \
-                    "Nuke Planet", "Planetary Beacon", "Diplomatic Espionage", "Computer virus", "Maps theft"],
+                    "Hack mainframe", \
+                    "Nuke Planet", "Planetary Beacon", "Diplomatic Espionage", "Bribe officials", "Maps theft"],
         "spell_list": ["Irradiate Ectrolium", "Incandescence", "Black Mist"],
         "incantation_list": ["Survey System", "Planetary Shielding"]},
     "Dreamweavers": {
@@ -247,7 +247,7 @@ race_info_list = {
         "ghost_ships_coeff": 1.3,
         "energy_production": 0.8,
         "race_special": None,
-        "op_list": ["Observe Planet", "Network Infiltration", "Bio Infection", "Energy Transfer", "Military Sabotage"],
+        "op_list": ["Observe Planet", "Network Infiltration", "Bio Infection", "Hack mainframe", "Military Sabotage"],
         "spell_list": ["Irradiate Ectrolium", "Dark Web", "Incandescence", "Black Mist", "War Illusions",
                        "Psychic Assault", "Phantoms", "Enlightenment", "Grow Planet's Size"],
         "incantation_list": ["Sense Artefact", "Portal Force Field", "Mind Control", "Energy Surge"]},
@@ -272,7 +272,7 @@ race_info_list = {
         "crystal_production": 1.25,
         "race_special": 'RACE_SPECIAL_WOOKIEE',
         "op_list": ["Observe Planet", "Infiltration", "Nuke Planet", "Planetary Beacon", "Diplomatic Espionage",
-                    "Computer virus"],
+                    "Bribe officials"],
         "spell_list": ["Irradiate Ectrolium", "Incandescence", "War Illusions", "Grow Planet's Size"],
         "incantation_list": ["Sense Artefact", "Survey System", "Portal Force Field", "Call to Arms"]}}
 

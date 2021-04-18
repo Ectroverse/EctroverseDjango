@@ -8,7 +8,7 @@ import copy
 import math
 
 
-def battleReadinessLoss(user1, user2):
+def battleReadinessLoss(user1, user2, planet):
     # print(user1, user2)
     fa = (1 + user1.num_planets) / (1 + user2.num_planets)
     empire1 = user1.empire
@@ -61,10 +61,10 @@ def battleReadinessLoss(user1, user2):
     if nap:
         fa = max(50, fa)
 
-    spec_ops = Specops.objects.filter(user_to=user2.user, name="Dark Web")
-
-    for specop in spec_ops:
-        fa *= 1 + specop.specop_strength / 100
+    if not Specops.objects.filter(name="Planetary Beacon", planet=planet).exists():
+        spec_ops = Specops.objects.filter(user_to=user2.user, name="Dark Web")
+        for specop in spec_ops:
+            fa *= 1 + specop.specop_strength / 100
 
     # add personal and fam news
     # dont forget to delete anempty fleet!
@@ -377,8 +377,12 @@ def attack_planet(attacking_fleet):
     deffactor = race_info_list[defender.get_race_display()].get("military_attack", 1.0) / \
                 race_info_list[attacker.get_race_display()].get("military_defence", 1.0) / fa
 
-    attacker.fleet_readiness -= battleReadinessLoss(attacker, defender)
+    attacker.fleet_readiness -= battleReadinessLoss(attacker, defender, attacked_planet)
     attacker.save()
+
+    if Specops.objects.filter(name="Planetary Beacon", planet=attacked_planet).exists():
+        attfactor /= 1.1
+        deffactor *= 1.1
 
     # defsatsbase = defsats = attacked_planet.defense_sats
     shields = shield_absorb * attacked_planet.shield_networks  # + specopShieldingCalc(defid, fleetd.destid);

@@ -189,7 +189,16 @@ function agentsCheck() {
 		<div class="ops_box spaceUnder">
 		<b>Operations affecting your faction:</b><br>
 			{% for o in ops_in%}
-				{{o.name}} of {{o.specop_strength}}% from {{o.user_from.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
+				{{o.name}} 
+				{% if o.specop_strength > 0 %}
+				of 
+				{{o.specop_strength}}% 
+				{% endif %}
+				from {{o.user_from.userstatus.user_name}}
+				{% if o.planet is not None %}
+						on planet {{o.planet.x}}:{{o.planet.y}},{{o.planet.i}} 
+				{% endif %}
+				for {{o.ticks_left}} weeks.<br>
 			{% endfor %}
 		</div>
 		<div id="dvtext2" class="ops_box2">
@@ -198,10 +207,14 @@ function agentsCheck() {
 				{{o.name}} 
 				{% if o.extra_effect is not None %}
 					<a href="/specop_show{{o.id}}">{{o.extra_effect}}</a>
-				{% else %}
+				{% elif o.specop_strength > 0 %}
 				of {{o.specop_strength}}% 
 					{% endif %}
-				on {{o.user_to.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
+				on {{o.user_to.userstatus.user_name}} 
+				{% if o.planet is not None %}
+					on planet {{o.planet.x}}:{{o.planet.y}},{{o.planet.i}} 
+				{% endif %}
+				for {{o.ticks_left}} weeks.<br>
 			{% endfor %}
 		</div>
 	</div>
