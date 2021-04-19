@@ -4,11 +4,8 @@ Put your name after an item if you want to reserve it for yourself, not all item
 
 #### v0.1 Remaining Items
 left to do:
-- battle sequence 
-- operations- just scouting for now
-- MAP!!!!!
-- update networth when fleet changes
-- units upkeep?
+- operations
+- any bugs?
 
 #### v0.2 Remaining Items
 
