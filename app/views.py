@@ -655,8 +655,14 @@ def build(request, planet_id):
         if cost_list:  # Remember that cost_list will be None if the tech is too low
             cost_list_labeled = []
             for i in range(5):  # 4 types of resources plus time
-                cost_list_labeled.append({"value": int(np.ceil(cost_list[i] * max(1, planet.overbuilt))),
+                if i < 4:
+                    cost_list_labeled.append({"value": int(np.ceil(cost_list[i] * max(1, planet.overbuilt))),
                                           "name": resource_names[i]})
+                else:
+                    cost_list_labeled.append({"value": int(np.ceil(cost_list[i])),
+                                              "name": resource_names[i]})
+
+
         else:
             cost_list_labeled = None  # Tech was too low
 
@@ -687,12 +693,20 @@ def mass_build(request):
     building_list = [SolarCollectors(), FissionReactors(), MineralPlants(), CrystalLabs(), RefinementStations(),
                      Cities(), ResearchCenters(), DefenseSats(), ShieldNetworks(), Portal()]
 
-    average_ob = 1
+
     msg = ""
     building_list_dict = {}
 
+    num_planets = 0
+    total_ob = 0
+
     if 'planets_id_mass_build' in request.POST:
         request.session['mass_build'] = request.POST.getlist('planets_id_mass_build')
+        planets_id = request.session['mass_build']
+        for pid in planets_id:
+            planet = Planet.objects.get(id=pid)
+            num_planets += 1
+            total_ob += planet.overbuilt
     elif 'mass_build' in request.session and request.session['mass_build'] is not None:
         planets_id = request.session['mass_build']
         for pid in planets_id:
@@ -702,6 +716,13 @@ def mass_build(request):
             msg += "building on planet " + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) + "\n"
             msg += build_on_planet(status, planet, building_list_dict)
             request.session['mass_build'] = None
+            num_planets += 1
+            total_ob += planet.overbuilt
+
+    if num_planets > 0:
+        average_ob = total_ob / num_planets
+    else:
+        average_ob = 1
 
     costs = []
     for building in building_list:
@@ -711,8 +732,12 @@ def mass_build(request):
         if cost_list:  # Remember that cost_list will be None if the tech is too low
             cost_list_labeled = []
             for i in range(5):  # 4 types of resources plus time
-                cost_list_labeled.append({"value": int(np.ceil(cost_list[i] * max(1, average_ob))),
+                if i < 4:
+                    cost_list_labeled.append({"value": int(np.ceil(cost_list[i] * max(1, average_ob))),
                                           "name": resource_names[i]})
+                else:
+                    cost_list_labeled.append({"value": int(np.ceil(cost_list[i] )),
+                                              "name": resource_names[i]})
         else:
             cost_list_labeled = None  # Tech was too low
 
