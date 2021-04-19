@@ -331,6 +331,18 @@ def build_on_planet(status, planet, building_list_dict):
             total_resource_cost, penalty = building.calc_cost(num, status.research_percent_construction,
                                                               status.research_percent_tech)
 
+            if Specops.objects.filter(user_to=status.user, name="Bribe officials",
+                                      extra_effect="resource_cost").exists():
+                br = Specops.objects.get(user_to=status.user, name="Bribe officials",
+                                         extra_effect="resource_cost")
+                for c in range(0, len(total_resource_cost)-1):
+                    total_resource_cost[c] *= br.specop_strength
+            if Specops.objects.filter(user_to=status.user, name="Bribe officials",
+                                      extra_effect="building_time").exists():
+                br = Specops.objects.get(user_to=status.user, name="Bribe officials",
+                                         extra_effect="building_time")
+                total_resource_cost[len(total_resource_cost)-1] *= br.specop_strength
+
             if not total_resource_cost:
                 msg += 'Not enough tech research to build ' + building.label + '<br>'
                 continue

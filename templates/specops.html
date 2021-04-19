@@ -205,7 +205,7 @@ function agentsCheck() {
 			<b>Your operations on other factions:</b><br>
 			{% for o in ops_out%}
 				{{o.name}} 
-				{% if o.extra_effect is not None %}
+				{% if o.name == "Diplomatic Espionage" or o.name == "High Infiltration" %}
 					<a href="/specop_show{{o.id}}">{{o.extra_effect}}</a>
 				{% elif o.specop_strength > 0 %}
 				of {{o.specop_strength}}% 
@@ -270,7 +270,18 @@ function agentsCheck() {
 		<div class="ops_box spaceUnder">
 		<b>Spells affecting your faction:</b><br>
 			{% for o in spells_in%}
-				{{o.name}} of {{o.specop_strength}}% from {{o.user_from.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
+				{{o.name}}
+				{% if o.name == "Enlightenment" %}
+					{% if o.extra_effect == "BadFR" %}
+						FR protection decreased by 
+					{% else %}
+						{{o.extra_effect}} production increased by
+					{% endif %}
+				{% else %}
+					of
+				{% endif %}
+				
+				{{o.specop_strength}}% from {{o.user_from.userstatus.user_name}} for {{o.ticks_left}} weeks.<br>
 			{% endfor %}
 		</div>
 		<div id="dvtext2" class="ops_box2">

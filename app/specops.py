@@ -695,16 +695,16 @@ def perform_operation(agent_fleet):
             news_message += "Your agents managed to successfully bribe certain officials!\n"
             news_message2 += "Your corrupt officials are slowing down our economy!\n"
             if r == 1: #increase resource cost
-                fa = round(success**2 * 33)
+                fa = min(300, round(success**2 * 33))
                 news_message += "Building costs increased by " + str(fa) + "%!"
                 news_message2 += "Building costs increased by " + str(fa) + "%!"
-                fa = fa + 100 /100
+                fa = (fa + 100) /100
                 extra = "resource_cost"
             else: #increase building time
-                fa = round(success ** 2 * 100)
+                fa = max(900, round(success ** 2 * 100))
                 news_message += "Building time increased by " + str(fa) + "%!"
                 news_message2 += "Building time increased by " + str(fa) + "%!"
-                fa = fa + 100 / 100
+                fa = (fa + 100) / 100
                 extra = "building_time"
             length = min(72, round(success *24))
             Specops.objects.create(user_to=user2.user,
