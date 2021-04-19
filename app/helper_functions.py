@@ -72,6 +72,11 @@ def generate_fleet_order(fleet, target_x, target_y, speed, order_type, *args):
         # print(fleet.current_position_x,fleet.current_position_y)
     min_dist = np.sqrt((fleet.current_position_x - float(target_x)) ** 2 +
                        (fleet.current_position_y - float(target_y)) ** 2)
+    speed_boost_enlightement = 1
+    if Specops.objects.filter(user_to=fleet.owner, name="Enlightenment", extra_effect="Speed").exists():
+        en = Specops.objects.get(user_to=fleet.owner, name="Enlightenment", extra_effect="Speed")
+        speed_boost_enlightement = (1 + en.specop_strength / 100)
+    speed *= speed_boost_enlightement
     fleet.ticks_remaining = int(np.ceil((min_dist / speed) - 0.001))  # due to rounding and
     # floating points the fleet travel time becomes more than it should, hence the subtraction
     fleet.command_order = order_type
@@ -268,7 +273,11 @@ def send_agents_ghosts(status, agents, ghosts, x, y, i, specop):
         return "You need at least one portal to send the fleet from!"
     best_portal_planet = find_nearest_portal(x, y, portal_planets)
     min_dist = np.sqrt((best_portal_planet.x - x) ** 2 + (best_portal_planet.y - y) ** 2)
-    speed = race_info_list[status.get_race_display()]["travel_speed"]  # * specopEnlightemntCalc(id,CMD_ENLIGHT_SPEED);
+    speed_boost_enlightement = 1
+    if Specops.objects.filter(user_to=status.user, name="Enlightenment", extra_effect="Speed").exists():
+        en = Specops.objects.get(user_to=status.user, name="Enlightenment", extra_effect="Speed")
+        speed_boost_enlightement *= (1 + en.specop_strength / 100)
+    speed = race_info_list[status.get_race_display()]["travel_speed"]* speed_boost_enlightement
     fleet_time = int(np.ceil(min_dist / speed))
     agent_fleet = Fleet.objects.create(owner=status.user,
                          command_order=6,

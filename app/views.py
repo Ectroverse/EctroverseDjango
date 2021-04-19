@@ -1240,7 +1240,13 @@ def fleetsend(request):
 
     best_portal_planet =  find_nearest_portal(x, y, portal_planets)
     min_dist = np.sqrt((best_portal_planet.x - x) ** 2 + (best_portal_planet.y - y) ** 2)
-    speed = race_info_list[status.get_race_display()]["travel_speed"]  # * specopEnlightemntCalc(id,CMD_ENLIGHT_SPEED);
+    speed = race_info_list[status.get_race_display()]["travel_speed"]
+    speed_boost_enlightement = 1
+    if Specops.objects.filter(user_to=request.user, name="Enlightenment", extra_effect="Speed").exists():
+        en = Specops.objects.get(user_to=request.user, name="Enlightenment", extra_effect="Speed")
+        speed_boost_enlightement = (1 + en.specop_strength / 100)
+    speed *= speed_boost_enlightement
+    # * specopEnlightemntCalc(id,CMD_ENLIGHT_SPEED);
     fleet_time = int(np.ceil(min_dist / speed))  # in ticks
 
     if not 'exploration' in request.POST:

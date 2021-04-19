@@ -507,3 +507,4 @@ class Specops(models.Model):
     ticks_left = models.IntegerField(default=0)
     stealth = models.BooleanField(default=False)
     planet = models.ForeignKey(Planet, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    date_and_time = models.DateTimeField(blank=True, null=True, default=None)

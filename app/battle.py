@@ -58,13 +58,17 @@ def battleReadinessLoss(user1, user2, planet):
     if empire1.id == empire2.id or ally or war:
         fa /= 3
 
-    if nap:
-        fa = max(50, fa)
-
     if not Specops.objects.filter(name="Planetary Beacon", planet=planet).exists():
         spec_ops = Specops.objects.filter(user_to=user2.user, name="Dark Web")
         for specop in spec_ops:
             fa *= 1 + specop.specop_strength / 100
+
+    if Specops.objects.filter(user_to=user2.user, name="Enlightenment", extra_effect="BadFR").exists():
+        en = Specops.objects.get(user_to=user2.user, name="Enlightenment", extra_effect="BadFR")
+        fa /= (1 + en.specop_strength / 100)
+
+    if nap:
+        fa = max(50, fa)
 
     # add personal and fam news
     # dont forget to delete anempty fleet!

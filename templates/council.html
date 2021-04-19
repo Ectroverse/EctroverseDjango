@@ -20,7 +20,18 @@
 			{% if status.race == 'WK' %}
 				<tr><td>Interest</td><td align="right" id="energyinterest">+{{status.energy_interest}}</td></tr>
 			{% endif %}
-			<tr><td>Energy income</td><td align="right" id="energyincome" {% if status.energy_income < 0 %} style="color:red"> {% else %}>+{% endif %}{{status.energy_income}}</td></tr>
+			{% if status.energy_specop_effect != 0 %}
+			<tr><td>Specops net flow</td><td align="right" id="energyincome" 
+			{% if  status.energy_specop_effect < 0 %} 
+				style="color:red"> 
+			{% else %}
+				>+
+			{% endif %}
+			
+			{{status.energy_specop_effect}}</td></tr>
+			{% endif %}
+			<tr><td>Energy income</td><td align="right" id="energyincome" {% if status.energy_income < 0 %} style="color:red"> 
+			{% else %}>+{% endif %}{{status.energy_income}}</td></tr>
 			</table>
 		</div>
 

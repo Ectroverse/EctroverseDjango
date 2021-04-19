@@ -126,8 +126,9 @@ public class ProcessTick
 	" construction_flag = ? ," +//56
 	" economy_flag = ? ," + //57
 	" military_flag = ? ," +//58
-	" total_buildings  = ? " + //59
-	" WHERE id = ?" ; //60 wow what a long string :P
+	" total_buildings  = ? , " + //59
+	" energy_specop_effect  = ? " + //60
+	" WHERE id = ?" ; //61 wow what a long string :P
 	
 	private void processTick(Connection con){
 		long startTime = 0, resultTime = 0;
@@ -181,10 +182,13 @@ public class ProcessTick
 		PreparedStatement fleetsDeleteUpdateStatement = con.prepareStatement(fleetsDeleteUpdateQuery); 
 
 		PreparedStatement userStatusUpdateStatement = con.prepareStatement(userStatusUpdateQuery); //mass update, much faster
-		 
-		String planetStatusUpdateQuery2 = "UPDATE \"PLANET\"  SET" +
-			" current_population = ? "+	 //1		 
-			" WHERE id = ?"  ; //2
+
+		String specopIncomeUpdateQuery = "UPDATE app_userstatus SET" +
+			" energy_specop_effect = energy_specop_effect + ? , "+	 //1	
+			" energy_income = energy_income + ? "+	 //2					
+			" WHERE id = ? "  ; //3
+					
+		PreparedStatement userIncomeUpdateStatement = con.prepareStatement(specopIncomeUpdateQuery);
 
 		 //loop over users to get their stats
 		while(resultSet.next()){
@@ -228,7 +232,7 @@ public class ProcessTick
 			HashMap<String,Long> userLongValues  = usersLong.get(j);
 			int userID = userIntValues.get("user_id");
 			int empireID = userIntValues.get("empire_id");
-			userStatusUpdateStatement.setInt(60, userID);
+			userStatusUpdateStatement.setInt(61, userID);
 			String race = usersRace.get(userID);
 			HashMap<String, Double> race_info = race_info_list.get(race);
 			long networth = 1;
@@ -273,6 +277,35 @@ public class ProcessTick
 			//update population
 			userStatusUpdateStatement.setLong(4, userPlanetsUpdate.getPopulation());
 			
+			//Enlightenment spell - increases productions
+			long energy_specop_effect1 = 0;
+			
+			long mineralProduction = userPlanetsUpdate.getResourceProduction(0);
+			long crystalProduction = userPlanetsUpdate.getResourceProduction(1);
+			long ectroliumProduction = userPlanetsUpdate.getResourceProduction(2);
+			double enlightenmentResearchFactor = 1;
+			double enlightenmentEnergyFactor = 0;
+			
+			ResultSet operationSet = statement3.executeQuery("SELECT * FROM app_specops WHERE name = \'Enlightenment\' AND user_to_id = " + userID);
+			
+			while (operationSet.next()){
+				if (operationSet.getString("extra_effect").equals("Energy")){
+					enlightenmentEnergyFactor = operationSet.getDouble("specop_strength") /100;
+				}
+				else if (operationSet.getString("extra_effect").equals("Mineral")){
+					mineralProduction *= (1 + operationSet.getDouble("specop_strength") /100);
+				}
+				else if (operationSet.getString("extra_effect").equals("Crystal")){
+					crystalProduction *= (1 + operationSet.getDouble("specop_strength") /100);
+				}
+				else if (operationSet.getString("extra_effect").equals("Ectrolium")){
+					ectroliumProduction *= (1 + operationSet.getDouble("specop_strength") /100);
+				}
+				else if (operationSet.getString("extra_effect").equals("Research")){
+					enlightenmentResearchFactor *= (1 + operationSet.getDouble("specop_strength") /100);
+				}
+			}
+			
 			//update reseach
 			int artibonus = 0;
 			double racebonus = 0;
@@ -283,7 +316,7 @@ public class ProcessTick
 			for(int i = 0; i < researchNames.length; i++){				
 				long rc = (long) (
 				userLongValues.get(researchNames[i][0]) +
-				1.2 * race_info.get(researchNames[i][1])  * userIntValues.get(researchNames[i][2])
+				enlightenmentResearchFactor * 1.2 * race_info.get(researchNames[i][1])  * userIntValues.get(researchNames[i][2])
 				* (userPlanetsUpdate.getResearchProduction() + userLongValues.get("current_research_funding")/100 + artibonus +
 				(racebonus * userPlanetsUpdate.getPopulation() / 6000.0) )  / 100
 				);			
@@ -311,9 +344,13 @@ public class ProcessTick
 			long energyProduction = (long)(userPlanetsUpdate.getEnergyProduction(0) * race_info.getOrDefault("race_special_solar_15", 1.0));
 			energyProduction += userPlanetsUpdate.getEnergyProduction(1);
 			double energyResearchFactor = 1.0 + 0.01* race_info.getOrDefault("energy_production", 1.0);
-			energyProduction = (long) (energyProduction * energyResearchFactor);
-			userStatusUpdateStatement.setLong(32, energyProduction);
+			energyProduction = (long) (energyProduction * energyResearchFactor);	
 			
+			//enlightnment energy
+			if (enlightenmentEnergyFactor > 0){
+				energy_specop_effect1 = (long)(enlightenmentEnergyFactor * energyProduction);
+			}
+
 			//energy decay
 			long lastTickEnergy = userLongValues.get("energy");
 			long energyDecay = (long) (Math.max(0,lastTickEnergy * energy_decay_factor));
@@ -365,13 +402,11 @@ public class ProcessTick
 			population_upkeep_reduction = Math.min(population_upkeep_reduction, buildings_upkeep + units_upkeep + portals_upkeep);
 			userStatusUpdateStatement.setLong(36, population_upkeep_reduction);
 			
-			//update resources income
-			//energy
-			long energy_income = energyProduction - energyDecay + energy_interest - units_upkeep - portals_upkeep + population_upkeep_reduction;
-			userStatusUpdateStatement.setLong(46, energy_income);
+
+
 
 			//minerals
-		    int mineral_production = (int) (race_info.get("mineral_production") * userPlanetsUpdate.getResourceProduction(0));
+		    int mineral_production = (int) (race_info.get("mineral_production") * mineralProduction);
 		    int mineral_decay = 0;
 		    int mineral_interest = (int) (userLongValues.get("minerals") * race_info.getOrDefault("race_special_resource_interest", 0.0));
 		    int mineral_income = mineral_production - mineral_decay + mineral_interest;
@@ -380,7 +415,7 @@ public class ProcessTick
 		    userStatusUpdateStatement.setInt(47, mineral_income);
 
 		    //crystals
-    	    int crystal_production = (int) (race_info.get("crystal_production") *  userPlanetsUpdate.getResourceProduction(1));
+    	    int crystal_production = (int) (race_info.get("crystal_production") *  crystalProduction);
     	    int crystal_decay = (int) (Math.max(0.0,userLongValues.get("crystals") * crystal_decay_factor));
     	    int crystal_interest = (int) (userLongValues.get("crystals") * race_info.getOrDefault("race_special_resource_interest", 0.0));
     	    int crystal_income = crystal_production - crystal_decay + crystal_interest;
@@ -390,19 +425,52 @@ public class ProcessTick
     	    userStatusUpdateStatement.setInt(48, crystal_income);
 			
     	    //ectrolium		    	    
-    	    int ectrolium_production = (int) (race_info.get("ectrolium_production") * userPlanetsUpdate.getResourceProduction(2));
+    	    int ectrolium_production = (int) (race_info.get("ectrolium_production") * ectroliumProduction);
     	    int ectrolium_decay = 0;
     	    int ectrolium_interest =(int) (userLongValues.get("ectrolium") * race_info.getOrDefault("race_special_resource_interest", 0.0));
     	    int ectrolium_income = ectrolium_production + ectrolium_decay + ectrolium_interest;
     	    userStatusUpdateStatement.setInt(41, ectrolium_production);
     	    userStatusUpdateStatement.setInt(45, ectrolium_interest);
     	    userStatusUpdateStatement.setInt(49, ectrolium_income);
+			
+			//hack mainframe op modifier
+			operationSet = statement3.executeQuery("SELECT * FROM app_specops WHERE name = \'Hack mainframe\' AND user_to_id = " + userID 
+			+ " ORDER BY date_and_time ");
+
+			long energyProductionTmp = energyProduction;
+			while(operationSet.next()){
+				double factor = operationSet.getFloat("specop_strength")/100;
+				double factor2 = operationSet.getFloat("specop_strength2")/operationSet.getFloat("specop_strength");
+				
+				long subtractEnergy = (long) (factor * energyProductionTmp); 
+				energy_specop_effect1 -= subtractEnergy;
+				energyProductionTmp -= energy_specop_effect1;
+				long energy_specop_effect2 = (long) (subtractEnergy * factor2);
+				userIncomeUpdateStatement.setLong(1, energy_specop_effect2);
+				userIncomeUpdateStatement.setLong(2, energy_specop_effect2);
+				userIncomeUpdateStatement.setLong(3, operationSet.getInt("user_from_id"));
+				userIncomeUpdateStatement.addBatch();
+			}
+			
+			//energy_specop_effect
+			System.out.println("energy_specop_effect1 " + energy_specop_effect1 );
+			userStatusUpdateStatement.setLong(60, energy_specop_effect1); 
+			userStatusUpdateStatement.setLong(32, energyProduction);
+			
+			//update resources income
+			//energy
+			long energy_income = energyProduction - energyDecay + energy_interest - units_upkeep - 
+								portals_upkeep + population_upkeep_reduction + energy_specop_effect1;
+			
+			userStatusUpdateStatement.setLong(46, energy_income);
     	    
     	    //update total resources
     	    userStatusUpdateStatement.setLong(50, Math.max(0, userLongValues.get("energy") + energy_income));
     	    userStatusUpdateStatement.setLong(51, Math.max(0, userLongValues.get("minerals") + mineral_income));
     	    userStatusUpdateStatement.setLong(52, Math.max(0,userLongValues.get("crystals") + crystal_income));
     	    userStatusUpdateStatement.setLong(53, Math.max(0,userLongValues.get("ectrolium") + ectrolium_income));
+			
+
 			
 			if( Math.max(0, userLongValues.get("energy") + energy_income) > 0){
 				int fr = Math.min(userIntValues.get("fleet_readiness")+2, userIntValues.get("fleet_readiness_max"));
@@ -431,7 +499,7 @@ public class ProcessTick
 			}
 			
 			userStatusUpdateStatement.setInt(59, total_buildings);
-			userStatusUpdateStatement.setInt(60, userID);
+			userStatusUpdateStatement.setInt(61, userID);
 			
 			//update networth
 			networth += userPlanetsUpdate.getNetworth();
@@ -456,7 +524,10 @@ public class ProcessTick
 
 		//update users
 		userStatusUpdateStatement.executeBatch();
-
+		
+		//update income from specops
+		userIncomeUpdateStatement.executeBatch();
+		
 		//update building news	
 		updateNews.executeNews();
 		
