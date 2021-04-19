@@ -73,14 +73,14 @@ agentop_specs = {
                       "Your agents will attempt to spread a dangerous infection which will kill most of the population and spread in nearby planets."],
     "Hack mainframe": [80, 22, 3.0, False, 'HM',
                         "Your agents will infiltrate the enemy energy storage facilities and temporarily divert income to your empire."],
-    "Military Sabotage": [100, 30, 3.5, False, 'MS',
-                 "Through an enemy portal, your agents will attempt to reach the enemy fleet and destroy military units."],
+    "Military Sabotage": [100, 30, 4.0, False, 'MS',
+                 "Your agents will attempt to reach the enemy fleet and destroy military units."],
     "Planetary Beacon": [100, 7, 1.0, False, 'PB',
                          "Your agents will attempt to place a beacon on target planet, if successful it will remove any dark webs present."],
-    "Bribe officials": [120, 50, 4.0, False, 'BO',
-                       "Your spies will try to bribe officials of target faction causing great inneficiencies!"],
     "Nuke Planet": [120, 20, 5.0, False, 'NP',
                            "Your agents will place powerful nuclear devices on the surface of the planet, destroying all buildings and units, leaving in uninhabited."],
+    "Bribe officials": [140, 60, 4.0, False, 'BO',
+                        "Your spies will try to bribe officials of target faction causing great inneficiencies!"],
     "Maps theft": [140, 40, 4.5, False, 'MT',
                    "Your agents will try to steal the maps of the enemie's territory!"],
     "High Infiltration": [160, 40, 6.0, False, 'HI',
@@ -698,13 +698,11 @@ def perform_operation(agent_fleet):
                 fa = min(300, round(success**2 * 33))
                 news_message += "Building costs increased by " + str(fa) + "%!"
                 news_message2 += "Building costs increased by " + str(fa) + "%!"
-                fa = (fa + 100) /100
                 extra = "resource_cost"
             else: #increase building time
-                fa = max(900, round(success ** 2 * 100))
+                fa = min(900, round(success ** 2 * 100))
                 news_message += "Building time increased by " + str(fa) + "%!"
                 news_message2 += "Building time increased by " + str(fa) + "%!"
-                fa = (fa + 100) / 100
                 extra = "building_time"
             length = min(72, round(success *24))
             Specops.objects.create(user_to=user2.user,
@@ -717,6 +715,33 @@ def perform_operation(agent_fleet):
         else:
             news_message += "Your agents didn't succeed!"
             news_message2 += "Your politicians seem to live the life of saints!"
+
+    if operation == "Military Sabotage":
+        if success >= 1.0:
+            a = 8
+        else:
+            a = int((8.0 / 0.5) * (success - 0.5))
+        if a > 0:
+            news_message += "The following units from the main fleet were destroyed:\n"
+            news_message2 += "The following units from the main fleet were destroyed:\n"
+            main_fleet = Fleet.objects.get(owner=user2.user, main_fleet=True)
+            no_units = True
+            for unit in unit_info["unit_list"]:
+                num = getattr(main_fleet, unit)
+                if num:
+                    fa = 0.01 * (a + random.randint(0, 3))
+                    num_lost = int(num * fa)
+                    if num_lost > 0:
+                        no_units = False
+                        news_message += str(unit) + ":" + str(num_lost) +"\n"
+                        news_message2 += str(unit) + ":" + str(num_lost) + "\n"
+                        setattr(main_fleet, unit, max(0, num - num_lost))
+            main_fleet.save()
+            if no_units:
+                news_message += "Your opponent has barely any fleet to destroy!"
+        else:
+            news_message += "Your agents didn't succeed!"
+            news_message2 += "Your agents managed to defend!"
 
     if empire2 is None:
         News.objects.create(user1=User.objects.get(id=user1.id),

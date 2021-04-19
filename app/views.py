@@ -650,7 +650,7 @@ def build(request, planet_id):
     costs = []
     for building in building_list:
         # Below doesn't include overbuild, it gets added below
-        cost_list, penalty = building.calc_cost(1, status.research_percent_construction, status.research_percent_tech)
+        cost_list, penalty = building.calc_cost(1, status.research_percent_construction, status.research_percent_tech, status)
         # Add resource names to the cost_list, for the sake of the for loop in the view
         if cost_list:  # Remember that cost_list will be None if the tech is too low
             cost_list_labeled = []
@@ -706,7 +706,7 @@ def mass_build(request):
     costs = []
     for building in building_list:
         # Below doesn't include overbuild, it gets added below
-        cost_list, penalty = building.calc_cost(1, status.research_percent_construction, status.research_percent_tech)
+        cost_list, penalty = building.calc_cost(1, status.research_percent_construction, status.research_percent_tech, status)
         # Add resource names to the cost_list, for the sake of the for loop in the view
         if cost_list:  # Remember that cost_list will be None if the tech is too low
             cost_list_labeled = []
@@ -787,6 +787,25 @@ def change_password(request):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def units(request):
     status = get_object_or_404(UserStatus, user=request.user)
+
+    # bribe officials operation modifier
+    bribe_resource_multiplier = 1
+    bribe_time_multiplier = 1
+    if Specops.objects.filter(user_to=status.user, name="Bribe officials",
+                              extra_effect="resource_cost").exists():
+        bribe = Specops.objects.filter(user_to=status.user, name="Bribe officials",
+                                       extra_effect="resource_cost")
+        for br in bribe:
+            bribe_resource_multiplier *= 1 + br.specop_strength / 100
+
+    if Specops.objects.filter(user_to=status.user, name="Bribe officials",
+                              extra_effect="building_time").exists():
+        bribe = Specops.objects.filter(user_to=status.user, name="Bribe officials",
+                                       extra_effect="building_time")
+        for br in bribe:
+            bribe_time_multiplier *= 1 + br.specop_strength / 100
+
+
     if request.method == 'POST':
         msg = ''
         for i, unit in enumerate(unit_info["unit_list"]):
@@ -806,11 +825,14 @@ def units(request):
                     msg += 'Not enough tech research to build ' + unit_info[unit]['label'] + '<br>'
                     continue
 
-                print("multiplier:", mult)
                 total_resource_cost = [int(np.ceil(x * mult)) for x in unit_info[unit]['cost']]
+
                 for j in range(4):  # multiply all resources except time by number of units
-                    total_resource_cost[j] *= num
-                print("total_resource_cost", total_resource_cost)
+                    total_resource_cost[j] *= num * bribe_resource_multiplier
+
+                #multiply time cost by bribe multiplier
+                total_resource_cost[4] *= bribe_time_multiplier
+
                 total_resource_cost = ResourceSet(total_resource_cost)  # convert to more usable object
                 if not total_resource_cost.is_enough(status):
                     msg += 'Not enough resources to build ' + unit_info[unit]['label'] + '<br>'
@@ -846,12 +868,21 @@ def units(request):
         d = {}
         mult, penalty = unit_cost_multiplier(status.research_percent_construction, status.research_percent_tech,
                                              unit_info[unit]['required_tech'])
+
+
+
         if not mult:
             cost = None
         else:
             cost = []
             for i, resource in enumerate(resource_names):
-                cost.append({"name": resource, "value": int(np.ceil(mult * unit_info[unit]['cost'][i]))})
+                if resource != 'Time':
+                    cost.append({"name": resource,
+                                 "value": int(np.ceil(mult * unit_info[unit]['cost'][i]*bribe_resource_multiplier))})
+                else:
+                    cost.append({"name": resource,
+                                 "value": int(np.ceil(mult * unit_info[unit]['cost'][i]*bribe_time_multiplier))})
+
             d["cost"] = cost
         d["penalty"] = penalty
         d["label"] = unit_info[unit]['label']

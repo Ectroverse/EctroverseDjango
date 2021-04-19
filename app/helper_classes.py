@@ -1,5 +1,6 @@
 import numpy as np
 from .constants import *
+from .models import *
 
 # Class used to represent resources in different ways
 class ResourceSet:
@@ -58,7 +59,7 @@ class Building:
         self.required_building_tech = required_building_tech[self.building_index]
 
     # Calc cost of N buildings, from cmdGetBuildCosts() in cmd.c
-    def calc_cost(self, num_buildings, research_construction, research_tech):
+    def calc_cost(self, num_buildings, research_construction, research_tech, status):
         multiplier = 100.0 / (100.0 + research_construction)
         tech_penalty = self.required_building_tech - research_tech;
         #buffer[CMD_RESSOURCE_NUMUSED+1] = 0;
@@ -75,6 +76,24 @@ class Building:
             final_costs.append(num_buildings * int(np.ceil(multiplier * self.costs[i])))
         final_costs.append(int(np.ceil(multiplier * self.costs[4]))) # Time doesn't get num_buildings multiplied by it
         penalty = np.round(penalty,2)
+
+        # bribe officials operation modifier
+        if Specops.objects.filter(user_to=status.user, name="Bribe officials",
+                                  extra_effect="resource_cost").exists():
+            bribe = Specops.objects.filter(user_to=status.user, name="Bribe officials",
+                                           extra_effect="resource_cost")
+            for br in bribe:
+                for c in range(0, len(final_costs) - 1):
+                    final_costs[c] *= 1 + br.specop_strength / 100
+
+        if Specops.objects.filter(user_to=status.user, name="Bribe officials",
+                                  extra_effect="building_time").exists():
+            bribe = Specops.objects.filter(user_to=status.user, name="Bribe officials",
+                                           extra_effect="building_time")
+            for br in bribe:
+                final_costs[len(final_costs) - 1] *= 1 + br.specop_strength / 100
+
+
         return final_costs, penalty # final_costs is a list of 5 ints, and pentaly is a float rounded to 2 decimal places
 
 class SolarCollectors(Building):

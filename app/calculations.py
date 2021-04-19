@@ -1,6 +1,6 @@
 import numpy as np
 from .constants import *
-
+from .models import *
 
 # This is where longer formulas should go, 1-3 liners can go inside process_tick.py
 
@@ -90,6 +90,7 @@ def unit_cost_multiplier(research_construction, research_tech, required_unit_tec
         multiplier *= 1.0 + 0.01*(penalty)
     else:
         penalty = 0
+
     return multiplier, np.round(penalty,2)
 
 # Return the max number of buildings that can still be made with a set ob

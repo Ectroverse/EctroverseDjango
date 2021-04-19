@@ -112,6 +112,19 @@ unit_race_bonus_labels = ["bombers_coeff", "fighters_coeff", "transports_coeff",
                           "soldiers_coeff", "droids_coeff", "goliaths_coeff", "phantoms_coeff", "psychics_coeff", \
                           "agents_coeff", "ghost_ships_coeff", "exploration_ships_coeff", ]
 
+building_labels = {
+'SC': 'Solar Collectors',
+'FR': 'Fission Reactors',
+'MP': 'Mineral Plants',
+'CL': 'Crystal Laboratories',
+'RS': 'Refinement Stations',
+'CT': 'Cities',
+'RC': 'Research Centers',
+'DS': 'Defense Satellites',
+'SN': 'Shield Networks',
+'PL': 'Portal'
+}
+
 # Build dictionary that will store all our unit info
 unit_info = {}
 # Order of this list much match the data above. Might as well store the order in the dict for reference in views
