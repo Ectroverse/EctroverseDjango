@@ -97,6 +97,9 @@ Nginx log:
 Database log:
 `docker logs -f ectroversedjango_db_1`
 
+Restart all docker containers:
+`docker restart $(docker ps -q)`
+
 ## Console into the python container (which runs the Django app) to poke around or debug something
 
 `docker exec -it ectroversedjango_python_1 /bin/bash`
