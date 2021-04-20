@@ -1,6 +1,8 @@
 import numpy as np
 from .constants import *
 from .models import *
+from .calculations import *
+
 
 # Class used to represent resources in different ways
 class ResourceSet:
@@ -176,3 +178,25 @@ class Portal(Building):
         self.model_name = 'portals' # since it ends up getting used for total_portals
         super().__init__()
 
+
+def raze_all_buildings2(planet, status):
+    building_list = [SolarCollectors(), FissionReactors(), MineralPlants(), CrystalLabs(), RefinementStations(),
+                     Cities(), ResearchCenters(), DefenseSats(), ShieldNetworks()]
+    for building in building_list:
+        num_on_planet = getattr(planet, building.model_name)
+        if num_on_planet:
+            setattr(planet, building.model_name, 0)
+            setattr(status, 'total_' + building.model_name,
+                    getattr(status, 'total_' + building.model_name) - num_on_planet)
+            setattr(status, 'total_buildings', getattr(status, 'total_buildings') - num_on_planet)
+    setattr(planet, 'total_buildings', 0)
+    # Portal
+    if planet.portal:
+        planet.portal = False
+        setattr(status, 'total_portals', getattr(status, 'total_portals') - 1)
+        setattr(status, 'total_buildings', getattr(status, 'total_buildings') - 1)
+    # Any time we change buildings we need to update planet's overbuild factor
+    planet.overbuilt = calc_overbuild(planet.size, planet.total_buildings + planet.buildings_under_construction)
+    planet.overbuilt_percent = (planet.overbuilt - 1.0) * 100
+    planet.save()
+    status.save()

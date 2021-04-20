@@ -599,27 +599,13 @@ def razeall(request, planet_id):  # TODO still need an html template for this pa
     planet = get_object_or_404(Planet, pk=planet_id)
     if request.method == 'POST':
         # List of building types, except portals
-        building_list = [SolarCollectors(), FissionReactors(), MineralPlants(), CrystalLabs(), RefinementStations(),
-                         Cities(), ResearchCenters(), DefenseSats(), ShieldNetworks()]
-        for building in building_list:
-            num_on_planet = getattr(planet, building.model_name)
-            if num_on_planet:
-                setattr(planet, building.model_name, 0)
-                setattr(status, 'total_' + building.model_name,
-                        getattr(status, 'total_' + building.model_name) - num_on_planet)
-                setattr(status, 'total_buildings', getattr(status, 'total_buildings') - num_on_planet)
-        setattr(planet, 'total_buildings', 0)
-        # Portal
-        if planet.portal:
-            planet.portal = False
-            setattr(status, 'total_portals', getattr(status, 'total_portals') - 1)
-            setattr(status, 'total_buildings', getattr(status, 'total_buildings') - 1)
-        # Any time we change buildings we need to update planet's overbuild factor
-        planet.overbuilt = calc_overbuild(planet.size, planet.total_buildings + planet.buildings_under_construction)
-        planet.overbuilt_percent = (planet.overbuilt - 1.0) * 100
-        planet.save()
-        status.save()
-        return HttpResponse("Razed all buildings on this planet!")
+        raze_all_buildings2(planet, status)
+        context = {"status": status,
+                   "planet": planet,
+                   "planet_owner_status": status,
+                   "page_title": "Planet " + str(planet.x) + ',' + str(planet.y) + ':' + str(planet.i),
+                   }
+        return render(request, "planet.html", context)
     else:
         return HttpResponse("CAN ONLY GET HERE BY CLICKING RAZE ALL BUTTON")
 
@@ -2246,3 +2232,6 @@ def hall_of_fame(request):
                 }
 
     return render(request, "hall_of_fame.html", context)
+
+
+

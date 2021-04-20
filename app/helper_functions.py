@@ -1,15 +1,15 @@
 from .models import *
-from app.helper_functions import *
 import numpy as np
 import miniball
 from collections import defaultdict
 from .map_settings import *
-from .specops import *
+from .specops import perform_operation
 from datetime import datetime
 from datetime import timedelta
 from django.template import RequestContext
 from .helper_classes import *
 from .calculations import *
+
 
 def give_first_planet(user, status, planet):
     planet.solar_collectors = staring_solars
@@ -389,3 +389,4 @@ def build_on_planet(status, planet, building_list_dict):
     status.save()  # update user's resources
 
     return msg
+

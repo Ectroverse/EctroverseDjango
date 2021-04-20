@@ -1,4 +1,5 @@
 import numpy as np
+from .helper_classes import *
 from app.constants import *
 from app.models import *
 from datetime import datetime
@@ -743,6 +744,31 @@ def perform_operation(agent_fleet):
             news_message += "Your agents didn't succeed!"
             news_message2 += "Your agents managed to defend!"
 
+    if operation == "Nuke Planet":
+        if success >= 1.0:
+            news_message += "The planet was nuked! Most of population is dead. Planet's building size is reduced.\n"
+            news_message2 += "The planet was nuked! Most of population is dead. Planet's building size is reduced.\n"
+            target_planet.owner = None
+            if target_planet.artefact is not None:
+                target_planet.artefact.empire_holding = None
+                target_planet.artefact.save()
+            stationed_fleet = Fleet.objects.filter(on_planet=target_planet).first()
+            if stationed_fleet is not None:
+                stationed_fleet.delete()
+                news_message += "Stationed fleet was completely destroyed in the blast!"
+                news_message2 += "Stationed fleet was completely destroyed in the blast!"
+            target_planet.size *= random.randint(80,99)/100
+            target_planet.current_population = target_planet.size * population_base_factor
+            raze_all_buildings2(target_planet, user2)
+            target_planet.protection = 0
+            target_planet.overbuilt = 0
+            target_planet.overbuilt_percent = 0
+            target_planet.save()
+
+        else:
+            news_message += "Your agents didn't succeed!"
+            news_message2 += "Your agents managed to defend!"
+
     if empire2 is None:
         News.objects.create(user1=User.objects.get(id=user1.id),
                         user2=None,
@@ -787,3 +813,4 @@ def perform_operation(agent_fleet):
 
                         )
     return news_message
+

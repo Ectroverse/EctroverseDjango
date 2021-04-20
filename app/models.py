@@ -67,7 +67,7 @@ class Planet(models.Model):
     total_buildings = models.IntegerField(default=0) # on this planet. doesn't include under construction
     buildings_under_construction = models.IntegerField(default=0) # number of total buildings under construction. NOTE- the C code doesnt have a field for this, it jsut calculates it each time, since it uses a single array for the buildings
 
-    artefact= models.ForeignKey(Artefacts, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    artefact = models.ForeignKey(Artefacts, on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
 
 class Empire(models.Model):
