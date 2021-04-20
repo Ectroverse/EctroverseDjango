@@ -43,9 +43,13 @@ admin.site.register(UserStatus, UserStatusAdmin)
 
 
 class PlanetAdmin(admin.ModelAdmin):
-    list_display = ["x","y","i","owner"]
+    list_display = ["x","y","i","owner","id"]
 admin.site.register(Planet, PlanetAdmin)
 
 class ScoutingAdmin(admin.ModelAdmin):
     list_display = ["user"]
 admin.site.register(Scouting, ScoutingAdmin)
+
+class ArtefactsAdmin(admin.ModelAdmin):
+    list_display = ["name", "description"]
+admin.site.register(Artefacts, ArtefactsAdmin)

@@ -771,12 +771,43 @@ def ranking(request):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def empire_ranking(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    empire = status.empire
-    table = EmpireRankTable(Empire.objects.all().filter(numplayers__gt=0), order_by=("-planets", "-networth"))
+    empires = Empire.objects.filter(numplayers__gt=0).order_by("-planets", "-networth")
+    table = {}
+
+    max_artis = 0
+    art_tab = {}
+    all_artis = Artefacts.objects.all()
+    for a in all_artis:
+        if a.empire_holding is not None:
+            if a.empire_holding not in art_tab:
+                art_tab[a.empire_holding] = 1
+            else:
+                art_tab[a.empire_holding] += 1
+            max_artis = max(art_tab[a.empire_holding ], max_artis)
+
+    for e in empires:
+        artefacts = []
+        artis = Artefacts.objects.filter(empire_holding=e)
+        round_arti_nr = Artefacts.objects.all().count()
+        if 3*len(artis) >= round_arti_nr or 3*max_artis/2 >= round_arti_nr:
+            for a in artis:
+                artefacts.append(a.image)
+
+        table[e.name_with_id] = {"planets": e.planets,
+                                 "numplayers": e.numplayers,
+                                 "nw": e.networth,
+                                 "artefacts": artefacts
+                                 }
+
+    artefacts_found = Artefacts.objects.filter(empire_holding__isnull=False)
+
     context = {"table": table,
                "page_title": "Empire ranking",
                "status": status,
-               "empire": empire}
+               "empire": empire,
+               "artefacts_found": artefacts_found,
+               "max_artis": art_tab,
+               "round_arti_nr":round_arti_nr}
     return render(request, "empire_ranking.html", context)
 
 

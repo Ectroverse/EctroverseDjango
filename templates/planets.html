@@ -20,6 +20,7 @@
 </style>
 <div class="dropdown"><button class="dropbtn" disabled>Bonus</button>
 <div class="dropdown-content">
+<a href="?order_by=bonus_artefacts">Artefacts</a>
 <a href="?order_by=-bonus_solar">Solar</a>
 <a href="?order_by=-bonus_mineral">Mineral</a>
 <a href="?order_by=-bonus_crystal">Crystal</a>
@@ -68,6 +69,10 @@
     {% endif %}
 {% endif %}
 
+{% if planet.artefact is not None %}
+	<img src="{{planet.artefact.image}}" alt="{{planet.artefact.name}}" title="Artefact"></td>
+{% else %}
+
 {% if planet.bonus_solar %}
 <img src="{% static 'pr0.gif' %}" alt="Solar" title="Solar">+{{planet.bonus_solar}}%</td>
 {% endif %}
@@ -82,6 +87,8 @@
 
 {% if planet.bonus_ectrolium %}
 <img src="{% static 'pr3.gif' %}" alt="Solar" title="Solar">+{{planet.bonus_ectrolium}}%</td>
+{% endif %}
+
 {% endif %}
 
 <td align="center"><input type="checkbox" name="planets_id_mass_build" value="{{planet.id}}"></td>

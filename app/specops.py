@@ -466,8 +466,8 @@ def perform_operation(agent_fleet):
             news_message += "no information was gathered about this planet!"
         if success >= 0.4:
             news_message += "planet size: " + str(target_planet.size)
-        # if success >= 1.0:
-        #     news_message += "artefact: " + target_planet.artefact
+        if success >= 1.0:
+            news_message += "\nartefact: " + target_planet.artefact.name
         if success >= 0.9:
             if target_planet.bonus_solar > 0:
                 news_message += "\nsolar bonus: " + str(target_planet.bonus_solar)

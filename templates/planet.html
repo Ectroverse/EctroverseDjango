@@ -33,6 +33,7 @@
 {% endif %}
 
 
+
 <br>
 Planet {{planet.x}},{{planet.y}}:{{planet.i}}
 
@@ -80,7 +81,15 @@ Planet {{planet.x}},{{planet.y}}:{{planet.i}}
 	httpPrintf( cnt, "<br><br>%s offered you this planet <a href="%s&amp;id=%d">accept offer?</a>", main2d.faction, URLAppend( cnt, "pltake" ), plnid );
 -->
 {% elif planet.owner.id == status.user.id %}
+
+
 This planet is yours
+<br><br>
+{% if planet.artefact %}
+<img src="{{planet.artefact.image}}" alt="{{planet.artefact.name}}" title="Artefact"></td><br>
+An old and powerfull artefact: {{ planet.artefact.name }} is present on this planet!<br>
+The artefact changes reality in the following way: {{ planet.artefact.description }}
+{% endif %}
 <br><br>
 Population: {{planet.current_population}}/{{planet.max_population}}
 <br><br>

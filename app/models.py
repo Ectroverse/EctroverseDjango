@@ -5,8 +5,23 @@ from django.utils.translation import gettext_lazy as _ # for the enumeration's l
 from .constants import *
 from django.db.models.signals import post_save # used to auto create UserStatus and fleet after a new user is created
 from app.map_settings import *
+from django.contrib.postgres.fields import ArrayField
 
 # Is there any reason to have a model for solar system?  That would then contain N planet objects
+class Artefacts(models.Model):
+    name = models.CharField(max_length=50, blank=True, null=True, default=None)
+    description = models.CharField(max_length=300, blank=True, null=True, default=None)
+    on_planet = models.ForeignKey('Planet', on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    effect1 = models.IntegerField(default=0)
+    effect2 = models.IntegerField(default=0)
+    effect3 = models.IntegerField(default=0)
+    ticks_left = models.IntegerField(default=0)
+    extra_effect = models.CharField(max_length=50, blank=True, null=True, default=None)
+    empire_holding = models.ForeignKey('Empire', related_name='artiempire', blank=True, null=True,
+                                  default=None, on_delete=models.SET_DEFAULT)
+    date_and_time = models.DateTimeField(blank=True, null=True, default=None)
+    image = models.CharField(max_length=50, blank=True, null=True, default=None)
+
 
 class Planet(models.Model):
     class Meta:
@@ -52,41 +67,16 @@ class Planet(models.Model):
     total_buildings = models.IntegerField(default=0) # on this planet. doesn't include under construction
     buildings_under_construction = models.IntegerField(default=0) # number of total buildings under construction. NOTE- the C code doesnt have a field for this, it jsut calculates it each time, since it uses a single array for the buildings
 
-
+    artefact= models.ForeignKey(Artefacts, on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
 
 class Empire(models.Model):
-    '''
-  int id;
-  int rank;
-  int flags;
-  int numplayers;
-  int politics[CMD_EMPIRE_POLITICS_TOTAL];
-  int player[ARRAY_MAX];
-  int vote[ARRAY_MAX];
-  int depreciated;
-  int homeid;
-  int homepos; // ( y << 16 ) + x
-  int picture;
-  int planets;
-  int artefacts;
-  int construction;
-  int building[CMD_BLDG_EMPIRE_NUMUSED];
-  int counters[16];
-  float taxation;
-  int64_t networth;
-  int64_t fund[CMD_RESSOURCE_NUMUSED];
-  int64_t infos[CMD_RESSOURCE_NUMUSED];
-  char name[USER_NAME_MAX];
-  char password[USER_PASS_MAX];
-    '''
     number = models.IntegerField(default=0)
     x = models.IntegerField(default=0)
     y = models.IntegerField(default=0)
     rank = models.IntegerField(default=0)
     numplayers = models.IntegerField(default=0)
     planets = models.IntegerField(default=0)
-    artefacts = models.IntegerField(default=0) #do we need this?
     taxation = models.FloatField(default=0.0)
     networth = models.BigIntegerField(default=0)
     name = models.CharField(max_length=30, default="")
@@ -99,7 +89,7 @@ class Empire(models.Model):
     pm_message = models.CharField(max_length=300, default="")
     relations_message = models.CharField(max_length=300, default="No relations message.")
     empire_image = models.ImageField(upload_to='empire_images/', blank=True)
-
+    artefacts = models.ManyToManyField(Artefacts)
 
 class News(models.Model): # a single type of building under construction
     user1 = models.ForeignKey(User, related_name='user11', on_delete=models.SET_NULL, blank=True, null=True,
@@ -508,3 +498,4 @@ class Specops(models.Model):
     stealth = models.BooleanField(default=False)
     planet = models.ForeignKey(Planet, on_delete=models.SET_NULL, blank=True, null=True, default=None)
     date_and_time = models.DateTimeField(blank=True, null=True, default=None)
+

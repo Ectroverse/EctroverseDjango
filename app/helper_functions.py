@@ -203,6 +203,10 @@ def explore_planets(fleets):
             if not planet.home_planet and planet.owner == None:
                 planet.owner = fl.owner
                 fl.delete()
+                # arti
+                if planet.artefact is not None:
+                    planet.artefact.empire_holding = status.empire
+                    planet.artefact.save()
                 planet.save()
                 status.military_flag = 1;
                 News.objects.create(user1 = fl.owner,

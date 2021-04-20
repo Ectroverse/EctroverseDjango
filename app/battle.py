@@ -463,6 +463,9 @@ def attack_planet(attacking_fleet):
         # attacked_planet.owner = attacker.id
         # destroy some buildings
         attacked_planet.owner = User.objects.get(id=attacker.id)
+        if attacked_planet.artefact is not None:
+            attacked_planet.artefact.empire_holding = attacker.empire
+            attacked_planet.artefact.save()
         attacked_planet.save()
         Scouting.objects.create(user= User.objects.get(id=attacker.id),
                                 planet = planet,

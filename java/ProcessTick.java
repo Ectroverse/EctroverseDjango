@@ -311,15 +311,24 @@ public class ProcessTick
 			double racebonus = 0;
 			if (race.equals("FH"))
 				racebonus = 1.0;
+			
+			
+			//Research laboratory artefact resarch
+			Statement statement4 = con.createStatement();
+			double research_modifier = 1.0;
+			ResultSet artefactSet = statement4.executeQuery("SELECT * FROM app_artefacts WHERE name = 'Research laboratory' AND empire_holding_id = " + empireID);
+			while (artefactSet.next()){
+				research_modifier = 1.0 + artefactSet.getInt("effect1") / 100.0;
+			}
 
 			long totalRcPoints = 0;
 			for(int i = 0; i < researchNames.length; i++){				
 				long rc = (long) (
 				userLongValues.get(researchNames[i][0]) +
-				enlightenmentResearchFactor * 1.2 * race_info.get(researchNames[i][1])  * userIntValues.get(researchNames[i][2])
-				* (userPlanetsUpdate.getResearchProduction() + userLongValues.get("current_research_funding")/100 + artibonus +
+				research_modifier * (enlightenmentResearchFactor * 1.2 * race_info.get(researchNames[i][1])  * userIntValues.get(researchNames[i][2])
+				* (userPlanetsUpdate.getResearchProduction() + userLongValues.get("current_research_funding")/100 + 
 				(racebonus * userPlanetsUpdate.getPopulation() / 6000.0) )  / 100
-				);			
+				));			
 				
 				rc = Math.max(0, rc);
 				totalRcPoints += rc;
@@ -345,6 +354,12 @@ public class ProcessTick
 			energyProduction += userPlanetsUpdate.getEnergyProduction(1);
 			double energyResearchFactor = 1.0 + 0.01* race_info.getOrDefault("energy_production", 1.0);
 			energyProduction = (long) (energyProduction * energyResearchFactor);	
+			
+			//ether gardens artefact energy
+			artefactSet = statement4.executeQuery("SELECT * FROM app_artefacts WHERE name = 'Ether Gardens' AND empire_holding_id = " + empireID);
+			while (artefactSet.next()){
+				energyProduction *= 1.0 + artefactSet.getInt("effect1") / 100.0;
+			}
 			
 			//enlightnment energy
 			if (enlightenmentEnergyFactor > 0){
@@ -407,6 +422,13 @@ public class ProcessTick
 
 			//minerals
 		    int mineral_production = (int) (race_info.get("mineral_production") * mineralProduction);
+			
+			//Mirny mine artefact minerals
+			artefactSet = statement4.executeQuery("SELECT * FROM app_artefacts WHERE name = 'Mirny mine' AND empire_holding_id = " + empireID);
+			while (artefactSet.next()){
+				mineral_production *= 1.0 + artefactSet.getInt("effect1") / 100.0;
+			}
+			
 		    int mineral_decay = 0;
 		    int mineral_interest = (int) (userLongValues.get("minerals") * race_info.getOrDefault("race_special_resource_interest", 0.0));
 		    int mineral_income = mineral_production - mineral_decay + mineral_interest;
@@ -416,6 +438,13 @@ public class ProcessTick
 
 		    //crystals
     	    int crystal_production = (int) (race_info.get("crystal_production") *  crystalProduction);
+			
+			//Crystal synthesis artefact скныефды
+			artefactSet = statement4.executeQuery("SELECT * FROM app_artefacts WHERE name = 'Crystal synthesis' AND empire_holding_id = " + empireID);
+			while (artefactSet.next()){
+				crystal_production *= 1.0 + artefactSet.getInt("effect1") / 100.0;
+			}
+			
     	    int crystal_decay = (int) (Math.max(0.0,userLongValues.get("crystals") * crystal_decay_factor));
     	    int crystal_interest = (int) (userLongValues.get("crystals") * race_info.getOrDefault("race_special_resource_interest", 0.0));
     	    int crystal_income = crystal_production - crystal_decay + crystal_interest;
@@ -426,6 +455,13 @@ public class ProcessTick
 			
     	    //ectrolium		    	    
     	    int ectrolium_production = (int) (race_info.get("ectrolium_production") * ectroliumProduction);
+			
+			//Foohon technology artefact ectrolium
+			artefactSet = statement4.executeQuery("SELECT * FROM app_artefacts WHERE name = 'Foohon technology' AND empire_holding_id = " + empireID);
+			while (artefactSet.next()){
+				ectrolium_production *= 1.0 + artefactSet.getInt("effect1") / 100.0;
+			}
+			
     	    int ectrolium_decay = 0;
     	    int ectrolium_interest =(int) (userLongValues.get("ectrolium") * race_info.getOrDefault("race_special_resource_interest", 0.0));
     	    int ectrolium_income = ectrolium_production + ectrolium_decay + ectrolium_interest;
@@ -453,7 +489,6 @@ public class ProcessTick
 			}
 			
 			//energy_specop_effect
-			System.out.println("energy_specop_effect1 " + energy_specop_effect1 );
 			userStatusUpdateStatement.setLong(60, energy_specop_effect1); 
 			userStatusUpdateStatement.setLong(32, energyProduction);
 			

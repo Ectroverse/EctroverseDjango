@@ -87,6 +87,7 @@ public class UpdateFleets {
 	private Connection connection;
 	private Statement statement;
 	private Statement statement2;
+	private Statement statement3;
 	private int total_built_units;
 	private int userID;
 	private int empireID;
@@ -99,6 +100,7 @@ public class UpdateFleets {
 		this.addNews = addNews; 
 		statement = connection.createStatement();
 		statement2 = connection.createStatement();
+		statement3 = connection.createStatement();
 		fleetsUpdateStatement = connection.prepareStatement(fleetsUpdateQuery); 
 		fleetMergeUpdateStatement = connection.prepareStatement(fleetMergeQuery); 
 		fleetStationUpdateStatement = connection.prepareStatement(fleetStationQuery); 
@@ -267,7 +269,7 @@ public class UpdateFleets {
 	}
 	
 	public void updateExplorationFleets(ResultSet fleet, int militaryFlag) throws Exception{
-		ResultSet exploredPlanet = statement2.executeQuery("SELECT * FROM \"PLANET\" WHERE x = " + fleet.getInt("x") 
+		ResultSet exploredPlanet = statement3.executeQuery("SELECT * FROM \"PLANET\" WHERE x = " + fleet.getInt("x") 
 		+ " AND y = " + fleet.getInt("y") + " AND i = " + fleet.getInt("i") + " ;");
 		
 		java.util.Date utilDate = new java.util.Date();
@@ -276,6 +278,13 @@ public class UpdateFleets {
 		if(exploredPlanet.next()){
 			int planetID = exploredPlanet.getInt("id");
 			if (exploredPlanet.getInt("owner_id") == 0){
+				statement2.execute("UPDATE \"PLANET\" SET owner_id = " + userID + " WHERE id = "+ planetID + ";");
+				//update arti holding family
+				int arti = exploredPlanet.getInt("artefact_id");
+				if (! exploredPlanet.wasNull()){
+					statement2.execute("UPDATE app_artefacts SET empire_holding = " + empireID + " WHERE id = "+ arti + ";");	
+				}
+				
 				statement2.execute("UPDATE \"PLANET\" SET owner_id = " + userID + " WHERE id = "+ planetID + ";");
 				fleetsDeleteUpdateStatement.setInt(1, fleet.getInt("id"));
 				fleetsDeleteUpdateStatement.addBatch();

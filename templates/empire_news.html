@@ -59,7 +59,13 @@
 				<div class="right_news">
 				<i>Week {{ n.tick_number|intdiv:52 }}, year {{ n.tick_number|mod:52 }}</i><br>
 				An exploration ship of {{n.user1.userstatus.user_name}} reached the <a href="/planet{{n.planet.id}}">
-				planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}</a> and established a colony.</div>
+				planet {{n.planet.x}},{{n.planet.y}}:{{n.planet.i}}</a> and established a colony.
+				{% if n.planet.artefact is not None %}
+					An old and powerfull artefact: {{ n.planet.artefact.name }} 
+					<img src="{{n.planet.artefact.image}}" alt="{{n.planet.artefact.name}}" title="Artefact">
+					is present on this planet!<br>
+				{% endif %}
+				</div>
 			</div>
 		{% endif %}
 		{% if n.news_type == 'UE' %}

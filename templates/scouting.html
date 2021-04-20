@@ -32,25 +32,35 @@
 </tr>
 <tr>
 {% for scouting in scouted %}
-{% if scouting.scout >= 1 %}
-<td><a href="/planet{{scouting.planet.id}}">{{scouting.planet.x}},{{scouting.planet.y}}:{{scouting.planet.i}}</a></td>
-<td>{{scouting.planet.size}}</td>
-<td>{% if scouting.planet.bonus_solar %}
-<img src="{% static 'pr0.gif' %}" alt="Solar" title="Solar">+{{scouting.planet.bonus_solar}}%</td>
+<td>
+{% if scouting.scout < 1.0 %}
+	Not fully scouted! 
 {% endif %}
+<a href="/planet{{scouting.planet.id}}">{{scouting.planet.x}},{{scouting.planet.y}}:{{scouting.planet.i}}</a>
+</td>
+<td>
+{% if scouting.scout >= 0.5 %}
+	{{scouting.planet.size}}
+{% else %}
+	unknown size
+{% endif %}
+</td>
+<td>
+{% if scouting.planet.artefact is not None and scouting.scout >= 1 %}
+	<img src="{{scouting.planet.artefact.image}}" alt="{{scouting.planet.artefact.name}}" title="Artefact"></td>
+{% elif scouting.planet.bonus_solar and scouting.scout >= 0.9 %}
+	<img src="{% static 'pr0.gif' %}" alt="Solar" title="Solar">+{{scouting.planet.bonus_solar}}%
+{% elif scouting.scouting.planet.bonus_mineral and scouting.scout >= 0.9  %}
+	<img src="{% static 'pr1.gif' %}" alt="Mineral" title="Solar">+{{scouting.planet.bonus_mineral}}%
+{% elif scouting.planet.bonus_crystal and scouting.scout >= 0.9  %}
+	<img src="{% static 'pr2.gif' %}" alt="Crystal" title="Solar">+{{scouting.planet.bonus_crystal}}%
+{% elif scouting.planet.bonus_ectrolium and scouting.scout >= 0.9 %}
+	<img src="{% static 'pr3.gif' %}" alt="Ectro" title="Solar">+{{scouting.planet.bonus_ectrolium}}%
+{% endif %}	
+</td>
 
-{% if scouting.scouting.planet.bonus_mineral %}
-<img src="{% static 'pr1.gif' %}" alt="Solar" title="Solar">+{{scouting.planet.bonus_mineral}}%</td>
-{% endif %}
-
-{% if scouting.planet.bonus_crystal %}
-<img src="{% static 'pr2.gif' %}" alt="Solar" title="Solar">+{{scouting.planet.bonus_crystal}}%</td>
-{% endif %}
-
-{% if scouting.planet.bonus_ectrolium %}
-<img src="{% static 'pr3.gif' %}" alt="Solar" title="Solar">+{{scouting.planet.bonus_ectrolium}}%</td>
-{% endif %}
-<td> {% if scouting.planet.owner == None %}
+<td> 
+{% if scouting.planet.owner == None %}
 <font color="#00FF00">Unexplored</font></td>
 {% elif scouting.planet.owner.id == status.user.id %}
 <font color="#FFFF00">{{scouting.planet.owner.userstatus.user_name}}</font></td>
@@ -58,33 +68,7 @@
 <font color="#FF0000">{{scouting.planet.owner.userstatus.user_name}}</font></td>
 {% endif %}
 </tr>
-{% elif scouting.scout >= 0.5 %}
-<td><a href="/scouting.planet{{scouting.planet.id}}">!{{scouting.planet.x}},{{scouting.planet.y}}:{{scouting.planet.i}}</a></td>
-<td>{{scouting.planet.size}}</td>
-<td>{% if scouting.planet.bonus_solar %}
-<img src="{% static 'pr0.gif' %}" alt="Solar" title="Solar">+{{scouting.planet.bonus_solar}}%</td>
-{% endif %}
 
-{% if scouting.planet.bonus_mineral %}
-<img src="{% static 'pr1.gif' %}" alt="Solar" title="Solar">+{{scouting.planet.bonus_mineral}}%</td>
-{% endif %}
-
-{% if scouting.planet.bonus_crystal %}
-<img src="{% static 'pr2.gif' %}" alt="Solar" title="Solar">+{{scouting.planet.bonus_crystal}}%</td>
-{% endif %}
-
-{% if scouting.planet.bonus_ectrolium %}
-<img src="{% static 'pr3.gif' %}" alt="Solar" title="Solar">+{{scouting.planet.bonus_ectrolium}}%</td>
-{% endif %}
-<td> {% if scouting.planet.owner == None %}
-<font color="#00FF00">Unexplored</font></td>
-{% elif scouting.planet.owner.id == status.user.id %}
-<font color="#FFFF00">{{scouting.planet.owner.userstatus.user_name}}</font></td>
-{% else %}
-<font color="#FF0000">{{scouting.planet.owner.userstatus.user_name}}</font></td>
-{% endif %}
-</tr>
-{% endif %}
 {% endfor %}
 </tbody>
 </table>
