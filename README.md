@@ -119,3 +119,6 @@ the user name and db name are set in the db: -> environment: in the docker-compo
 to kill it:
 1. `jobs -l` - get the list of currently running jobs
 2. ` kill PID` ,replacing the PID with the process ID of the Main.java
+
+##Django shell
+`python manage.py shell`
