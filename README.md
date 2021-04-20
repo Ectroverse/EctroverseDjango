@@ -97,6 +97,9 @@ Nginx log:
 Database log:
 `docker logs -f ectroversedjango_db_1`
 
+Restart all docker containers:
+`docker restart $(docker ps -q)`
+
 ## Console into the python container (which runs the Django app) to poke around or debug something
 
 `docker exec -it ectroversedjango_python_1 /bin/bash`
@@ -116,3 +119,6 @@ the user name and db name are set in the db: -> environment: in the docker-compo
 to kill it:
 1. `jobs -l` - get the list of currently running jobs
 2. ` kill PID` ,replacing the PID with the process ID of the Main.java
+
+##Django shell
+`python manage.py shell`
