@@ -24,6 +24,23 @@ public class UpdateFleets {
 	" WHERE owner_id = ?" + //14
 	" AND main_fleet = true;";
 	
+	private final String fleetsDecayQuery =
+	"UPDATE app_fleet SET" +	
+	" bomber = ?" + //1
+	" , fighter =  ?" + //2
+	" , transport = ?" + //3
+	" , cruiser =  ?" + //4
+	" , carrier =  ?" + //5
+	" , soldier =  ?" + //6
+	" , droid =  ?" + //7
+	" , goliath =  ?" + //8
+	" , phantom =  ?" + //9
+	" , wizard =  ?" + //10
+	" , agent =  ?" + //11
+	" , ghost =  ?" + //12
+	" , exploration =  ?" + //13
+	" WHERE id = ?;"; //14
+	
 	private final String fleetMergeQuery = 
 	"UPDATE app_fleet SET" +
 	" bomber = ?" + //1
@@ -84,6 +101,9 @@ public class UpdateFleets {
 	private PreparedStatement fleetPhantomsUpdateStatement; 
 	private PreparedStatement fleetsDeleteUpdateStatement;
 	private PreparedStatement fleetMoveUpdateStatement;
+	private PreparedStatement fleetsDecayStatement;
+	
+
 	private Connection connection;
 	private Statement statement;
 	private Statement statement2;
@@ -106,6 +126,7 @@ public class UpdateFleets {
 		fleetStationUpdateStatement = connection.prepareStatement(fleetStationQuery); 
 		fleetPhantomsUpdateStatement = connection.prepareStatement(phantomsUpdateQuery); 
 		fleetsDeleteUpdateStatement = connection.prepareStatement(fleetsDeleteUpdateQuery); 
+		fleetsDecayStatement = connection.prepareStatement(fleetsDecayQuery); 
 		fleetMoveUpdateStatement = connection.prepareStatement(fleetMoveQuery); 
 	}
 	
@@ -141,6 +162,23 @@ public class UpdateFleets {
 		
 		fleetsUpdateStatement.setInt(14, userID);
 		fleetsUpdateStatement.addBatch();
+	}
+	
+	public void updateDecayedFleet() throws Exception{
+		String unitsQuery = 
+		" SELECT * FROM app_fleet"+
+		" WHERE owner_id = " + userID;
+
+		ResultSet resultSet = statement.executeQuery(unitsQuery);
+		while (resultSet.next()){
+			for(int i = 1; i <= unit_names.length; i++){
+				fleetsDecayStatement.setLong(i, resultSet.getLong(unit_names[i-1])*98/100);
+			}
+			fleetsDecayStatement.setInt(14, resultSet.getInt("id"));
+			System.out.print(fleetsDecayStatement);
+			fleetsDecayStatement.addBatch();
+		}
+
 	}
 	
 	public void updateFleetsMerge() throws Exception{
@@ -419,6 +457,7 @@ public class UpdateFleets {
 		fleetStationUpdateStatement.executeBatch();
 		fleetPhantomsUpdateStatement.executeBatch();
 		fleetsDeleteUpdateStatement.executeBatch();
+		fleetsDecayStatement.executeBatch();
 	}
 
 }

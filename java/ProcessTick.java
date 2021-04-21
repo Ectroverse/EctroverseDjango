@@ -506,7 +506,7 @@ public class ProcessTick
     	    userStatusUpdateStatement.setLong(53, Math.max(0,userLongValues.get("ectrolium") + ectrolium_income));
 			
 
-			
+			//decay
 			if( Math.max(0, userLongValues.get("energy") + energy_income) > 0){
 				int fr = Math.min(userIntValues.get("fleet_readiness")+2, userIntValues.get("fleet_readiness_max"));
 				userStatusUpdateStatement.setInt(1, fr);
@@ -522,6 +522,8 @@ public class ProcessTick
 				userStatusUpdateStatement.setInt(2, pr);
 				int ar = Math.max(userIntValues.get("agent_readiness")-3, -200);
 				userStatusUpdateStatement.setInt(3, ar);
+				//fleets also decya, 2% a tick
+				updateFleets.updateDecayedFleet();
 			}
 
 			//update research funding
