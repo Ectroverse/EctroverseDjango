@@ -1894,16 +1894,33 @@ def specop_show(request, specop_id):
         for s in specops_affecting_target:
             specop_info += "Specop: " + str(s.name)
             specop_info += " Time remaining: " + str(s.ticks_left)
-            if s.specop_strength > 0 :
+            if s.specop_strength > 0:
                 specop_info += " Strength: " + str(s.ticks_left)
             if s.extra_effect is not None:
                 specop_info += " Extra effect: " + str(s.extra_effect)
             specop_info += "\n"
-
+    planets = None
+    target_player = UserStatus.objects.get(user=specop.user_to)
+    fleets = None
+    if specop.name == "High Infiltration":
+        if specop.specop_strength >= 0.8:
+            planets = Planet.objects.filter(owner=specop.user_to)
+            for p in planets:
+                scouting = Scouting.objects.filter(planet=p, user=specop.user_from).first()
+                if scouting is None:
+                    Scouting.objects.create(user=specop.user_from, planet=p, scout=1)
+                elif scouting.scout < 1:
+                    scouting.scout = 1
+                    scouting.save()
+        if specop.specop_strength >= 1.0:
+            fleets = Fleet.objects.filter(owner=specop.user_to)
 
     context = {"status": status,
                "page_title": specop.name,
-               "specop_info": specop_info
+               "specop_info": specop_info,
+               "planets": planets,
+               "fleets": fleets,
+               "target_player": target_player
                }
     return render(request, "specop_show.html", context)
 

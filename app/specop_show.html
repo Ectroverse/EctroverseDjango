@@ -11,18 +11,10 @@
 	<br>
 {% endif %}
 
-<style>
-tr.border_bottom td {
-  border-bottom: 2px solid #00aaaa;
-  border-left: 0px;
-  border-right: 0px;
-}
-</style>
-
 
 
 	{% if page_title == "High Infiltration" %}
-		<u>Faction info:</u><br> 
+		Faction info:<br> 
 		<div style="  margin-left: auto;   margin-right: auto;">
 		<table width="100%">
 		<tr><td><b>Resources</b></td></tr>
@@ -56,7 +48,7 @@ tr.border_bottom td {
 		<br>
 	
 		{% if planets is not None %}
-		<u>Planets:</u>
+		Planets:
 			<div class= "center">
 			<table width="100%">
 			<tr>
@@ -139,10 +131,10 @@ tr.border_bottom td {
 		{% endif %}
 		
 		{% if fleets is not None %}
-		<u>Fleets:</u>
+		Fleets:
 	<div class="center"> 
 			<table width="100%">
-			<tr class="border_bottom">
+			<tr>
 			<td>
 				Type:
 			</td>
@@ -160,7 +152,7 @@ tr.border_bottom td {
 			</td>
 			
 			{% for fleet in fleets %}
-			<tr class="border_bottom">
+			<tr>
 			<td>
 				{% if fleet.main_fleet == True %}
 				Main fleet
@@ -225,7 +217,7 @@ tr.border_bottom td {
 				PERFORM OPERATION - {{fleet.specop}}
 				{% elif  fleet.command_order == 7 %}
 				PERFORM INCANTATION  - {{fleet.specop}}
-				{% elif  fleet.command_order == 8 %}
+				{% elif  fleet.command_order == 7 %}
 				STATIONED on {{fleet.on_planet.x}}:{{fleet.on_planet.y}},{{fleet.on_planet.i}}
 				{% elif  fleet.command_order == 10 %}
 				EXPLORE PLANET
