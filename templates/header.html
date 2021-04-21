@@ -211,7 +211,6 @@
 	height: 42px;
 	left: 35px;
 	top: 21px;
-    content:url({% static 'mobnoti1.png' %});
 }
 
 .mobdrop ul{
@@ -349,7 +348,32 @@
 		</div>
 
 	<div class="menu_container_header_right"></div>
-	<a href="/headquarters"><div class="menu_container_btnmob"></div></a>
+	
+	
+	{% if status.mail_flag == 1 %}
+	<a href="/messages"><div class="menu_container_btnmob">
+	<img src=
+		"{% static 'i09a.jpg' %}"
+	{% else %}
+	
+	<a href="/headquarters"><div class="menu_container_btnmob">
+	<img src=
+		{% if status.military_flag == 1 %}
+			"{% static 'i12a.jpg' %}"
+		{% elif status.military_flag == 2 %}
+			"{% static 'i12b.jpg' %}"
+		{% elif status.military_flag == 3 %}
+			"{% static 'i12c.jpg' %}"
+		{% elif status.military_flag == 3 %}
+			"{% static 'i12c.jpg' %}"
+		{% elif status.construction_flag == 1 %}
+			"{% static 'i10a.jpg' %}"
+		{% else %}
+			"{% static 'i09.jpg' %}"
+		{% endif %}
+	{% endif %}
+	>
+	</div></a>
 	<div class="menu_container_footer_leftmob"></div>
 	<div class="menu_container_footer_midmob">
 		<div class = "menu_leftmob1_align">
