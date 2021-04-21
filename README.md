@@ -9,10 +9,8 @@ left to do:
 
 #### v0.2 Remaining Items
 
-- cancel buildings/fleets
-- scouting page
 - add proper design to rankings tables
-- add deletion possibility to account (Vladimir)
+- add deletion possibility to account
 - improve html design inside, some parts are shown badly on phone
 - forum
 - round reset function
@@ -24,7 +22,6 @@ left to do:
 - new player tutorial
 - map bonuses? ancients
 - do we need the market?
-- other operations, as well as spells and incantations
 - move the menu button to the main header and perhaps draw it nicely
 - add device fingerprinting to prevent double accounts
 - add sliders for mobile version forms
