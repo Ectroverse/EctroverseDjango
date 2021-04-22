@@ -39,10 +39,21 @@ left to do:
 6. `python manage.py collectstatic --noinput`
 7. `python manage.py generate_planets` (can take a while if its a big galaxy with a lot of planets)
 8. go to http://127.0.0.1:8000, log in as admin, and choose a race
-9. `python manage.py process_tick` (will eventually get called every 10 minutes with a cronjob)
-10. go to http://127.0.0.1:8000 and it should work now
-11. to start automatic ticks, type `crontab -e` and add this line to the bottom: `* * * * * /usr/local/bin/python3 /code/manage.py process_tick 2>&1 >>/tmp/tick.log`
-12. control-x to exit crontab, do a `service cron restart`, and it should now automatically run ticks, check status with `ls /tmp/tick.log`
+9. `python manage.py generate_artefacts`
+10. `cd java`
+11. `javac *.java -d .` - if wasnt allready compiled into bytecode
+12. `java -cp postgresql-42.2.19.jar: org.ectroverse.processtick.ProcessTick >> log.txt &`
+13. Set the `Round statuss` object's `Is running` to True whenever you want the tick time to start running
+
+to kill the java process tick:
+1. `ps -aux` - get the list of currently running jobs
+2. ` kill PID` ,replacing the PID with the process ID of the Main.java
+
+this was the old way, which was never finished:
+ `python manage.py process_tick` (will eventually get called every 10 minutes with a cronjob)
+ go to http://127.0.0.1:8000 and it should work now
+ to start automatic ticks, type `crontab -e` and add this line to the bottom: `* * * * * /usr/local/bin/python3 /code/manage.py process_tick 2>&1 >>/tmp/tick.log`
+ control-x to exit crontab, do a `service cron restart`, and it should now automatically run ticks, check status with `ls /tmp/tick.log`
 
 ## Starting up server once its setup
 
