@@ -11,9 +11,7 @@ left to do:
 
 - add proper design to rankings tables
 - add deletion possibility to account
-- improve html design inside, some parts are shown badly on phone
 - forum
-- round reset function
 - email password recovery
 - round ranks for past rounds
 
@@ -22,7 +20,6 @@ left to do:
 - new player tutorial
 - map bonuses? ancients
 - do we need the market?
-- move the menu button to the main header and perhaps draw it nicely
 - add device fingerprinting to prevent double accounts
 - add sliders for mobile version forms
 
