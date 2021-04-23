@@ -12,13 +12,13 @@
 
 Account ID: {{player.user.id}}
 <br>
-Faction name : {{player.user_name}}
+Faction name: {{player.user_name}}
 <br>
-Faction race : {{player.get_race_display}}
+Faction race: {{player.get_race_display}}
 <br>
-Faction empire : {{player.empire.name_with_id}}
+Faction empire: {{player.empire.name_with_id}}
 <br>
-Tag points : {{player.tag_points}}
+Tag: {{tag}}
 <br>
 
 {% if player.user.id == status.user.id %}
@@ -26,7 +26,8 @@ User name : {{player.user}}
 <br>
 User e-mail : {{player.user.email}}
 <br>
-
+Tag points : {{player.tag_points}}
+<br>
 <a href="/password">Change Password</a>
 
 <form action="" method="POST">

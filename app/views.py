@@ -852,12 +852,21 @@ def account(request, player_id):
                 msg = "Deleted!"
             else:
                 msg = "The round allready started, you cannot rejoin!"
-
     player = UserStatus.objects.get(id=player_id)
+    tag = ""
+    for i in range(len(tag_points_numbers)):
+        if tag_points_numbers[i] < player.tag_points:
+            continue
+        else:
+            tag = tag_points_names[i]
+            break
+
+
     context = {"status": status,
                "player": player,
                "round": RoundStatus.objects.filter().first,
                "page_title": "Account",
+               "tag": tag,
                "msg": msg}
     return render(request, "account.html", context)
 
@@ -2348,9 +2357,14 @@ def hall_of_fame(request):
 def races(request):
     status = UserStatus.objects.filter(user=request.user).first()
     races = race_info_list
+    if status.empire:
+        my_template = 'base.html'
+    else:
+        my_template = 'front_page.html'
     context = {"status":status,
                "page_title": "Races",
                "races": races,
+               "my_template": my_template
                }
 
     return render(request, "races.html", context)

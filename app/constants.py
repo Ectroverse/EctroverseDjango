@@ -306,3 +306,56 @@ sats_defence = 450
 #    news         #
 ###################
 news_show = 288
+
+# tag points
+
+tag_points_names =[
+"Player",
+"Veteran",
+"Chicken-soup-machine Repairman",
+"3rd Technician",
+"2nd Technician",
+"1st Technician",
+"Helmsman",
+"Master-at-Arms",
+"3rd Officer",
+"2nd Officer",
+"1st Officer",
+"Patrol Officer",
+"Squad Lieutenant",
+"Lieutenant Commander",
+"Wing Commander",
+"Cruiser Captain",
+"Squadron Commander",
+"Fleet Admiral",
+"Elite Strategist",
+"Dear Leader",
+"Master Wizard",
+"Transcend",
+"(personalized tag)",
+]
+
+tag_points_numbers =[
+45,
+80,
+160,
+240,
+380,
+460,
+600,
+850,
+1150,
+1320,
+1700,
+2250,
+2600,
+3100,
+3500,
+3900,
+4600,
+5800,
+7000,
+9000,
+12500,
+0xFFFFFFF
+]

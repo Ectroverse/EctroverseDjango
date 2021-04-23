@@ -1,8 +1,23 @@
-{% extends "base.html" %}
+{% extends my_template %}
 
 {% load static %}
 
 {% block content %}
+
+{% if my_template == "front_page.html" %}
+<div class="display_box" style="width:85%" >
+	<div class="display_box_header">
+		<div class="display_box_header_left"></div>
+		<div class="display_box_header_center">
+			<div class="display_box_header_center_content">Races</div>
+		</div>
+		<div class="display_box_header_right"></div>
+	</div>
+	<div class="display_box_content" style =" margin: 0 auto;" >
+		<div class="display_box_content_left"></div>
+		<div class="display_box_content_center"  >
+{% endif %}
+
 
 {% for key,val in races.items %}
 <b>Race: {{key}}<br></b>
@@ -11,6 +26,19 @@
 	{% endfor %}
 	<br><br>
 {% endfor %}
+
+{% if my_template == "front_page.html" %}
+		</div>
+		<div class="display_box_content_right"></div>
+	</div>
+
+	<div class="display_box_footer">
+		<div class="display_box_footer_left"></div>
+		<div class="display_box_footer_center"></div>
+		<div class="display_box_footer_right"></div>
+	</div>
+</div>
+{% endif %}
 
 
 {% endblock %}
