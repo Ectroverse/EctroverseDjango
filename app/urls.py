@@ -1,5 +1,6 @@
-from django.urls import path
+from django.urls import include, path
 from django.conf.urls import url
+from machina import urls as machina_urls
 
 from . import views
 from django.conf import settings
@@ -58,6 +59,8 @@ urlpatterns = [
     url(r'^account(?P<player_id>[0-9]+)/$', views.account, name='account'),
     path('mass_build', views.mass_build, name='mass_build'),
     path('races', views.races, name='races'),
+    path('forum/', include(machina_urls)),
+    path('forum2',  views.forum2, name='forum2'),
 ]
 
 if settings.DEBUG:

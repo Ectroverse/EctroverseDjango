@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from machina import MACHINA_MAIN_STATIC_DIR
+from machina import MACHINA_MAIN_TEMPLATE_DIR
+
 load_dotenv() # loads in env vars defined in .env, which contain passwords/keys we dont want to commit
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -42,6 +45,24 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 	'mathfilters',
+
+    # Machina dependencies:
+    'mptt',
+    'haystack',
+    'widget_tweaks',
+
+    # Machina apps:
+    'machina',
+    'machina.apps.forum',
+    'machina.apps.forum_conversation',
+    'machina.apps.forum_conversation.forum_attachments',
+    'machina.apps.forum_conversation.forum_polls',
+    'machina.apps.forum_feeds',
+    'machina.apps.forum_moderation',
+    'machina.apps.forum_search',
+    'machina.apps.forum_tracking',
+    'machina.apps.forum_member',
+    'machina.apps.forum_permission',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +73,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Machina
+    'machina.apps.forum_permission.middleware.ForumPermissionMiddleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -59,17 +82,27 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'),
-                 os.path.join(BASE_DIR, 'templates/registration')],
+        'DIRS': [
+                 os.path.join(BASE_DIR, 'templates'),
+                 os.path.join(BASE_DIR, 'templates/registration'),
+                 os.path.join(BASE_DIR, 'templates/machina'),
+            ],
+            #      MACHINA_MAIN_TEMPLATE_DIR],
 
-        'APP_DIRS': True,
+        # 'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # Machina
+                'machina.core.context_processors.metadata',
             ],
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ]
         },
     },
 ]
@@ -135,6 +168,8 @@ MEDIA_URL = '/media/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"), # lets us have a static directory in root repo
+    os.path.join(BASE_DIR, "static/machina/build")
+    # MACHINA_MAIN_STATIC_DIR,
 ]
 # Login-system related
 
@@ -143,3 +178,23 @@ LOGIN_REDIRECT_URL = '/choose_empire_race' # Redirect to home URL after login (D
 LOOUT_REDIRECT_URL = '/'
 
 DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap.html"
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    },
+    'machina_attachments': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp',
+    },
+}
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
+    },
+}
+
+MACHINA_FORUM_NAME = "Ectroverse Forum"
+
+MACHINA_BASE_TEMPLATE_NAME = "machina_base.html"

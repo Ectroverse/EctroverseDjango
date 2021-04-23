@@ -33,6 +33,10 @@ from matplotlib.colors import LinearSegmentedColormap
 from datetime import datetime
 from datetime import timedelta
 
+from django.urls import include, path
+from django.conf.urls import url
+from machina import urls as machina_urls
+
 
 # Remember that Django uses the word View to mean the Controller in MVC.  Django's "Views" are the HTML templates. Models are models.
 
@@ -2368,3 +2372,19 @@ def races(request):
                }
 
     return render(request, "races.html", context)
+
+
+def forum2(request):
+    status = UserStatus.objects.filter(user=request.user).first()
+    if status.empire:
+        my_template = 'base.html'
+    else:
+        my_template = 'front_page.html'
+
+    msg = include(machina_urls)
+    context = {"status": status,
+               "page_title": "Forum",
+               "my_template": my_template,
+               }
+
+    return render(request, "forum2.html", context)
