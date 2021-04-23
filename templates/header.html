@@ -271,7 +271,13 @@
 				</div>
 
 			</div>
-			<div class="mob_menu_mid_align">Next tick : <span id="headerTime1"></span> </div>
+			<div class="mob_menu_mid_align">Next tick :
+			{% if round.is_running == False %}
+			Time frozen!
+			{% else %}
+			<span id="headerTime1"></span>
+			{% endif %}		
+			</span> </div>
 			<div class="mob_menu_right_align">Networth : <span id="networth"></span> </div>
 			<div class="hide_pop "><div class="mob_menu_right_align">Population: <span id="population"></span> </div></div>
 	</div>
@@ -284,7 +290,13 @@
 				Networth : {{status.networth}}
 			</div>
 			<div class = "menu_mid_align">
-				Next tick  : <span id="headerTime2"></span>
+			
+				Next tick  : 
+				{% if round.is_running == False %}
+				Time frozen!
+				{% else %}
+				<span id="headerTime2"></span>
+				{% endif %}
 			</div>
 			<div class = "menu_right_align">
 				Population : {{status.population}}

@@ -4,17 +4,38 @@
 
 {% block content %}
 
-Account ID: {{status.user.id}}
+{% if msg is not None %}
+{{msg}}
+{% endif %}
+
+
+
+Account ID: {{player.user.id}}
 <br>
-User name : {{status.user}}
+Faction name : {{player.user_name}}
 <br>
-User e-mail : {{status.user.email}}
+Faction race : {{player.get_race_display}}
 <br>
-Faction name : {{status.user_name}}
+Faction empire : {{player.empire.name_with_id}}
 <br>
-Faction race : {{status.get_race_display}}
+Tag points : {{player.tag_points}}
 <br>
+
+{% if player.user.id == status.user.id %}
+User name : {{player.user}}
+<br>
+User e-mail : {{player.user.email}}
+<br>
+
 <a href="/password">Change Password</a>
+
+<form action="" method="POST">
+{% csrf_token %}
+<input type="submit" name = "Rejoin" value="Rejoin"></form>
+</form>
+
+{% endif %}
+
 
 {% endblock %}
 

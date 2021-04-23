@@ -27,8 +27,8 @@
 {% for status in player_list %}
 <tr>
 <td>{{status.get_empire_role_display}}</td>
-    <td><b>{{status.user_name}}</b></td>
-<td>{{status.get_race_display}}</td>
+    <td><b><a href= "/account{{status.id}}" >{{status.user_name}}</a></b></td>
+<td><a href= "/races" >{{status.get_race_display}}</a></td>
 <td>{{status.num_planets }}</td>
 <td>{{status.networth}}</td>
 {# status - online? #}

@@ -7,7 +7,9 @@ import java.time.Clock;
 import java.time.Instant; 
 import java.util.concurrent.*;
 import java.util.Arrays.*;
+import java.text.SimpleDateFormat;
 import static org.ectroverse.processtick.Constants.*;
+
 
 public class ProcessTick
 {
@@ -59,8 +61,19 @@ public class ProcessTick
 		};
 		
 		//use this for 10 second tick
-		long millistoNext = HelperFunctions.secondsToFirstOccurence10(calendar);	
+
+		long millistoNext = HelperFunctions.startDelay(calendar, Settings.tickTime);	
+		long currentTime = System.currentTimeMillis();
+		long tickScheduleTime = currentTime + millistoNext;
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");   
+		java.util.Date current = new java.util.Date(currentTime);		
+		java.util.Date resultdate = new java.util.Date(tickScheduleTime);
+
+		System.out.println("Current time: " + sdf.format(current));
+		System.out.println("Tick start scheduled at " + sdf.format(resultdate));
 		s.scheduleAtFixedRate(scheduledTask, millistoNext, Settings.tickTime*1000, TimeUnit.MILLISECONDS);
+		
 		
 		//use this for 10 minute tick
 		// long millistoNext = HelperFunctions.secondsToFirstOccurence600(calendar);	
@@ -135,10 +148,23 @@ public class ProcessTick
 		long postgresProcedureExecTime = 0;
 		long main_loop1 = 0, main_loop2 = 0;
 		long batchTime2 = 0, batchTime1 = 0;
+		
+		Statement statement;
+		try {
+			statement = con.createStatement();
+			ResultSet roundCeck = statement.executeQuery("SELECT * FROM app_roundstatus");
+			while(roundCeck.next()){
+				if (roundCeck.getBoolean("is_running") == false )
+					return;
+			}
+		}
+		catch (SQLException ex){
+			ex.printStackTrace();
+		}
 
 		try {
+		statement = con.createStatement();
 	 	startTime = System.nanoTime();
-		Statement statement = con.createStatement();
 		Statement statement2 = con.createStatement();
 		
 		//lock the tables so that users dont interfere with the update

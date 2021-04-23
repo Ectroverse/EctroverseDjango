@@ -33,6 +33,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from datetime import datetime
 from datetime import timedelta
 
+
 # Remember that Django uses the word View to mean the Controller in MVC.  Django's "Views" are the HTML templates. Models are models.
 
 
@@ -42,21 +43,26 @@ def race_check(user):
     else:
         return True
 
+
 def reverse_race_check(user):
     if not user.userstatus.race or not user.userstatus.empire:
         return True
     else:
         return False
 
+
 def index(request):
     context = {"news_feed": NewsFeed.objects.all().order_by('-date_and_time')}
     return render(request, "login.html", context)
 
+
 def guide(request):
     return render(request, "guide.html")
 
+
 def faq(request):
     return render(request, "faq.html")
+
 
 def custom_login(request):
     username = request.POST['username']
@@ -70,6 +76,7 @@ def custom_login(request):
         context = {"news_feed": NewsFeed.objects.all().order_by('-date_and_time'),
                    "errors": "Wrong username/password!"}
         return render(request, "login.html", context)
+
 
 # In contrast to HttpRequest objects, which are created automatically by Django, HttpResponse objects are your responsibility. Each view you write is responsible for instantiating, populating, and returning an HttpResponse.
 # The HttpResponse class lives in the django.http module.
@@ -90,7 +97,7 @@ def register(response):
             return redirect("/headquarters")
     else:
         form = RegisterForm()
-    return render(response, "register.html", {"form":form})
+    return render(response, "register.html", {"form": form})
 
 
 @login_required
@@ -100,8 +107,9 @@ def headquarters(request):
     tick_time = RoundStatus.objects.get().tick_number
     week = tick_time % 52
     year = tick_time // 52
-    fresh_news = News.objects.filter(user1 = request.user, is_read = False, is_personal_news = True).order_by('-date_and_time')
-    old_news = News.objects.filter(user1 = request.user, is_read = True, is_personal_news = True).order_by('-date_and_time')
+    fresh_news = News.objects.filter(user1=request.user, is_read=False, is_personal_news=True).order_by(
+        '-date_and_time')
+    old_news = News.objects.filter(user1=request.user, is_read=True, is_personal_news=True).order_by('-date_and_time')
     for n in fresh_news:
         n.is_read = True
     News.objects.bulk_update(fresh_news, ['is_read'])
@@ -110,6 +118,7 @@ def headquarters(request):
     status.military_flag = 0
     status.save()
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Headquarters",
                "week": week,
                "year": year,
@@ -117,37 +126,40 @@ def headquarters(request):
                "old_news": old_news}
     return render(request, "headquarters.html", context)
 
+
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def btn(request):
     status = get_object_or_404(UserStatus, user=request.user)
     # mail
     btn1 = "i09.jpg"
-    if status.mail_flag == 1: #blue
+    if status.mail_flag == 1:  # blue
         btn1 = "i09a.jpg"
     # building
     btn2 = "i10.jpg"
-    if status.construction_flag == 1: #yellow
+    if status.construction_flag == 1:  # yellow
         btn2 = "i10a.jpg"
     # market
     btn3 = "i11.jpg"
-    if status.economy_flag == 1: #green
+    if status.economy_flag == 1:  # green
         btn3 = "i11a.jpg"
     # fleets
     btn4 = "i12.jpg"
-    if status.military_flag == 1: #red
+    if status.military_flag == 1:  # red
         btn4 = "i12a.jpg"
-    if status.military_flag == 2: #green
+    if status.military_flag == 2:  # green
         btn4 = "i12b.jpg"
-    if status.military_flag == 3: #yellow
+    if status.military_flag == 3:  # yellow
         btn4 = "i12c.jpg"
     context = {"status": status,
-                "btn1": btn1,
-                "btn2": btn2,
-                "btn3": btn3,
-                "btn4": btn4
-                }
+               "round": RoundStatus.objects.filter().first,
+               "btn1": btn1,
+               "btn2": btn2,
+               "btn3": btn3,
+               "btn4": btn4
+               }
     return render(request, "btn.html", context)
+
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -160,23 +172,24 @@ def scouting(request):
         # scouted = Scouting.objects.filter(planet__owner=request.user).\
         #     values('planet__size','scout','planet__x','planet__y','planet__i','planet__x').\
         #     order_by('planet__x','planet__y','planet__i')
-        scouted = Scouting.objects.select_related('planet').filter(user=request.user).\
-            order_by('planet__x','planet__y','planet__i')
+        scouted = Scouting.objects.select_related('planet').filter(user=request.user). \
+            order_by('planet__x', 'planet__y', 'planet__i')
 
     elif order_by == 'size':
         scouted = Scouting.objects.select_related('planet').filter(user=request.user).order_by('planet__size')
     else:
         scouted = Scouting.objects.select_related('planet').filter(user=request.user). \
-            order_by('planet__'+order_by)
-
+            order_by('planet__' + order_by)
 
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Planatery Scouting",
                "scouted": scouted,
                "planets": planets,
                "sql": scouted.query
-                   }
+               }
     return render(request, "scouting.html", context)
+
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -197,11 +210,13 @@ def battle(request, fleet_id):
         return fleets(request)
     battle_report = attack_planet(fleet)
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Battle",
                "fleet": fleet,
                "battle_report": battle_report
                }
     return render(request, "battle.html", context)
+
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -226,7 +241,7 @@ def map_settings(request):
             j = 0
             while j < len(delete_setting2):
                 if j < len(delete_setting2) - 1 and delete_setting2[j] == "0":
-                    if delete_setting2[j+1] == "1":
+                    if delete_setting2[j + 1] == "1":
                         delete_setting.append(1)
                         j += 2
                     else:
@@ -242,7 +257,7 @@ def map_settings(request):
             for i in range(0, len(settings_id)):
                 if map_settings[i] == 'PF':
                     if not details[i]:
-                        err_msg = "You have to specify faction id or name for setting # " + str(i) +" !"
+                        err_msg = "You have to specify faction id or name for setting # " + str(i) + " !"
                         break
 
                     faction_setting, err_msg = get_userstatus_from_id_or_name(details[i])
@@ -251,17 +266,19 @@ def map_settings(request):
 
                 elif map_settings[i] == 'PE':
                     if not details[i]:
-                        err_msg = "You have to specify empire id or name for setting # " + str(i) +"!"
+                        err_msg = "You have to specify empire id or name for setting # " + str(i) + "!"
                         break
                     if isinstance(details[i], int):
                         if Empire.objects.filter(number=details[i]).first() is None:
-                            err_msg = "The empire id " + str(details[i]) + " doesn't exist for setting # " + str(i) +"!"
+                            err_msg = "The empire id " + str(details[i]) + " doesn't exist for setting # " + str(
+                                i) + "!"
                             break
                         else:
                             empire_setting = Empire.objects.filter(number=details[i]).first()
                     else:
                         if Empire.objects.filter(name=details[i]).first() is None:
-                            err_msg = "The empire name " + str(details[i]) + " doesn't exist for setting # " + str(i) +"!"
+                            err_msg = "The empire name " + str(details[i]) + " doesn't exist for setting # " + str(
+                                i) + "!"
                             break
                         else:
                             empire_setting = Empire.objects.filter(name=details[i]).first()
@@ -287,6 +304,7 @@ def map_settings(request):
 
     map_gen_settings = MapSettings.objects.filter(user=request.user).order_by('id')
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Map Settings",
                "map_settings": map_gen_settings,
                "msg": msg,
@@ -294,22 +312,25 @@ def map_settings(request):
                }
     return render(request, "map_settings.html", context)
 
+
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def famnews(request):
     status = get_object_or_404(UserStatus, user=request.user)
     current_tick_number = RoundStatus.objects.get().tick_number
     empire_news = News.objects.filter(empire1=status.empire,
-                                      is_empire_news = True,
-                                      tick_number__gte=current_tick_number-news_show).\
-                                        order_by('-date_and_time')
+                                      is_empire_news=True,
+                                      tick_number__gte=current_tick_number - news_show). \
+        order_by('-date_and_time')
 
     current_empire = status.empire
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Empire News",
                "current_empire": current_empire,
                "news": empire_news}
     return render(request, "empire_news.html", context)
+
 
 @login_required
 @user_passes_test(reverse_race_check, login_url="/headquarters")
@@ -348,7 +369,7 @@ def choose_empire_race(request):
                 for p in Planet.objects.filter(x=empire1.x, y=empire1.y):
                     if p.owner is None:
                         give_first_planet(request.user, status, p)
-                        give_first_fleet(Fleet.objects.get(owner=request.user,main_fleet=True))
+                        give_first_fleet(Fleet.objects.get(owner=request.user, main_fleet=True))
                         break
                 return render(request, "headquarters.html")
 
@@ -371,6 +392,7 @@ def choose_empire_race(request):
                'error': error}
     return render(request, "choose_empire_race.html", context)
 
+
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def council(request):
@@ -382,25 +404,25 @@ def council(request):
         cancelled_units = request.POST.getlist('cancel_unit')
         for cu in cancelled_units:
             cf = UnitConstruction.objects.get(id=cu)
-            refund[0] += int(cf.energy_cost/2)
-            refund[1] += int(cf.mineral_cost/2)
-            refund[2] += int(cf.crystal_cost/2)
-            refund[3] += int(cf.ectrolium_cost/2)
+            refund[0] += int(cf.energy_cost / 2)
+            refund[1] += int(cf.mineral_cost / 2)
+            refund[2] += int(cf.crystal_cost / 2)
+            refund[3] += int(cf.ectrolium_cost / 2)
             cf.delete()
-        msg += "You were refunded with" + str(refund[0]) + " energy, " + str(refund[1]) + " minerals, " +\
-            str(refund[2]) + " crystals, " + str(refund[3]) + " ectrolium! "
+        msg += "You were refunded with" + str(refund[0]) + " energy, " + str(refund[1]) + " minerals, " + \
+               str(refund[2]) + " crystals, " + str(refund[3]) + " ectrolium! "
 
     if 'cancel_build' in request.POST:
         cancelled_buildings = request.POST.getlist('cancel_build')
         for cb in cancelled_buildings:
             cf = Construction.objects.get(id=cb)
-            refund[0] += int(cf.energy_cost/2)
-            refund[1] += int(cf.mineral_cost/2)
-            refund[2] += int(cf.crystal_cost/2)
-            refund[3] += int(cf.ectrolium_cost/2)
+            refund[0] += int(cf.energy_cost / 2)
+            refund[1] += int(cf.mineral_cost / 2)
+            refund[2] += int(cf.crystal_cost / 2)
+            refund[3] += int(cf.ectrolium_cost / 2)
             cf.delete()
-        msg += "You were refunded with" + str(refund[0]) + " energy, " + str(refund[1]) + " minerals, " +\
-            str(refund[2]) + " crystals, " + str(refund[3]) + " ectrolium! "
+        msg += "You were refunded with" + str(refund[0]) + " energy, " + str(refund[1]) + " minerals, " + \
+               str(refund[2]) + " crystals, " + str(refund[3]) + " ectrolium! "
 
     status.energy += refund[0]
     status.minerals += refund[1]
@@ -421,11 +443,11 @@ def council(request):
     constructions = Construction.objects.filter(user=request.user)
     built_fleet = UnitConstruction.objects.filter(user=request.user)
 
-    construction_sum_filter = Construction.objects.filter(user=request.user).\
+    construction_sum_filter = Construction.objects.filter(user=request.user). \
         values("building_type").annotate(buildings_sum=Sum("n"))
-    fleets_sum_filter = UnitConstruction.objects.filter(user=request.user).\
+    fleets_sum_filter = UnitConstruction.objects.filter(user=request.user). \
         values("unit_type").annotate(units_sum=Sum("n"))
-    print("fleets_sum_filter",fleets_sum_filter)
+    print("fleets_sum_filter", fleets_sum_filter)
 
     fleets_sum = {}
     for unit_query in fleets_sum_filter:
@@ -439,9 +461,9 @@ def council(request):
         num = build_query['buildings_sum']
         construction_sum[building_labels[building]] = num
 
-
     # fleets_sum = UnitConstruction.objects.filter(user=request.user).aggregate(Sum('unit_type'))
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "constructions": constructions,
                "built_fleet": built_fleet,
                "main_fleet": main_fleet_list,
@@ -482,6 +504,7 @@ def map(request):
     status = get_object_or_404(UserStatus, user=request.user)
     systems = Planet.objects.filter(i=0).values_list('x', 'y')  # result is a list of 2-tuples
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "planets": Planet.objects.all(),
                "settings": MapSettings.objects.filter(user=status.id),
                "systems": systems, "page_title": "Map", "show_heatmap": show_heatmap}
@@ -506,6 +529,7 @@ def planets(request):
         planets = Planet.objects.filter(owner=request.user).order_by(order_by)  # directly use the keyword
 
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "planets": planets,
                "page_title": "Planets"}
     return render(request, "planets.html", context)
@@ -526,8 +550,9 @@ def planet(request, planet_id):
     exploration_cost = calc_exploration_cost(status)
 
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "planet": planet,
-               "attack_cost":attack_cost,
+               "attack_cost": attack_cost,
                "planet_owner_status": planet_owner_status,
                "page_title": "Planet " + str(planet.x) + ',' + str(planet.y) + ':' + str(planet.i),
                "exploration_cost": exploration_cost}
@@ -586,6 +611,7 @@ def raze(request, planet_id):
         top_msg = None
 
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "planet": planet,
                "top_msg": top_msg,
                "page_title": "Raze Buildings on Planet " + str(planet.x) + ',' + str(planet.y) + ':' + str(planet.i)}
@@ -601,6 +627,7 @@ def razeall(request, planet_id):  # TODO still need an html template for this pa
         # List of building types, except portals
         raze_all_buildings2(planet, status)
         context = {"status": status,
+                   "round": RoundStatus.objects.filter().first,
                    "planet": planet,
                    "planet_owner_status": status,
                    "page_title": "Planet " + str(planet.x) + ',' + str(planet.y) + ':' + str(planet.i),
@@ -629,21 +656,22 @@ def build(request, planet_id):
         for building in building_list:
             building_list_dict[building] = request.POST.get(str(building.building_index), None)
 
-        msg = "building on planet " + str(planet.x) + ":" + str(planet.y) + "," +str(planet.i) + "\n"
+        msg = "building on planet " + str(planet.x) + ":" + str(planet.y) + "," + str(planet.i) + "\n"
         msg += build_on_planet(status, planet, building_list_dict)
 
     # Build up list of dicts, designed to be used easily by template
     costs = []
     for building in building_list:
         # Below doesn't include overbuild, it gets added below
-        cost_list, penalty = building.calc_cost(1, status.research_percent_construction, status.research_percent_tech, status)
+        cost_list, penalty = building.calc_cost(1, status.research_percent_construction, status.research_percent_tech,
+                                                status)
         # Add resource names to the cost_list, for the sake of the for loop in the view
         if cost_list:  # Remember that cost_list will be None if the tech is too low
             cost_list_labeled = []
             for i in range(5):  # 4 types of resources plus time
                 if i < 4:
                     cost_list_labeled.append({"value": int(np.ceil(cost_list[i] * max(1, planet.overbuilt))),
-                                          "name": resource_names[i]})
+                                              "name": resource_names[i]})
                 else:
                     cost_list_labeled.append({"value": int(np.ceil(cost_list[i])),
                                               "name": resource_names[i]})
@@ -660,6 +688,7 @@ def build(request, planet_id):
 
     # Build context
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "planet": planet,
                "costs": costs,
                "portal": planet.portal,
@@ -678,7 +707,6 @@ def mass_build(request):
 
     building_list = [SolarCollectors(), FissionReactors(), MineralPlants(), CrystalLabs(), RefinementStations(),
                      Cities(), ResearchCenters(), DefenseSats(), ShieldNetworks(), Portal()]
-
 
     msg = ""
     building_list_dict = {}
@@ -713,16 +741,17 @@ def mass_build(request):
     costs = []
     for building in building_list:
         # Below doesn't include overbuild, it gets added below
-        cost_list, penalty = building.calc_cost(1, status.research_percent_construction, status.research_percent_tech, status)
+        cost_list, penalty = building.calc_cost(1, status.research_percent_construction, status.research_percent_tech,
+                                                status)
         # Add resource names to the cost_list, for the sake of the for loop in the view
         if cost_list:  # Remember that cost_list will be None if the tech is too low
             cost_list_labeled = []
             for i in range(5):  # 4 types of resources plus time
                 if i < 4:
                     cost_list_labeled.append({"value": int(np.ceil(cost_list[i] * max(1, average_ob))),
-                                          "name": resource_names[i]})
+                                              "name": resource_names[i]})
                 else:
-                    cost_list_labeled.append({"value": int(np.ceil(cost_list[i] )),
+                    cost_list_labeled.append({"value": int(np.ceil(cost_list[i])),
                                               "name": resource_names[i]})
         else:
             cost_list_labeled = None  # Tech was too low
@@ -735,10 +764,12 @@ def mass_build(request):
 
     # Build context
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "costs": costs,
                "msg": msg,
                "page_title": "Mass build"}
     return render(request, "mass_build.html", context)
+
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -769,20 +800,21 @@ def empire_ranking(request):
                 art_tab[a.empire_holding] = 1
             else:
                 art_tab[a.empire_holding] += 1
-            max_artis = max(art_tab[a.empire_holding ], max_artis)
+            max_artis = max(art_tab[a.empire_holding], max_artis)
 
     for e in empires:
         artefacts = []
         artis = Artefacts.objects.filter(empire_holding=e)
         round_arti_nr = Artefacts.objects.all().count()
-        if 3*len(artis) >= round_arti_nr or 3*max_artis/2 >= round_arti_nr:
+        if 3 * len(artis) >= round_arti_nr or 3 * max_artis / 2 >= round_arti_nr:
             for a in artis:
                 artefacts.append(a.image)
 
         table[e.name_with_id] = {"planets": e.planets,
                                  "numplayers": e.numplayers,
                                  "nw": e.networth,
-                                 "artefacts": artefacts
+                                 "artefacts": artefacts,
+                                 "empire_id":e.id
                                  }
 
     artefacts_found = Artefacts.objects.filter(empire_holding__isnull=False)
@@ -790,19 +822,43 @@ def empire_ranking(request):
     context = {"table": table,
                "page_title": "Empire ranking",
                "status": status,
+               "round": RoundStatus.objects.filter().first,
                "empire": empire,
                "artefacts_found": artefacts_found,
                "max_artis": art_tab,
-               "round_arti_nr":round_arti_nr}
+               "round_arti_nr": round_arti_nr}
     return render(request, "empire_ranking.html", context)
 
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
-def account(request):
+def account(request, player_id):
     status = get_object_or_404(UserStatus, user=request.user)
+    msg = ""
+    if request.method == 'POST':
+        msg += str(request.POST)
+        if 'Rejoin' in request.POST:
+            round = RoundStatus.objects.get()
+            if round.tick_number < 1:
+                emp = status.empire
+                emp.numplayers -= 1
+                emp.save()
+                status.empire = None
+                planets = Planet.objects.filter(owner=status.user)
+                for p in planets:
+                    p.owner = None
+                    p.save()
+                status.save()
+                msg = "Deleted!"
+            else:
+                msg = "The round allready started, you cannot rejoin!"
+
+    player = UserStatus.objects.get(id=player_id)
     context = {"status": status,
-               "page_title": "Account",}
+               "player": player,
+               "round": RoundStatus.objects.filter().first,
+               "page_title": "Account",
+               "msg": msg}
     return render(request, "account.html", context)
 
 
@@ -847,7 +903,6 @@ def units(request):
         for br in bribe:
             bribe_time_multiplier *= 1 + br.specop_strength / 100
 
-
     if request.method == 'POST':
         msg = ''
         for i, unit in enumerate(unit_info["unit_list"]):
@@ -872,7 +927,7 @@ def units(request):
                 for j in range(4):  # multiply all resources except time by number of units
                     total_resource_cost[j] *= num * bribe_resource_multiplier
 
-                #multiply time cost by bribe multiplier
+                # multiply time cost by bribe multiplier
                 total_resource_cost[4] *= bribe_time_multiplier
 
                 total_resource_cost = ResourceSet(total_resource_cost)  # convert to more usable object
@@ -911,8 +966,6 @@ def units(request):
         mult, penalty = unit_cost_multiplier(status.research_percent_construction, status.research_percent_tech,
                                              unit_info[unit]['required_tech'])
 
-
-
         if not mult:
             cost = None
         else:
@@ -920,10 +973,10 @@ def units(request):
             for i, resource in enumerate(resource_names):
                 if resource != 'Time':
                     cost.append({"name": resource,
-                                 "value": int(np.ceil(mult * unit_info[unit]['cost'][i]*bribe_resource_multiplier))})
+                                 "value": int(np.ceil(mult * unit_info[unit]['cost'][i] * bribe_resource_multiplier))})
                 else:
                     cost.append({"name": resource,
-                                 "value": int(np.ceil(mult * unit_info[unit]['cost'][i]*bribe_time_multiplier))})
+                                 "value": int(np.ceil(mult * unit_info[unit]['cost'][i] * bribe_time_multiplier))})
 
             d["cost"] = cost
         d["penalty"] = penalty
@@ -932,7 +985,8 @@ def units(request):
         d["i"] = unit_info[unit]['i']
         unit_dict.append(d)
     context = {"status": status,
-               "page_title":"Units",
+               "round": RoundStatus.objects.filter().first,
+               "page_title": "Units",
                "unit_dict": unit_dict,
                "msg": msg}
     return render(request, "units.html", context)
@@ -953,17 +1007,17 @@ def fleets_orders(request):
     # the box was actually checked, stupid html :P
     fleets_checkbox2 = []
     for i in range(0, len(fleets_checkbox)):
-        print("i",i)
+        print("i", i)
         if fleets_checkbox[i] == '0':
-            if i < len(fleets_checkbox)-1 and fleets_checkbox[i+1] == '1':
+            if i < len(fleets_checkbox) - 1 and fleets_checkbox[i + 1] == '1':
                 fleets_checkbox2.append('1')
             else:
                 fleets_checkbox2.append('0')
 
     fleets_id2 = []
     # select only checked fleets
-    for i,fleet in enumerate(fleets_id):
-        print(i,fleet,fleets_checkbox2[i])
+    for i, fleet in enumerate(fleets_id):
+        print(i, fleet, fleets_checkbox2[i])
         if fleets_checkbox2[i] == '1':
             fleets_id2.append(fleet)
 
@@ -979,18 +1033,21 @@ def fleets_orders(request):
 
     if 'massExplo1' in request.POST:
         context = {"status": status,
+                   "round": RoundStatus.objects.filter().first,
                    "page_title": "Exploration orders",
                    "display_fleet": display_fleet,
-                   "hidden_fleet_id":fleets_id2,
+                   "hidden_fleet_id": fleets_id2,
                    }
         return render(request, "explo_orders.html", context)
     else:
         context = {"status": status,
+                   "round": RoundStatus.objects.filter().first,
                    "page_title": "Fleets orders",
                    "display_fleet": display_fleet,
-                   "hidden_fleet_id":fleets_id2,
+                   "hidden_fleet_id": fleets_id2,
                    }
         return render(request, "fleets_orders.html", context)
+
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -1012,14 +1069,14 @@ def fleets_orders_process(request):
     fleets_id = request.POST.getlist("fleet_select_hidden")
     order = int(request.POST.get("order"))
 
-    if (order == 0 or order == 1  or order == 2 or order == 3 or order == 10) and not request.POST.get("X"):
+    if (order == 0 or order == 1 or order == 2 or order == 3 or order == 10) and not request.POST.get("X"):
         request.session['error'] = "You must enter x coordinate!"
         return fleets(request)
-    if (order == 0 or order == 1  or order == 2 or order == 3 or order == 10) and not request.POST.get("Y"):
+    if (order == 0 or order == 1 or order == 2 or order == 3 or order == 10) and not request.POST.get("Y"):
         request.session['error'] = "You must enter y coordinate!"
         return fleets(request)
 
-    if order == 0 or order == 1  or order == 2 or order == 3 or order == 10:
+    if order == 0 or order == 1 or order == 2 or order == 3 or order == 10:
         x = int(request.POST.get("X"))
         y = int(request.POST.get("Y"))
 
@@ -1096,7 +1153,7 @@ def fleets_orders_process(request):
     if order == 6:
         split_pct = int(request.POST.get("split_pct"))
         total_fleets = Fleet.objects.filter(owner=status.user.id, main_fleet=False)
-        if len(total_fleets) >= 50 :
+        if len(total_fleets) >= 50:
             request.session['error'] = "You cant have more than 50 fleets out at the same time!"
             return fleets(request)
         split_fleets(fleets_id2, split_pct)
@@ -1108,6 +1165,7 @@ def fleets_orders_process(request):
         explore_planets(fleets_buffer)
 
     return fleets(request)
+
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -1146,7 +1204,7 @@ def fleets(request):
     status2 = None
     if planet_to_template_attack:
         status2 = UserStatus.objects.get(id=planet_to_template_attack.owner.id)
-        attack_cost = battleReadinessLoss(status, status2,planet_to_template_attack)
+        attack_cost = battleReadinessLoss(status, status2, planet_to_template_attack)
 
     # If user changed order after attack or percentages
     if request.method == 'POST' and 'attack' in request.POST:
@@ -1181,20 +1239,22 @@ def fleets(request):
                     display_fleet[fleet] = display_fleet_inner
 
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Fleets",
                "main_fleet_list": main_fleet_list,
                "send_fleet_list": send_fleet_list,
                "other_fleets": other_fleets,
-               "display_fleet":display_fleet,
+               "display_fleet": display_fleet,
                "display_fleet_exploration": display_fleet_exploration,
                "explo_ships": explo_ships,
-               "error":error,
+               "error": error,
                "planet_to_template_explore": planet_to_template_explore,
                "planet_to_template_attack": planet_to_template_attack,
                "exploration_cost": exploration_cost,
-               "owner_of_attacked_pl" : status2,
-               "attack_cost" : attack_cost}
+               "owner_of_attacked_pl": status2,
+               "attack_cost": attack_cost}
     return render(request, "fleets.html", context)
+
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -1202,7 +1262,7 @@ def fleets_disband(request):
     status = get_object_or_404(UserStatus, user=request.user)
     main_fleet = Fleet.objects.get(owner=status.user.id, main_fleet=True)  # should only ever be 1
     main_fleet_list = []
-    print("main_fleet",main_fleet)
+    print("main_fleet", main_fleet)
 
     disband_info = {}
 
@@ -1217,13 +1277,15 @@ def fleets_disband(request):
     for unit in unit_info["unit_list"]:
         num = getattr(main_fleet, unit)
         if num:
-            main_fleet_list.append({"name": unit_info[unit]["label"], "value": num, "i": unit_info[unit]["i"], "db_name": unit})
+            main_fleet_list.append(
+                {"name": unit_info[unit]["label"], "value": num, "i": unit_info[unit]["i"], "db_name": unit})
 
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Fleets disband",
                "main_fleet": main_fleet_list,
-               "disband_info" : disband_info,
-                }
+               "disband_info": disband_info,
+               }
     return render(request, "fleets_disband.html", context)
 
 
@@ -1236,7 +1298,6 @@ def fleetsend(request):
 
     if request.method != 'POST':
         return HttpResponse("You shouldnt be able to get to this page!")
-
 
     total_fleets = Fleet.objects.filter(owner=status.user.id, main_fleet=False)
     if len(total_fleets) >= 50:
@@ -1278,7 +1339,6 @@ def fleetsend(request):
         request.session['error'] = "You must send some units to make a fleet"
         return fleets(request)
 
-
     # The rest mostly comes from cmdExecSendFleet in cmdexec.c
     if order == 0 or order == 1 or order == 10:  # if attack planet or station on planet orexplore, make sure planet exists and get planet object
         try:
@@ -1295,13 +1355,14 @@ def fleetsend(request):
         # Carrier/transport check
         if send_unit_dict['carrier'] * 100 < (
                 send_unit_dict['bomber'] + send_unit_dict['fighter'] + send_unit_dict['transport']):
-            request.session['error'] = "You are not sending enough carriers, each carrier can hold 100 fighters, bombers or transports"
+            request.session[
+                'error'] = "You are not sending enough carriers, each carrier can hold 100 fighters, bombers or transports"
             return fleets(request)
         if send_unit_dict['transport'] * 100 < (
                 send_unit_dict['soldier'] + send_unit_dict['droid'] + 4 * send_unit_dict['goliath']):
-            request.session['error'] = "You are not sending enough transports, each transport can hold 100 soldiers or droids, or 25 goliaths"
+            request.session[
+                'error'] = "You are not sending enough transports, each transport can hold 100 soldiers or droids, or 25 goliaths"
             return fleets(request)
-
 
     # Find closest portal and its distance away, which is done in specopVortexListCalc in cmd.c in the C code
     portal_planets = Planet.objects.filter(owner=request.user,
@@ -1311,7 +1372,7 @@ def fleetsend(request):
         request.session['error'] = "You need at least one portal to send the fleet from!"
         return fleets(request)
 
-    best_portal_planet =  find_nearest_portal(x, y, portal_planets)
+    best_portal_planet = find_nearest_portal(x, y, portal_planets)
     min_dist = np.sqrt((best_portal_planet.x - x) ** 2 + (best_portal_planet.y - y) ** 2)
     speed = race_info_list[status.get_race_display()]["travel_speed"]
     speed_boost_enlightement = 1
@@ -1323,7 +1384,7 @@ def fleetsend(request):
     fleet_time = int(np.ceil(min_dist / speed))  # in ticks
 
     if not 'exploration' in request.POST:
-    # Remove units from main fleet
+        # Remove units from main fleet
         for unit in unit_info["unit_list"][0:9]:
             setattr(main_fleet, unit, getattr(main_fleet, unit) - send_unit_dict[unit])
     else:
@@ -1331,14 +1392,14 @@ def fleetsend(request):
 
     # Create new Fleet object
     fleet = Fleet.objects.create(owner=request.user,
-                         command_order=order,
-                         x=x,
-                         y=y,
-                         i=planet_i,
-                         ticks_remaining=fleet_time,
-                         current_position_x=best_portal_planet.x,
-                         current_position_y=best_portal_planet.y,
-                         **send_unit_dict)
+                                 command_order=order,
+                                 x=x,
+                                 y=y,
+                                 i=planet_i,
+                                 ticks_remaining=fleet_time,
+                                 current_position_x=best_portal_planet.x,
+                                 current_position_y=best_portal_planet.y,
+                                 **send_unit_dict)
 
     main_fleet.save()
     # If instant travel then immediately do the cmdFleetAction stuff
@@ -1347,7 +1408,7 @@ def fleetsend(request):
     if fleet_time == 0:
         fleets_tmp.append(fleet)
 
-    if order == 10 :
+    if order == 10:
         fr_cost = calc_exploration_cost(status)
         status.fleet_readiness -= fr_cost
         status.save()
@@ -1356,7 +1417,7 @@ def fleetsend(request):
             explore_planets(fleets_tmp)
 
     if order == 1 and fleet_time == 0:
-        station_fleets(request,fleets_tmp,status)
+        station_fleets(request, fleets_tmp, status)
 
     if fleet_time == 0:
         # TODO
@@ -1385,6 +1446,7 @@ def empire(request, empire_id):
     empire1 = Empire.objects.get(pk=empire_id)
     print(empire_id)
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": empire1.name_with_id,
                "player_list": player_list,
                "empire": empire1}
@@ -1400,6 +1462,7 @@ def vote(request):
         new_voting_for = (request.POST['choice'])
     except (KeyError, ObjectDoesNotExist):
         context = {"status": status,
+                   "round": RoundStatus.objects.filter().first,
                    "page_title": "Vote",
                    "player_list": player_list}
         return render(request, "vote.html", context)
@@ -1455,21 +1518,22 @@ def results(request):
     status = get_object_or_404(UserStatus, user=request.user)
     player_list = UserStatus.objects.filter(empire=status.empire)
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Results",
                "player_list": player_list}
     return render(request, "results.html", context)
 
+
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
-def set_relation(request,relation, current_empire, target_empire, *rel_time_passed):
-
+def set_relation(request, relation, current_empire, target_empire, *rel_time_passed):
     if current_empire.id == target_empire.id:
         return
     if not rel_time_passed or rel_time_passed[0] == '':
         rel_time = 0
     else:
         # rel time is given in hours in leaders options, however is stored as number of ticks internally
-        rel_time = int(rel_time_passed[0])*3600/tick_time
+        rel_time = int(rel_time_passed[0]) * 3600 / tick_time
 
     if current_empire is None or target_empire is None:
         return
@@ -1503,7 +1567,7 @@ def set_relation(request,relation, current_empire, target_empire, *rel_time_pass
             News.objects.create(empire1=current_empire,
                                 empire2=target_empire,
                                 news_type='RAD',
-                                date_and_time=datetime.now()+timedelta(seconds=1),
+                                date_and_time=datetime.now() + timedelta(seconds=1),
                                 is_personal_news=False,
                                 is_empire_news=True,
                                 tick_number=RoundStatus.objects.get().tick_number
@@ -1537,7 +1601,7 @@ def set_relation(request,relation, current_empire, target_empire, *rel_time_pass
             News.objects.create(empire1=current_empire,
                                 empire2=target_empire,
                                 news_type='RND',
-                                date_and_time=datetime.now()+timedelta(seconds=1),
+                                date_and_time=datetime.now() + timedelta(seconds=1),
                                 is_personal_news=False,
                                 is_empire_news=True,
                                 tick_number=RoundStatus.objects.get().tick_number
@@ -1552,10 +1616,11 @@ def set_relation(request,relation, current_empire, target_empire, *rel_time_pass
                                      relation_length=rel_time,
                                      relation_creation_tick=RoundStatus.objects.get().tick_number,
                                      relation_remaining_time=rel_time)
+
+
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def cancel_relation(request, rel):
-
     try:
         rel2 = Relations.objects.get(empire1=rel.empire2, empire2=rel.empire1)
     except ObjectDoesNotExist:
@@ -1614,7 +1679,7 @@ def pm_options(request):
 
         if request.POST['empire_offer_alliance']:
             target_empire = Empire.objects.get(number=int(request.POST['empire_offer_alliance']))
-            set_relation(request,'ally', status.empire, target_empire)
+            set_relation(request, 'ally', status.empire, target_empire)
             News.objects.create(empire1=status.empire,
                                 empire2=target_empire,
                                 news_type='RAP',
@@ -1625,9 +1690,9 @@ def pm_options(request):
                                 )
         elif request.POST['empire_offer_nap']:
             target_empire = Empire.objects.get(number=int(request.POST['empire_offer_nap']))
-            set_relation(request,'nap', status.empire, target_empire, request.POST['empire_offer_nap_hours'])
+            set_relation(request, 'nap', status.empire, target_empire, request.POST['empire_offer_nap_hours'])
             if request.POST['empire_offer_nap_hours']:
-                info = request.POST['empire_offer_nap_hours'] +" hour"
+                info = request.POST['empire_offer_nap_hours'] + " hour"
             else:
                 info = "permanent"
             News.objects.create(empire1=status.empire,
@@ -1636,7 +1701,7 @@ def pm_options(request):
                                 date_and_time=datetime.now(),
                                 is_personal_news=False,
                                 is_empire_news=True,
-                                extra_info =info,
+                                extra_info=info,
                                 tick_number=RoundStatus.objects.get().tick_number
                                 )
         elif request.POST['empire_cancel_relation']:
@@ -1651,15 +1716,16 @@ def pm_options(request):
                 else:
                     target_empire = rel.empire1
 
-                if (rel.relation_type=='A' or rel.relation_type=='W') and RoundStatus.objects.get().tick_number - rel.relation_creation_tick <= min_relation_time:
-                    error = "You can't cancel the relation for " +str(min_relation_time) + " ticks after creating it!"
+                if (
+                        rel.relation_type == 'A' or rel.relation_type == 'W') and RoundStatus.objects.get().tick_number - rel.relation_creation_tick <= min_relation_time:
+                    error = "You can't cancel the relation for " + str(min_relation_time) + " ticks after creating it!"
                 else:
                     n_type = 'N'
-                    if rel.relation_type=='W':
+                    if rel.relation_type == 'W':
                         n_type = 'RWE'
-                    elif rel.relation_type=='A':
+                    elif rel.relation_type == 'A':
                         n_type = 'RAE'
-                    elif rel.relation_type=='N':
+                    elif rel.relation_type == 'N':
                         n_type = 'RNE'
                     cancel_relation(request, rel)
                     News.objects.create(empire1=status.empire,
@@ -1672,7 +1738,7 @@ def pm_options(request):
                                         )
         elif request.POST['empire_declare_war']:
             target_empire = Empire.objects.get(number=int(request.POST['empire_declare_war']))
-            set_relation(request,'war', status.empire, target_empire)
+            set_relation(request, 'war', status.empire, target_empire)
             News.objects.create(empire1=status.empire,
                                 empire2=target_empire,
                                 news_type='RWD',
@@ -1684,10 +1750,11 @@ def pm_options(request):
 
         user_empire.save()
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Prime Minister options",
                "empire": status.empire,
                "relation_empires": relation_empires,
-               'error':error}
+               'error': error}
     return render(request, "pm_options.html", context)
 
 
@@ -1699,11 +1766,12 @@ def relations(request):
     relations_to_empire = Relations.objects.filter(empire2=status.empire).order_by('-relation_creation_tick')
     tick_time = RoundStatus.objects.get().tick_number
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Relations",
                "relations_from_empire": relations_from_empire,
                "relations_to_empire": relations_to_empire,
                "empire": status.empire,
-               "tick_time":tick_time}
+               "tick_time": tick_time}
     return render(request, "relations.html", context)
 
 
@@ -1727,7 +1795,7 @@ def research(request):
             total = 0
             for a, key in enumerate(request.POST.items()):
                 if a > 0 and key[0] != 'rc_alloc_form':
-                    print("key",a,key[1])
+                    print("key", a, key[1])
                     total += int(key[1])
             if total != 100:
                 message = "Research allocation percentages must be equal to 100% in total!"
@@ -1743,9 +1811,11 @@ def research(request):
                 status.save()
 
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Research",
                "message": message}
     return render(request, "research.html", context)
+
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -1771,7 +1841,7 @@ def specops(request):
     ops = {}
     for o in agentop_specs:
         if o in race_ops:
-            specs = [None]*8
+            specs = [None] * 8
             for j in range(len(agentop_specs[o])):
                 specs[j] = agentop_specs[o][j]
             if user_to_template_specop:
@@ -1805,7 +1875,7 @@ def specops(request):
             elif int(request.POST['unit_ammount']) > main_fleet.wizard:
                 msg = "You don't have that many psychics!"
             else:
-                if psychicop_specs[request.POST['spell']][3] is False and request.POST['user_id2'] == "" :
+                if psychicop_specs[request.POST['spell']][3] is False and request.POST['user_id2'] == "":
                     msg = "You must specify a target player for this spell!"
                 else:
                     if psychicop_specs[request.POST['spell']][3] is False:
@@ -1826,17 +1896,18 @@ def specops(request):
                 msg = "You don't have that many agents!"
             elif request.POST['X'] == "" or request.POST['Y'] == "" or request.POST['I'] == "":
                 msg = "You must specify a planet!"
-            elif get_op_penalty(status.research_percent_operations, agentop_specs[request.POST['operation']][0])  == -1:
+            elif get_op_penalty(status.research_percent_operations, agentop_specs[request.POST['operation']][0]) == -1:
                 msg = "You don't have enough operations research to perform this covert operation!"
             else:
                 planet = None
                 try:
                     planet = Planet.objects.get(x=request.POST['X'], y=request.POST['Y'], i=request.POST['I'])
                 except Planet.DoesNotExist:
-                   msg = "This planet doesn't exist"
+                    msg = "This planet doesn't exist"
                 if planet:
                     msg = send_agents_ghosts(status, int(request.POST['unit_ammount']), 0,
-                        request.POST['X'], request.POST['Y'], request.POST['I'], request.POST['operation'])
+                                             request.POST['X'], request.POST['Y'], request.POST['I'],
+                                             request.POST['operation'])
         if 'agent_select' in request.POST:
             agent_select = request.POST.getlist('agent_select')
             for agent_id in agent_select:
@@ -1844,7 +1915,8 @@ def specops(request):
                 speed = race_info_list[status.get_race_display()]["travel_speed"]
                 agent_fleet = Fleet.objects.get(id=agent_id)
                 portal_planets = Planet.objects.filter(owner=request.user, portal=True)
-                portal = find_nearest_portal(agent_fleet.current_position_x, agent_fleet.current_position_y, portal_planets)
+                portal = find_nearest_portal(agent_fleet.current_position_x, agent_fleet.current_position_y,
+                                             portal_planets)
                 generate_fleet_order(agent_fleet, portal.x, portal.y, speed, 5, portal.i)
                 main_fleet = Fleet.objects.get(owner=request.user, main_fleet=True)
                 fleets_id3 = Fleet.objects.filter(id=agent_id, ticks_remaining=0)
@@ -1865,23 +1937,25 @@ def specops(request):
         template_name = user_to_template_specop.user_name
 
     context = {"status": status,
-                "page_title": "Special Operations",
-                "operations": ops,
-                "spells": spells,
-                "incantations": inca,
-                "msg": msg,
-                "main_fleet": main_fleet,
-                "agent_fleets": agent_fleets,
-                "ops_out": ops_out,
-                "ops_in": ops_in,
-                "spells_in": spells_in,
-                "spells_out": spells_out,
-                "inca_out": inca_out,
-                "inca_in": inca_in,
-                "planet_to_template_specop": planet_to_template_specop,
-                "user_to_template_specop": template_name,
+               "round": RoundStatus.objects.filter().first,
+               "page_title": "Special Operations",
+               "operations": ops,
+               "spells": spells,
+               "incantations": inca,
+               "msg": msg,
+               "main_fleet": main_fleet,
+               "agent_fleets": agent_fleets,
+               "ops_out": ops_out,
+               "ops_in": ops_in,
+               "spells_in": spells_in,
+               "spells_out": spells_out,
+               "inca_out": inca_out,
+               "inca_in": inca_in,
+               "planet_to_template_specop": planet_to_template_specop,
+               "user_to_template_specop": template_name,
                }
     return render(request, "specops.html", context)
+
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -1916,6 +1990,7 @@ def specop_show(request, specop_id):
             fleets = Fleet.objects.filter(owner=specop.user_to)
 
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": specop.name,
                "specop_info": specop_info,
                "planets": planets,
@@ -1923,6 +1998,7 @@ def specop_show(request, specop_id):
                "target_player": target_player
                }
     return render(request, "specop_show.html", context)
+
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -1933,62 +2009,67 @@ def famaid(request):
     message = ''
     news_message = ''
     if request.method == 'POST':
-        status2 = get_object_or_404(UserStatus, user=request.POST['player'])
-        total = 0
-        if request.POST['energy']:
-            e = int(request.POST['energy'])
-            if e > status.energy:
-                message += "You don't have so much energy!<br>"
-            else:
-                status.energy -= e
-                status2.energy += e
-                message += str(e) + " Energy was transferred!<br>"
-                news_message += str(e) + " energy "
-                total+= e
-        if request.POST['minerals']:
-            m = int(request.POST['minerals'])
-            if m > status.minerals:
-                message += "You don't have so much minerals!<br>"
-            else:
-                status.minerals -= m
-                status2.minerals += m
-                message += str(m) + " Minerals was transferred!<br>"
-                news_message += str(m) + " minerals "
-                total += m
-        if request.POST['crystals']:
-            c = int(request.POST['crystals'])
-            if c > status.crystals:
-                message += "You don't have so much crystals!<br>"
-            else:
-                status.crystals -= c
-                status2.crystals += c
-                message += str(c) + " Crystals was transferred!<br>"
-                news_message += str(c) + " crystals "
-                total += c
-        if request.POST['ectrolium']:
-            e = int(request.POST['ectrolium'])
-            if e > status.ectrolium:
-                message += "You don't have so much ectrolium!<br>"
-            else:
-                status.ectrolium -= e
-                status2.ectrolium += e
-                message += str(e) + " Ectrolium was transferred!<br>"
-                news_message += str(e) + " ectrolium "
-                total += e
-        if total > 0:
-            News.objects.create(user1=request.user,
-                            user2=status2.user,
-                            empire1=status.empire,
-                            news_type='SI',
-                            date_and_time=datetime.now(),
-                            is_personal_news=True,
-                            is_empire_news=True,
-                            extra_info=news_message,
-                            tick_number=RoundStatus.objects.get().tick_number
-                            )
-        status.save()
-        status2.save()
+        round = RoundStatus.objects.get()
+        if round.tick_number > 0:
+            status2 = get_object_or_404(UserStatus, user=request.POST['player'])
+            total = 0
+            if request.POST['energy']:
+                e = int(request.POST['energy'])
+                if e > status.energy:
+                    message += "You don't have so much energy!<br>"
+                else:
+                    status.energy -= e
+                    status2.energy += e
+                    message += str(e) + " Energy was transferred!<br>"
+                    news_message += str(e) + " energy "
+                    total += e
+            if request.POST['minerals']:
+                m = int(request.POST['minerals'])
+                if m > status.minerals:
+                    message += "You don't have so much minerals!<br>"
+                else:
+                    status.minerals -= m
+                    status2.minerals += m
+                    message += str(m) + " Minerals was transferred!<br>"
+                    news_message += str(m) + " minerals "
+                    total += m
+            if request.POST['crystals']:
+                c = int(request.POST['crystals'])
+                if c > status.crystals:
+                    message += "You don't have so much crystals!<br>"
+                else:
+                    status.crystals -= c
+                    status2.crystals += c
+                    message += str(c) + " Crystals was transferred!<br>"
+                    news_message += str(c) + " crystals "
+                    total += c
+            if request.POST['ectrolium']:
+                e = int(request.POST['ectrolium'])
+                if e > status.ectrolium:
+                    message += "You don't have so much ectrolium!<br>"
+                else:
+                    status.ectrolium -= e
+                    status2.ectrolium += e
+                    message += str(e) + " Ectrolium was transferred!<br>"
+                    news_message += str(e) + " ectrolium "
+                    total += e
+            if total > 0:
+                News.objects.create(user1=request.user,
+                                    user2=status2.user,
+                                    empire1=status.empire,
+                                    news_type='SI',
+                                    date_and_time=datetime.now(),
+                                    is_personal_news=True,
+                                    is_empire_news=True,
+                                    extra_info=news_message,
+                                    tick_number=RoundStatus.objects.get().tick_number
+                                    )
+            status.save()
+            status2.save()
+        else:
+            message = "Aid cannot be sent before round start!"
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "num_players": num_players,
                "page_title": "Send aid",
                "player_list": player_list,
@@ -2005,70 +2086,75 @@ def famgetaid(request):
     message = ''
     news_message = ''
     if 'receive_aid' in request.POST:
-        status2 = get_object_or_404(UserStatus, user=request.POST['player'])
-        if status2.request_aid == 'A' or (status2.request_aid == 'PM' and status.empire_role == 'PM') or \
-            (status2.request_aid == 'VM' and (status.empire_role == 'PM' or status.empire_role == 'VM')):
-            total = 0
-            if request.POST['energy']:
-                e = int(request.POST['energy'])
-                if e > status2.energy:
-                    message += status2.user_name + " doesn't have so much energy!<br>"
-                else:
-                    status.energy += e
-                    status2.energy -= e
-                    message += str(e) + " Energy was transferred!<br>"
-                    news_message += str(e) + " energy "
-                    total += e
-            if request.POST['minerals']:
-                m = int(request.POST['minerals'])
-                if m > status2.minerals:
-                    message += status2.user_name + " doesn't have so much minerals!<br>"
-                else:
-                    status.minerals += m
-                    status2.minerals -= m
-                    message += str(m) + " Minerals was transferred!<br>"
-                    news_message += str(m) + " minerals "
-                    total += m
-            if request.POST['crystals']:
-                c = int(request.POST['crystals'])
-                if c > status2.crystals:
-                    message += status2.user_name + " doesn't have so much crystals!<br>"
-                else:
-                    status.crystals += c
-                    status2.crystals -= c
-                    message += str(c) + " Crystals was transferred!<br>"
-                    news_message += str(c) + " crystals "
-                    total += m
-            if request.POST['ectrolium']:
-                e = int(request.POST['ectrolium'])
-                if e > status2.ectrolium:
-                    message += status2.user_name + " doesn't have so much ectrolium!<br>"
-                else:
-                    status.ectrolium += e
-                    status2.ectrolium -= e
-                    message += str(e) + " Ectrolium was transferred!<br>"
-                    news_message += str(e) + " ectrolium "
-                    total += e
-            if total > 0:
-                News.objects.create(user1=request.user,
-                                user2=status2.user,
-                                empire1=status.empire,
-                                news_type='RA',
-                                date_and_time=datetime.now(),
-                                is_personal_news=True,
-                                is_empire_news=True,
-                                extra_info = news_message,
-                                tick_number=RoundStatus.objects.get().tick_number
-                                )
-            status.save()
-            status2.save()
+        round = RoundStatus.objects.get()
+        if round.tick_number > 0:
+            status2 = get_object_or_404(UserStatus, user=request.POST['player'])
+            if status2.request_aid == 'A' or (status2.request_aid == 'PM' and status.empire_role == 'PM') or \
+                    (status2.request_aid == 'VM' and (status.empire_role == 'PM' or status.empire_role == 'VM')):
+                total = 0
+                if request.POST['energy']:
+                    e = int(request.POST['energy'])
+                    if e > status2.energy:
+                        message += status2.user_name + " doesn't have so much energy!<br>"
+                    else:
+                        status.energy += e
+                        status2.energy -= e
+                        message += str(e) + " Energy was transferred!<br>"
+                        news_message += str(e) + " energy "
+                        total += e
+                if request.POST['minerals']:
+                    m = int(request.POST['minerals'])
+                    if m > status2.minerals:
+                        message += status2.user_name + " doesn't have so much minerals!<br>"
+                    else:
+                        status.minerals += m
+                        status2.minerals -= m
+                        message += str(m) + " Minerals was transferred!<br>"
+                        news_message += str(m) + " minerals "
+                        total += m
+                if request.POST['crystals']:
+                    c = int(request.POST['crystals'])
+                    if c > status2.crystals:
+                        message += status2.user_name + " doesn't have so much crystals!<br>"
+                    else:
+                        status.crystals += c
+                        status2.crystals -= c
+                        message += str(c) + " Crystals was transferred!<br>"
+                        news_message += str(c) + " crystals "
+                        total += m
+                if request.POST['ectrolium']:
+                    e = int(request.POST['ectrolium'])
+                    if e > status2.ectrolium:
+                        message += status2.user_name + " doesn't have so much ectrolium!<br>"
+                    else:
+                        status.ectrolium += e
+                        status2.ectrolium -= e
+                        message += str(e) + " Ectrolium was transferred!<br>"
+                        news_message += str(e) + " ectrolium "
+                        total += e
+                if total > 0:
+                    News.objects.create(user1=request.user,
+                                        user2=status2.user,
+                                        empire1=status.empire,
+                                        news_type='RA',
+                                        date_and_time=datetime.now(),
+                                        is_personal_news=True,
+                                        is_empire_news=True,
+                                        extra_info=news_message,
+                                        tick_number=RoundStatus.objects.get().tick_number
+                                        )
+                status.save()
+                status2.save()
+            else:
+                message = "You are not authorised to take aid from this faction!"
         else:
-            message = "You are not authorised to take aid from this faction!"
+            message = "Aid cannot be sent before round start!"
     if 'aid_settings' in request.POST:
         status.request_aid = request.POST['settings']
         message = "Settings changed!"
         status.save()
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "num_players": num_players,
                "page_title": "Receive aid",
                "player_list": player_list,
@@ -2084,9 +2170,10 @@ def game_messages(request):
     status.mail_flag = 0
     status.save()
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Inbox",
                "messages_from": messages_from,
-                }
+               }
     return render(request, "messages.html", context)
 
 
@@ -2096,9 +2183,10 @@ def outbox(request):
     status = get_object_or_404(UserStatus, user=request.user)
     messages_to = Messages.objects.filter(user1=status.id, user1_deleted=False).order_by('-date_and_time')
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Outbox",
                "messages_to": messages_to,
-                }
+               }
     return render(request, "outbox.html", context)
 
 
@@ -2121,26 +2209,26 @@ def compose_message(request, user_id):
         if user_found:
             msg = request.POST['message']
             if len(msg) > 0:
-                Messages.objects.create(user1 = status,
-                                        user2 = status2,
-                                        message = msg,
-                                        date_and_time = datetime.now())
+                Messages.objects.create(user1=status,
+                                        user2=status2,
+                                        message=msg,
+                                        date_and_time=datetime.now())
                 msg_on_top = 'Message sent!'
-                News.objects.create(user1 = request.user,
-                                    user2 = User.objects.get(id=request.POST['recipient']),
-                                    news_type = 'MS',
+                News.objects.create(user1=request.user,
+                                    user2=User.objects.get(id=request.POST['recipient']),
+                                    news_type='MS',
                                     date_and_time=datetime.now(),
                                     is_personal_news=True,
                                     is_empire_news=False,
-                                    tick_number = RoundStatus.objects.get().tick_number
+                                    tick_number=RoundStatus.objects.get().tick_number
                                     )
-                News.objects.create(user1 = User.objects.get(id=request.POST['recipient']),
-                                    user2 = request.user,
-                                    news_type = 'MR',
+                News.objects.create(user1=User.objects.get(id=request.POST['recipient']),
+                                    user2=request.user,
+                                    news_type='MR',
                                     date_and_time=datetime.now(),
                                     is_personal_news=True,
                                     is_empire_news=False,
-                                    tick_number = RoundStatus.objects.get().tick_number
+                                    tick_number=RoundStatus.objects.get().tick_number
                                     )
                 status2.mail_flag = 1
                 status2.save()
@@ -2148,18 +2236,19 @@ def compose_message(request, user_id):
                 msg_on_top = 'You cannot send an empty message!'
 
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Compose message",
                "msg_on_top": msg_on_top,
                "user_id": user_id,
-                }
+               }
     return render(request, "compose_message.html", context)
 
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def del_message_in(request, message_id):
-    status = get_object_or_404(UserStatus, user = request.user)
-    message = get_object_or_404(Messages, id = message_id, user2 = status.id)
+    status = get_object_or_404(UserStatus, user=request.user)
+    message = get_object_or_404(Messages, id=message_id, user2=status.id)
     if message.user1_deleted:
         message.delete()
     else:
@@ -2167,17 +2256,18 @@ def del_message_in(request, message_id):
         message.save()
     messages_from = Messages.objects.filter(user2=status.id, user2_deleted=False).order_by('-date_and_time')
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Inbox",
                "messages_from": messages_from,
-                }
+               }
     return render(request, "messages.html", context)
 
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def del_message_out(request, message_id):
-    status = get_object_or_404(UserStatus, user = request.user)
-    message = get_object_or_404(Messages, id = message_id, user1 = status.id)
+    status = get_object_or_404(UserStatus, user=request.user)
+    message = get_object_or_404(Messages, id=message_id, user1=status.id)
     if message.user2_deleted:
         message.delete()
     else:
@@ -2185,44 +2275,48 @@ def del_message_out(request, message_id):
         message.save()
     messages_to = Messages.objects.filter(user1=status.id, user1_deleted=False).order_by('-date_and_time')
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Outbox",
                "messages_to": messages_to,
-                }
+               }
     return render(request, "outbox.html", context)
 
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def bulk_del_message_out(request):
-    status = get_object_or_404(UserStatus, user = request.user)
-    messages_buffer = Messages.objects.filter(user1 = status.id)
+    status = get_object_or_404(UserStatus, user=request.user)
+    messages_buffer = Messages.objects.filter(user1=status.id)
     for message in messages_buffer:
         message.user1_deleted = True
     Messages.objects.bulk_update(messages_buffer, ['user1_deleted'])
-    Messages.objects.filter(user1_deleted = True, user2_deleted = True).delete()
+    Messages.objects.filter(user1_deleted=True, user2_deleted=True).delete()
     messages_to = ''
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Outbox",
                "messages_to": messages_to,
-                }
+               }
     return render(request, "outbox.html", context)
 
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def bulk_del_message_in(request):
-    status = get_object_or_404(UserStatus, user = request.user)
-    messages_buffer = Messages.objects.filter(user2 = status.id)
+    status = get_object_or_404(UserStatus, user=request.user)
+    messages_buffer = Messages.objects.filter(user2=status.id)
     for message in messages_buffer:
         message.user2_deleted = True
     Messages.objects.bulk_update(messages_buffer, ['user2_deleted'])
-    Messages.objects.filter(user1_deleted = True, user2_deleted = True).delete()
+    Messages.objects.filter(user1_deleted=True, user2_deleted=True).delete()
     messages_from = ''
     context = {"status": status,
+               "round": RoundStatus.objects.filter().first,
                "page_title": "Inbox",
                "messages_to": messages_from,
-                }
+               }
     return render(request, "messages.html", context)
+
 
 @login_required
 @user_passes_test(race_check, login_url="/choose_empire_race")
@@ -2240,15 +2334,23 @@ def hall_of_fame(request):
         msg = "The hall of fame is empty!"
     else:
         num_rounds = int(rounds["round__max"])
-        for i in range ((num_rounds), -1, -1):
+        for i in range((num_rounds), -1, -1):
             round_records[i] = HallOfFame.objects.filter(round=i).order_by('-planets')
 
     context = {"page_title": "Hall of Fame",
                "round_records": round_records,
-               "msg":msg
-                }
+               "msg": msg
+               }
 
     return render(request, "hall_of_fame.html", context)
 
 
+def races(request):
+    status = UserStatus.objects.filter(user=request.user).first()
+    races = race_info_list
+    context = {"status":status,
+               "page_title": "Races",
+               "races": races,
+               }
 
+    return render(request, "races.html", context)

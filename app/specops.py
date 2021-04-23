@@ -19,7 +19,8 @@ all_spells = ["Irradiate Ectrolium",
               "Enlightenment",
               "Grow Planet's Size"]
 
-all_incantations = ["Survey System"]
+all_incantations = []
+# "Survey System"
 
 # tech, readiness, difficulty, self-spell
 psychicop_specs = {
@@ -767,6 +768,9 @@ def perform_operation(agent_fleet):
                                    extra_effect="show high infiltration",
                                    name="High Infiltration",
                                    ticks_left=104)
+
+            news_message += "Your got faction information!"
+            news_message2 += "Your agents managed to defend!"
         else:
             news_message += "Your agents didn't succeed!"
             news_message2 += "Your agents managed to defend!"

@@ -17,7 +17,6 @@ urlpatterns = [
     url(r'^build(?P<planet_id>[0-9]+)/$', views.build, name='build'),
     path('ranking', views.ranking, name='ranking'),
     path('empire_ranking', views.empire_ranking, name='empire_ranking'),
-    path('account', views.account, name='account'),
     url(r'^password/$', views.change_password, name='change_password'),
     path('units', views.units, name='units'),
     path('fleets', views.fleets, name='fleets'),
@@ -56,7 +55,9 @@ urlpatterns = [
     path('scouting', views.scouting, name='scouting'),
     path('halloffame', views.hall_of_fame, name='hall_of_fame'),
     url(r'^specop_show(?P<specop_id>[0-9]+)/$', views.specop_show, name='specop_show'),
+    url(r'^account(?P<player_id>[0-9]+)/$', views.account, name='account'),
     path('mass_build', views.mass_build, name='mass_build'),
+    path('races', views.races, name='races'),
 ]
 
 if settings.DEBUG:

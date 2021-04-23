@@ -5,6 +5,7 @@ import java.util.*;
 import java.time.Clock; 
 import java.time.Instant; 
 
+
 public class HelperFunctions{
 	
 	public static double calc_overbuild(int size, int buildings) {
@@ -37,6 +38,38 @@ public class HelperFunctions{
     int secondsToNextMinute = 60 - seconds -1;
     int millisToNextSecond = 1000 - millis;
     return minutesToNextTenMinutes*60*1000 + secondsToNextMinute*1000 + millisToNextSecond;
+	}
+	
+	public static long startDelay(Calendar calendar, int tickTime){
+		int minutes = calendar.get(Calendar.MINUTE);
+		int seconds = calendar.get(Calendar.SECOND);
+		int millis = calendar.get(Calendar.MILLISECOND);
+		
+		if(tickTime < 60){
+			int secondsToNextTick = tickTime - seconds % tickTime -1;
+			int millisToNextSecond = 1000 - millis;
+			
+			if (60 % tickTime  == 0){
+				return secondsToNextTick*1000 + millisToNextSecond;
+			}
+			else{
+				return millisToNextSecond;
+			}
+		}
+		
+		if(tickTime < 3600){
+			int secondsToNextTick = tickTime - (seconds+minutes*60) % tickTime -1;
+			int millisToNextSecond = 1000 - millis;
+			
+			if (3600 % tickTime == 0){
+				return secondsToNextTick*1000 + millisToNextSecond;
+			}
+			else{
+				return millisToNextSecond;
+			}
+		}
+		
+		else return  1000 - millis;
 	}
 
 	public static Object getValueByType(int columnIndex, int columnType, ResultSet queryResult) throws SQLException {

@@ -20,8 +20,16 @@ def give_first_planet(user, status, planet):
     planet.portal = True
     planet.owner = user
     planet.save()
+    status.total_solar_collectors = staring_solars
+    status.total_mineral_plants = starting_meral_planets
+    status.total_refinement_stations = starting_ectrolium_refs
+    status.total_crystal_labs = starting_crystal_labs
+    status.total_cities = starting_cities
+    status.total_portals = 1
+    status.total_buildings = starting_total
     status.home_planet = planet
     status.num_planets = 1
+
     status.save()
     Scouting.objects.create(user=status.user, planet=planet, scout=1.0 )
 

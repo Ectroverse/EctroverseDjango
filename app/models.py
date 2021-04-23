@@ -288,6 +288,8 @@ class UserStatus(models.Model):
         RECALL_TO_MAIN    = 2
     post_attack_order = models.IntegerField(choices=PostAttackOrder.choices, default=2)
 
+    tag_points = models.IntegerField(default=0)
+
 
 # When a new User is created, automatically create an associated UserStatus and main fleet
 def new_user_post_save(sender, instance, created, **kwargs):

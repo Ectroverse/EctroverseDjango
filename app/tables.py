@@ -18,14 +18,14 @@ class UserRankTable(tables.Table):
 # Empire rank table
 class EmpireRankTable(tables.Table):
     empire_names = tables.TemplateColumn('<a href="/empire{{record.id}}/">{{record.name_with_id}}</a>',verbose_name='Empire Name')
-    # planets = tables.Column(verbose_name='Planets')
-    # numplayers = tables.Column(verbose_name='Players')
-    # networth = tables.Column(verbose_name='Networth')
+    planets = tables.Column(verbose_name='Planets')
+    numplayers = tables.Column(verbose_name='Players')
+    networth = tables.Column(verbose_name='Networth')
 
-    # class Meta:
-    #     model = Empire
-    #     attrs = {'class': 'table table-condensed'} # uses bootstrap table style
-    #     fields = ("empire_names", "planets", "numplayers", "networth")
+    class Meta:
+        model = Empire
+        attrs = {'class': 'table table-condensed'} # uses bootstrap table style
+        fields = ("empire_names", "planets", "numplayers", "networth")
 
 ''' NEVER ENDED UP USING THIS
 class PlanetTable(tables.Table):

@@ -10,4 +10,4 @@ starting_cities = 20
 starting_total = staring_solars+ starting_meral_planets+ \
                  starting_ectrolium_refs+ starting_crystal_labs+starting_cities
 # unit_labels = ["Bombers","Fighters","Transports","Cruisers","Carriers","Soldiers","Droids","Goliaths","Phantoms","Psychics","Agents","Ghost Ships","Exploration Ships"]
-starting_fleet=[0,100,50,50,50,100,0,0,0,50,50,0,4]
+starting_fleet=[0,50,50,0,0,50,0,0,0,50,50,0,4]

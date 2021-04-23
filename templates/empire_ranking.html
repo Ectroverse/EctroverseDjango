@@ -9,11 +9,13 @@
 <br>
 <table style="width:100%">
 <tr>
-<td></td>
-<td>Name</td>
-<td>Planet number</td>
-<td>Players</td>
-<td>Networth</td>
+
+<td><u>Artefacts</u></td>
+<td><u>Empire name</u></td>
+<td><u>Planet number</u></td>
+<td><u>Players</u></td>
+<td><u>Networth</u></td>
+
 </tr>
 {% for empire, values in table.items %}
 <tr>
@@ -25,7 +27,7 @@
 {% endif %}
 </td>
 
-<td>{{empire}}</td> 
+<td><a href = "/empire{{values.empire_id}}" >{{empire}}</a></td> 
 <td>{{values.planets}}</td>  
 <td>{{values.numplayers}}</td> 
 <td>{{values.nw}}</td> 

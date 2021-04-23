@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+{% for key,val in races.items %}
+<b>Race: {{key}}<br></b>
+	{% for k,v in val.items %}
+	{{k}} - {{v}}<br>
+	{% endfor %}
+	<br><br>
+{% endfor %}
+
+
+{% endblock %}
