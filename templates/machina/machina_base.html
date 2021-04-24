@@ -1,4 +1,4 @@
-
+{% load static %}
 {% load i18n %}
 
 <!DOCTYPE html>
@@ -27,7 +27,7 @@
     {% endblock extra_css %}
 
   </head>
-  <body>
+  <body style="background-image:url({% static 'background.gif' %});">
 
     {% block js %}
     {% endblock js %}

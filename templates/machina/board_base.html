@@ -13,12 +13,11 @@
 
 {% block body %}
 {% block header %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <a class="navbar-brand" href="{% url 'forum:index' %}">{% block brand %}{{ MACHINA_FORUM_NAME|default:"My forum" }}{% endblock %}</a>
+<nav class="navbar navbar-expand-lg navbar-dark " >
+ <a class="navbar-brand" href="/headquarters">Ectroverse</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-  <a class="navbar-brand" href="/headquarters">ectroverse.org</a>
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     {% block header_collapse %}
     <form class="form-inline my-2 ml-3 my-lg-0" role="search" action="{% url 'forum_search:search' %}">
@@ -32,7 +31,7 @@
   </div>
 </nav>
 {% endblock header %}
-<div class="container" id="main_container" style="background-image:url({% static 'background.gif' %});">
+<div class="my-5 container" id="main_container" >
   <div class="row">
     <div class="col-12">
       {% block breadcrumb %}{% include "partials/breadcrumb.html" %}{% endblock breadcrumb %}
