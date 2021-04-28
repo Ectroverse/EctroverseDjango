@@ -169,7 +169,7 @@ def btn(request):
 @user_passes_test(race_check, login_url="/choose_empire_race")
 def scouting(request):
     status = get_object_or_404(UserStatus, user=request.user)
-    scouted = Scouting.objects.filter(user=request.user)
+    scouted = Scouting.objects.filter(user=request.user).distinct()
     order_by = request.GET.get('order_by', 'planet')
 
     if order_by == 'planet':
@@ -177,13 +177,13 @@ def scouting(request):
         #     values('planet__size','scout','planet__x','planet__y','planet__i','planet__x').\
         #     order_by('planet__x','planet__y','planet__i')
         scouted = Scouting.objects.select_related('planet').filter(user=request.user). \
-            order_by('planet__x', 'planet__y', 'planet__i')
+            order_by('planet__x', 'planet__y', 'planet__i').distinct()
 
     elif order_by == 'size':
-        scouted = Scouting.objects.select_related('planet').filter(user=request.user).order_by('planet__size')
+        scouted = Scouting.objects.select_related('planet').filter(user=request.user).order_by('planet__size').distinct()
     else:
         scouted = Scouting.objects.select_related('planet').filter(user=request.user). \
-            order_by('planet__' + order_by)
+            order_by('planet__' + order_by).distinct()
 
     context = {"status": status,
                "round": RoundStatus.objects.filter().first,
@@ -511,6 +511,7 @@ def map(request):
                "round": RoundStatus.objects.filter().first,
                "planets": Planet.objects.all(),
                "settings": MapSettings.objects.filter(user=status.id),
+               "scouted": Scouting.objects.filter(user=request.user),
                "systems": systems, "page_title": "Map", "show_heatmap": show_heatmap}
     return render(request, "map.html", context)
 
