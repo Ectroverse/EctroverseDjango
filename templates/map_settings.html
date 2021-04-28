@@ -32,12 +32,12 @@ You don't have any setting currently. Consider creating one.
 		Colour:
 	</div>
 	<div class="center_map_box">
-		Details (faction/empire name or id-number): 
+		Details (faction/empire name or id-number):
 	</div>
 </div>
 
 {% for setting in map_settings %}
-<input type="hidden" name="setting_object" value="{{setting.id}}"> 
+<input type="hidden" name="setting_object" value="{{setting.id}}">
 
 
 <div class="wrap_box">
@@ -45,28 +45,30 @@ You don't have any setting currently. Consider creating one.
 	{{ forloop.counter0 }}.
 		<select name="map_settings">
 		<option value="U" {% if setting.map_setting == 'U' %}selected{% endif %}>
-		Unused</option>
+		Unused :</option>
 		<option value="YP" {% if setting.map_setting == 'YP' %}selected{% endif %}>
-		Your planets</option>
+		Your planets :</option>
 		<option value="YR" {% if setting.map_setting == 'YR' %}selected{% endif %}>
-		Your portals</option>
+		Your portals :</option>
 		<option value="YE" {% if setting.map_setting == 'YE' %}selected{% endif %}>
-		Your empire</option>
+		Your empire :</option>
 		<option value="PF" {% if setting.map_setting == 'PF' %}selected{% endif %}>
 		Planets of faction :</option>
 		<option value="PE" {% if setting.map_setting == 'PE' %}selected{% endif %}>
 		Planets of empire :</option>
 		<option value="UE" {% if setting.map_setting == 'UE' %}selected{% endif %}>
-		Unexplored planets</option>
+		Unexplored planets :</option>
+		<option value="SC" {% if setting.map_setting == 'SC' %}selected{% endif %}>
+		Scouted Planets :</option>
 		</select>
 	</div>
-	
+
 	<div class="right2_map_box">
 		<input type='hidden' value='0' name='delete_setting'>
 		<input type='checkbox' value='1' name='delete_setting'>
 	</div>
 
-	
+
 	<div class="right1_map_box">
 		<select name="color">
 		<option value="G" {% if setting.color_settings == 'G' %}selected{% endif %}>

@@ -22,7 +22,6 @@
     .style("width", '100%')
     .attr("preserveAspectRatio", "xMidYMin meet") // see here for a nice graphic https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/preserveAspectRatio
     .attr("viewBox", [-1, -1, width+1, height+1]) // default view
-    .on("click", reset); // zooms out when you click on not the background
 
   const g = svg.append("g");
 
@@ -36,7 +35,6 @@
       .attr('xlink:href','/static/heatmap.png')
       .style("opacity", 0.5)
   {% endif %}
-
 
 {% for planet in planets %}
 
@@ -335,10 +333,66 @@
                 .attr("r", circle_radius * 1)
                 .style("fill", "{{ setting.get_color_settings_display }}")
                 .style("opacity", 0.2)
-            {% endif %}
-          {% endif %}
- {% endfor %}
-{% endfor %}
+
+                {% endif %}
+              {% endif %}
+     {% endfor %}
+    {% endfor %}
+
+    {% for planet in planets %}
+
+    {% for setting in settings %}
+              {% for scouting in scouted %}
+                {% if setting.map_setting == "SC" and scouting.planet.id == planet.id %}
+                    g.append("circle")
+                    {% if planet.id|mod:10 == 1 %}
+                      .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                      .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                      {% endif %}
+                    {% if planet.id|mod:10 == 2 %}
+                      .attr("cx", {{planet.x}} + 0.35*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                      .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                      {% endif %}
+                    {% if planet.id|mod:10 == 3 %}
+                        .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                        .attr("cy", {{planet.y}} + (0.55*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                        {% endif %}
+                      {% if planet.id|mod:10 == 4 %}
+                        .attr("cx", {{planet.x}} + 0.55*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                        .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                        {% endif %}
+                      {% if planet.id|mod:10 == 5 %}
+                          .attr("cx", {{planet.x}} + 0.25*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                          .attr("cy", {{planet.y}} + (0.35*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                          {% endif %}
+                        {% if planet.id|mod:10 == 6 %}
+                          .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                          .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                          {% endif %}
+                        {% if planet.id|mod:10 == 7 %}
+                            .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                            .attr("cy", {{planet.y}} + (0.25*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                            {% endif %}
+                          {% if planet.id|mod:10 == 8 %}
+                            .attr("cx", {{planet.x}} + 0.15*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                            .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                            {% endif %}
+                          {% if planet.id|mod:10 == 9 %}
+                              .attr("cx", {{planet.x}} + 0.45*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                              .attr("cy", {{planet.y}} + (0.15*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                              {% endif %}
+                            {% if planet.id|mod:10 == 0 %}
+                        .attr("cx", {{planet.x}} + 0.65*Math.sin(-1.57-2*3.14*0.125*{{planet.pos_in_system}}))
+                        .attr("cy", {{planet.y}} + (0.65*Math.cos(-1.57-2*3.14*0.125*{{planet.pos_in_system}})))
+                    {% endif %}
+                    .attr("r", circle_radius * 1.5)
+                    .style("stroke", "{{ setting.get_color_settings_display }}")
+                    .style("fill", "none")
+                    .style("opacity", 0.2)
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
 
          {% for planet in planets %}
 
